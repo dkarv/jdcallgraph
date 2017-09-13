@@ -8,7 +8,9 @@ You have to invoke `java` with the `-javaagent:/path/to/jdcallgraph.jar=/path/to
 ### Plain Java/Jar
 ```
 java -javaagent:/path/to/jdcallgraph.jar=/path/to/config.ini example.Main
+```
 or
+```
 java -javaagent:/path/to/jdcallgraph.jar=/path/to/config.ini -jar target.jar
 ```
 
@@ -23,12 +25,13 @@ I did not succeed starting it with the ANT_OPTS environment variable. Instead yo
 Change the lines
 ```
 <junit fork="no">
-...
+  ...
 </junit>
 ```
 To
 ```
 <junit fork="yes" forkmode="once">
   <jvmarg value="-javaagent:/path/to/jdcallgraph.jar=/path/to/config.ini" />
+  ...
 </junit>
 ```
