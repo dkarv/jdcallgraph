@@ -40,7 +40,7 @@ public class CallGraph {
     public void called(String methodName, boolean isTest) throws IOException {
         if (calls.isEmpty()) {
             writer = new BufferedWriter(new OutputStreamWriter(
-                    new FileOutputStream(Config.OUT_DIR + methodName + ".dot"), "UTF-8"));
+                    new FileOutputStream(Config.getInst().outDir() + methodName + ".dot"), "UTF-8"));
 
             writer.write("digraph abc \n{\n");
             writer.write("\t\"" + methodName + "\" [style=filled,fillcolor=red];\n");

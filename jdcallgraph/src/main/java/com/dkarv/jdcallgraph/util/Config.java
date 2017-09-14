@@ -29,7 +29,12 @@ import java.nio.charset.Charset;
 import java.nio.file.Files;
 
 public class Config {
-    public static String OUT_DIR = null;
+    private static Config instance;
+
+    /**
+     * Output directory.
+     */
+    private String outDir = null;
 
     /**
      * The available log levels are: <br/>
@@ -41,10 +46,15 @@ public class Config {
      * 5 | Debug <br/>
      * 6 | Trace <br/>
      */
-    public static int LOG_LEVEL = 7;
-    public static boolean LOG_STDOUT = false;
+    private int logLevel = 7;
+
+    /**
+     * Log to stdout.
+     */
+    private boolean logStdout = false;
 
     public static void load(String path) throws IOException {
+        instance = new Config();
         final File file = new File(path);
 
         for (String line : Files.readAllLines(file.toPath(), Charset.defaultCharset())) {
@@ -59,17 +69,19 @@ public class Config {
             }
 
             if ("outDir".equals(args[0])) {
-                OUT_DIR = args[1].trim();
-                if (!OUT_DIR.endsWith(File.separator)) {
-                    OUT_DIR = OUT_DIR + File.separator;
+                String outDir = args[1].trim();
+                if (!outDir.endsWith(File.separator)) {
+                    outDir = outDir + File.separator;
                 }
+                instance.outDir = outDir;
             } else if ("logLevel".equals(args[0])) {
-                LOG_LEVEL = Integer.parseInt(args[1].trim());
-                if (LOG_LEVEL < 0 || LOG_LEVEL > 6) {
-                    throw new IllegalArgumentException("Invalid log level: " + LOG_LEVEL);
+                int logLevel = Integer.parseInt(args[1].trim());
+                if (logLevel < 0 || logLevel > 6) {
+                    throw new IllegalArgumentException("Invalid log level: " + logLevel);
                 }
+                instance.logLevel = logLevel;
             } else if ("logStdout".equals(args[0])) {
-                LOG_STDOUT = Boolean.parseBoolean(args[1].trim());
+                instance.logStdout = Boolean.parseBoolean(args[1].trim());
             } else {
                 throw new IllegalArgumentException("Unknown config option: " + line);
             }
@@ -79,8 +91,24 @@ public class Config {
     }
 
     private static void checkValues() {
-        if (OUT_DIR == null) {
+        if (instance.outDir == null) {
             throw new IllegalArgumentException("Please specify an output directory in your config");
         }
+    }
+
+    public static Config getInst() {
+        return instance;
+    }
+
+    public String outDir() {
+        return outDir;
+    }
+
+    public int logLevel() {
+        return logLevel;
+    }
+
+    public boolean logStdout() {
+        return logStdout;
     }
 }
