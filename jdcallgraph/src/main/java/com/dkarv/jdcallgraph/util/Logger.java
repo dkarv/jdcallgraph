@@ -24,138 +24,138 @@
 
 package com.dkarv.jdcallgraph.util;
 
+import com.dkarv.jdcallgraph.util.log.ConsoleTarget;
+import com.dkarv.jdcallgraph.util.log.FileTarget;
+import com.dkarv.jdcallgraph.util.log.LogTarget;
+
 import java.io.*;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
+import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 public class Logger {
   private final SimpleDateFormat FORMAT = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss:S");
-
-  static Writer error;
-  static Writer debug;
+  private final static String[] PREFIX = new String[]{
+      "NO", "FATAL", "ERROR", "WARN", "INFO", "DEBUG", "TRACE"
+  };
 
   final String prefix;
+  final static List<LogTarget> TARGETS = new ArrayList<>();
 
   public Logger(Class clazz) {
     String name = clazz.getName();
     prefix = "[" + name.substring(name.lastIndexOf(".") + 1) + "]";
   }
 
-  public static void init() throws FileNotFoundException, UnsupportedEncodingException {
-    if (error == null && Config.getInst().logLevel() > 0) {
-      error = new BufferedWriter(new OutputStreamWriter(
-          new FileOutputStream(Config.getInst().outDir() + "error.log", true), "UTF-8"), 128);
-    }
-    if (debug == null && Config.getInst().logLevel() >= 3) {
-      debug = new BufferedWriter(new OutputStreamWriter(
-          new FileOutputStream(Config.getInst().outDir() + "debug.log", true), "UTF-8"), 128);
-    }
-  }
-
-  private void append(String msg) throws IOException {
-    if (Config.getInst().logStdout()) {
-      System.out.print(msg);
-    }
-    if (Logger.debug != null) {
-      Logger.debug.write(msg);
-      Logger.debug.flush();
+  public static void init() {
+    TARGETS.clear();
+    if (Config.getInst().logLevel() > 0) {
+      TARGETS.add(new FileTarget(Config.getInst().outDir(), Config.getInst().logLevel()));
+      if (Config.getInst().logStdout()) {
+        TARGETS.add(new ConsoleTarget());
+      }
     }
   }
 
-  private void appendE(String msg) throws IOException {
-    if (Config.getInst().logStdout()) {
-      System.err.print(msg);
-    }
-    if (Logger.error != null) {
-      Logger.error.write(msg);
-      Logger.error.flush();
-    }
-  }
-
-  void log(String prefix, boolean error, String msg, Object... args) {
-    for (Object o : args) {
-      msg = msg.replaceFirst("\\{}", o.toString());
-    }
-
-    msg = "[" +
+  private String build(int level, String msg) {
+    return "[" +
         FORMAT.format(new Date()) +
-        ']' +
-        ' ' +
-        prefix +
-        ' ' +
+        "] [" +
+        PREFIX[level] +
+        "] " +
         this.prefix +
         ' ' +
         msg +
         '\n';
-    try {
-      if (error) {
-        appendE(msg);
+  }
+
+  void log(int level, String msg, Object... args) {
+    for (Object o : args) {
+      String replacement = o == null ? "null" : o.toString();
+      replacement = Matcher.quoteReplacement(replacement);
+
+      Matcher m = Pattern.compile("\\{}").matcher(msg);
+      if (!m.find()) {
+        throw new IllegalArgumentException("Too less {} to replace");
       }
-      append(msg);
+      StringBuffer sb = new StringBuffer();
+      m.appendReplacement(sb, replacement);
+      m.appendTail(sb);
+      msg = sb.toString();
+    }
+    Matcher m = Pattern.compile("\\{}").matcher(msg);
+    if (m.find()) {
+      throw new IllegalArgumentException("Too less arguments to replace all {}");
+    }
+
+    msg = build(level, msg);
+    try {
+      for (LogTarget target : TARGETS) {
+        target.print(msg, level);
+      }
     } catch (IOException e) {
       System.err.println("Error in logger: " + e.getMessage());
       e.printStackTrace();
     }
   }
 
-  void logE(String prefix, String msg, Object... args) {
+  void logE(int level, String msg, Object... args) {
     Exception e = null;
     if (args.length > 0 && args[args.length - 1] instanceof Exception) {
       e = (Exception) args[args.length - 1];
       args = Arrays.copyOfRange(args, 0, args.length - 1);
     }
-    log(prefix, true, msg, args);
+    log(level, msg, args);
     if (e != null) {
       try {
-        String errMsg = prefix + " " + e.getMessage() + ":\n";
-        appendE(errMsg);
-        e.printStackTrace(new PrintWriter(error));
-        e.printStackTrace(System.err);
-        append(errMsg);
-        e.printStackTrace(new PrintWriter(debug));
-        if (Config.getInst().logStdout()) {
-          e.printStackTrace(System.out);
+        String err = build(level, e.getMessage());
+        for (LogTarget target : TARGETS) {
+          target.print(err, level);
+          target.printTrace(e, level);
         }
       } catch (IOException ioe) {
-        log("[FATAL]", true, "Error logging exception: {}", e.getMessage());
+        System.err.println("Error in logger: " + ioe.getMessage());
       }
     }
   }
 
   public void trace(String msg, Object... args) {
     if (Config.getInst().logLevel() >= 6) {
-      log("[TRACE]", false, msg, args);
+      log(6, msg, args);
     }
   }
 
   public void debug(String msg, Object... args) {
     if (Config.getInst().logLevel() >= 5) {
-      log("[DEBUG]", false, msg, args);
+      log(5, msg, args);
     }
   }
 
   public void info(String msg, Object... args) {
     if (Config.getInst().logLevel() >= 4) {
-      log("[INFO]", false, msg, args);
+      log(4, msg, args);
     }
   }
 
   public void warn(String msg, Object... args) {
     if (Config.getInst().logLevel() >= 3) {
-      log("[WARN]", false, msg, args);
+      log(3, msg, args);
     }
   }
 
   public void error(String msg, Object... args) {
     if (Config.getInst().logLevel() >= 2) {
-      logE("[ERROR]", msg, args);
+      logE(2, msg, args);
     }
   }
 
   public void fatal(String msg, Object... args) {
     if (Config.getInst().logLevel() >= 1) {
-      logE("[FATAL]", msg, args);
+      logE(1, msg, args);
     }
   }
 }

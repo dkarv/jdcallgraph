@@ -1,4 +1,4 @@
-package com.dkarv.jdcallgraph.util;
+package com.dkarv.jdcallgraph.helper;
 
 import org.junit.rules.TemporaryFolder;
 

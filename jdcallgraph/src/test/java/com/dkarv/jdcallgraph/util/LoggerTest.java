@@ -1,156 +1,186 @@
 package com.dkarv.jdcallgraph.util;
 
-import com.dkarv.jdcallgraph.helper.Console;
-import org.hamcrest.Matchers;
-import org.junit.Assert;
+import com.dkarv.jdcallgraph.helper.TestUtils;
+import com.dkarv.jdcallgraph.util.log.ConsoleTarget;
+import com.dkarv.jdcallgraph.util.log.FileTarget;
+import com.dkarv.jdcallgraph.util.log.LogTarget;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.TemporaryFolder;
-import org.mockito.AdditionalMatchers;
 import org.mockito.Mockito;
 
-import java.io.ByteArrayOutputStream;
 import java.io.IOException;
-import java.io.PrintStream;
+
+import static org.junit.Assert.*;
 
 public class LoggerTest {
   @Rule
   public TemporaryFolder tmp = new TemporaryFolder();
 
-  private void initialize(int logLevel, boolean stdOut) throws IOException {
-    Logger.debug = null;
-    Logger.error = null;
-    Config.load(TestUtils.writeFile(tmp, "outDir: " + tmp.getRoot(), "logLevel: " + logLevel,
-        "logStdout: " + stdOut).getCanonicalPath());
+  private Logger init(int logLevel, boolean stdOut) {
+    try {
+      Config.load(TestUtils.writeFile(tmp, "outDir: " + tmp.getRoot(), "logLevel: " + logLevel,
+          "logStdout: " + stdOut).getCanonicalPath());
+    } catch (IOException e) {
+      fail("Error initializing config");
+    }
     Logger.init();
+    return new Logger(LoggerTest.class);
   }
 
   @Test
-  public void testSetup() throws IOException {
-    initialize(6, false);
-    Assert.assertNotNull(Logger.error);
-    Assert.assertNotNull(Logger.debug);
+  public void testInit() {
+    init(0, false);
+    assertTrue(Logger.TARGETS.isEmpty());
 
-    initialize(2, false);
-    Assert.assertNotNull(Logger.error);
-    Assert.assertNull(Logger.debug);
+    init(1, false);
+    assertEquals(1, Logger.TARGETS.size());
+    assertTrue(Logger.TARGETS.get(0) instanceof FileTarget);
 
-    initialize(6, false);
-    Logger logger = new Logger(LoggerTest.class);
-    Assert.assertEquals("[LoggerTest]", logger.prefix);
+
+    init(1, true);
+    assertEquals(2, Logger.TARGETS.size());
+    assertTrue(Logger.TARGETS.get(0) instanceof FileTarget);
+    assertTrue(Logger.TARGETS.get(1) instanceof ConsoleTarget);
+
+    Logger logger = init(1, false);
+    assertEquals("[LoggerTest]", logger.prefix);
   }
 
   @Test
-  public void testTrace() throws IOException {
-    initialize(6, false);
-    Logger logger = Mockito.spy(new Logger(LoggerTest.class));
+  public void testTrace() {
+    Logger logger = Mockito.spy(init(6, false));
     logger.trace("test");
-    Mockito.verify(logger).log("[TRACE]", false, "test");
+    Mockito.verify(logger).trace("test");
+    Mockito.verify(logger).log(6, "test");
+    Mockito.verifyNoMoreInteractions(logger);
 
-    initialize(5, false);
-    logger = Mockito.spy(new Logger(LoggerTest.class));
+    logger = Mockito.spy(init(5, false));
     logger.trace("test");
     Mockito.verify(logger).trace("test");
     Mockito.verifyNoMoreInteractions(logger);
   }
 
   @Test
-  public void testDebug() throws IOException {
-    initialize(5, false);
-    Logger logger = Mockito.spy(new Logger(LoggerTest.class));
+  public void testDebug() {
+    Logger logger = Mockito.spy(init(5, false));
     logger.debug("test");
-    Mockito.verify(logger).log("[DEBUG]", false, "test");
+    Mockito.verify(logger).debug("test");
+    Mockito.verify(logger).log(5, "test");
+    Mockito.verifyNoMoreInteractions(logger);
 
-    initialize(4, false);
-    logger = Mockito.spy(new Logger(LoggerTest.class));
+    logger = Mockito.spy(init(4, false));
     logger.debug("test");
     Mockito.verify(logger).debug("test");
     Mockito.verifyNoMoreInteractions(logger);
   }
 
   @Test
-  public void testInfo() throws IOException {
-    initialize(4, false);
-    Logger logger = Mockito.spy(new Logger(LoggerTest.class));
+  public void testInfo() {
+    Logger logger = Mockito.spy(init(4, false));
     logger.info("test");
-    Mockito.verify(logger).log("[INFO]", false, "test");
+    Mockito.verify(logger).info("test");
+    Mockito.verify(logger).log(4, "test");
+    Mockito.verifyNoMoreInteractions(logger);
 
-    initialize(3, false);
-    logger = Mockito.spy(new Logger(LoggerTest.class));
+    logger = Mockito.spy(init(3, false));
     logger.info("test");
     Mockito.verify(logger).info("test");
     Mockito.verifyNoMoreInteractions(logger);
   }
 
   @Test
-  public void testWarn() throws IOException {
-    initialize(3, false);
-    Logger logger = Mockito.spy(new Logger(LoggerTest.class));
+  public void testWarn() {
+    Logger logger = Mockito.spy(init(3, false));
     logger.warn("test");
-    Mockito.verify(logger).log("[WARN]", false, "test");
+    Mockito.verify(logger).warn("test");
+    Mockito.verify(logger).log(3, "test");
+    Mockito.verifyNoMoreInteractions(logger);
 
-    initialize(2, false);
-    logger = Mockito.spy(new Logger(LoggerTest.class));
+    logger = Mockito.spy(init(2, false));
     logger.warn("test");
     Mockito.verify(logger).warn("test");
     Mockito.verifyNoMoreInteractions(logger);
   }
 
   @Test
-  public void testError() throws IOException {
-    initialize(2, false);
-    Logger logger = Mockito.spy(new Logger(LoggerTest.class));
+  public void testError() {
+    Logger logger = Mockito.spy(init(2, false));
     logger.error("test");
-    Mockito.verify(logger).logE("[ERROR]", "test");
+    Mockito.verify(logger).error("test");
+    Mockito.verify(logger).logE(2, "test");
+    Mockito.verify(logger).log(2, "test");
+    Mockito.verifyNoMoreInteractions(logger);
 
-    initialize(1, false);
-    logger = Mockito.spy(new Logger(LoggerTest.class));
+    logger = Mockito.spy(init(1, false));
     logger.error("test");
     Mockito.verify(logger).error("test");
     Mockito.verifyNoMoreInteractions(logger);
   }
 
   @Test
-  public void testFatal() throws IOException {
-    initialize(1, false);
-    Logger logger = Mockito.spy(new Logger(LoggerTest.class));
+  public void testFatal() {
+    Logger logger = Mockito.spy(init(1, false));
     logger.fatal("test");
-    Mockito.verify(logger).logE("[FATAL]", "test");
+    Mockito.verify(logger).fatal("test");
+    Mockito.verify(logger).logE(1, "test");
+    Mockito.verify(logger).log(1, "test");
+    Mockito.verifyNoMoreInteractions(logger);
 
-    initialize(0, false);
-    logger = Mockito.spy(new Logger(LoggerTest.class));
+    logger = Mockito.spy(init(0, false));
     logger.fatal("test");
     Mockito.verify(logger).fatal("test");
     Mockito.verifyNoMoreInteractions(logger);
   }
 
   @Test
-  public void testStdOut() throws IOException {
-    initialize(6, true);
-    Console console = new Console();
-    console.startCapture();
+  public void testException() throws IOException {
+    Logger logger = init(6, false);
+    Logger.TARGETS.clear();
+    LogTarget target = Mockito.mock(LogTarget.class);
+    Logger.TARGETS.add(target);
 
-    Logger logger = Mockito.spy(new Logger(LoggerTest.class));
-    logger.debug("test");
+    Exception e = new RuntimeException();
+    logger.error("test", e);
 
-    Assert.assertThat(console.getOut(), Matchers.matchesPattern("\\[.*\\] \\[DEBUG\\] \\[LoggerTest\\] test\n"));
-    Assert.assertEquals("", console.getErr());
-
-    console.reset();
+    Mockito.verify(target).printTrace(e, 2);
+    Mockito.verify(target, Mockito.times(2)).print(Mockito.anyString(), Mockito.eq(2));
+    Mockito.verifyNoMoreInteractions(target);
   }
 
   @Test
-  public void testStdErr() throws IOException {
-    initialize(2, true);
-    Console console = new Console();
-    console.startCapture();
+  public void testReplacement() throws IOException {
+    Logger logger = init(6, false);
+    Logger.TARGETS.clear();
+    LogTarget target = Mockito.mock(LogTarget.class);
+    Logger.TARGETS.add(target);
 
-    Logger logger = Mockito.spy(new Logger(LoggerTest.class));
-    logger.error("test");
+    String arg = "123";
+    logger.debug("test {}", arg);
+    Mockito.verify(target).print(Mockito.matches("\\[.*] \\[DEBUG] \\[LoggerTest] test 123\n"),
+        Mockito.eq(5));
+    Mockito.verifyNoMoreInteractions(target);
 
-    Assert.assertThat(console.getErr(), Matchers.matchesPattern("\\[.*\\] \\[ERROR\\] \\[LoggerTest\\] test\n"));
-    Assert.assertThat(console.getOut(), Matchers.matchesPattern("\\[.*\\] \\[ERROR\\] \\[LoggerTest\\] test\n"));
+    arg = null;
+    logger.debug("test {}", arg);
+    Mockito.verify(target).print(Mockito.matches("\\[.*] \\[DEBUG] \\[LoggerTest] test null\n"),
+        Mockito.eq(5));
+    Mockito.verifyNoMoreInteractions(target);
+  }
 
-    console.reset();
+  @Test
+  public void testWrongArgumentCount() {
+    Logger logger = init(6, false);
+    try {
+      logger.debug("test {}", "123", "456");
+      fail("Should notice too less {}");
+    } catch (IllegalArgumentException e) {
+    }
+
+    try {
+      logger.debug("test {} {}");
+      fail("Should notice missing arguments");
+    } catch (IllegalArgumentException e) {
+    }
   }
 }
