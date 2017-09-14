@@ -1,0 +1,9 @@
+language: java
+sudo: false
+dist: trusty
+jdk:
+  - openjdk8
+  - openjdk7
+  - oraclejdk8
+  - oraclejdk7
+script: mvn install -f jdcallgraph/pom.xml
