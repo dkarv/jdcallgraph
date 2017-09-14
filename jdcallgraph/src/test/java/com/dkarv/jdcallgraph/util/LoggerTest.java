@@ -154,14 +154,4 @@ public class LoggerTest {
     console.reset();
   }
 
-  @Test
-  public void testException() throws IOException {
-    initialize(2, false);
-    Logger logger = Mockito.spy(new Logger(LoggerTest.class));
-    logger.error("test", new IllegalArgumentException("test"));
-
-    Mockito.verify(logger).log("[ERROR",true,"test", AdditionalMatchers.);
-
-  }
-
 }
