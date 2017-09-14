@@ -1,6 +1,8 @@
 # jdcallgraph
 JDCallgraph - Dynamic call graph generation for Java. Uses [Javassist](http://jboss-javassist.github.io/javassist/) to instrument the target application.
 
+[![Build Status](https://travis-ci.org/dkarv/jdcallgraph.svg?branch=master)](https://travis-ci.org/dkarv/jdcallgraph)
+
 ## How-To
 Download the jdcallgraph.jar or build it using `mvn install`.
 You have to invoke `java` with the `-javaagent:/path/to/jdcallgraph.jar=/path/to/config.ini`. A few examples:
