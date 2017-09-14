@@ -153,10 +153,4 @@ public class LoggerTest {
 
     console.reset();
   }
-
-  @Test
-  public void fail() {
-    Assert.fail("test travis");
-  }
-
 }
