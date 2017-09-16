@@ -1,15 +1,16 @@
-package com.dkarv.jdcallgraph.util;
+package com.dkarv.jdcallgraph.util.log;
 
+import com.dkarv.jdcallgraph.helper.Console;
 import com.dkarv.jdcallgraph.helper.TestUtils;
-import com.dkarv.jdcallgraph.util.log.ConsoleTarget;
-import com.dkarv.jdcallgraph.util.log.FileTarget;
-import com.dkarv.jdcallgraph.util.log.LogTarget;
+import com.dkarv.jdcallgraph.util.config.ConfigReader;
+import org.hamcrest.text.MatchesPattern;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.TemporaryFolder;
 import org.mockito.Mockito;
 
 import java.io.IOException;
+import java.util.regex.Pattern;
 
 import static org.junit.Assert.*;
 
@@ -19,8 +20,9 @@ public class LoggerTest {
 
   private Logger init(int logLevel, boolean stdOut) {
     try {
-      Config.load(TestUtils.writeFile(tmp, "outDir: " + tmp.getRoot(), "logLevel: " + logLevel,
-          "logStdout: " + stdOut).getCanonicalPath());
+      ConfigReader.reset();
+      ConfigReader.read(TestUtils.writeFile(tmp, "outDir: " + tmp.getRoot(), "logLevel: " + logLevel,
+          "logConsole: " + stdOut));
     } catch (IOException e) {
       fail("Error initializing config");
     }
@@ -182,5 +184,24 @@ public class LoggerTest {
       fail("Should notice missing arguments");
     } catch (IllegalArgumentException e) {
     }
+  }
+
+  @Test
+  public void testTargetError() throws IOException {
+    Logger logger = init(6, false);
+    Logger.TARGETS.clear();
+    LogTarget target = Mockito.mock(LogTarget.class);
+    Mockito.doThrow(new IOException("error")).when(target).print(Mockito.anyString(), Mockito.anyInt());
+    Logger.TARGETS.add(target);
+
+    Console console = new Console();
+    console.startCapture();
+    logger.debug("test");
+    logger.error("test", new RuntimeException());
+    assertEquals("", console.getOut());
+    String pattern = "Error in logger: error\njava.io.IOException: error\n.*";
+    pattern = pattern + pattern + pattern;
+    assertThat(console.getErr(), MatchesPattern.matchesPattern(Pattern.compile(pattern, Pattern.DOTALL)));
+    console.reset();
   }
 }

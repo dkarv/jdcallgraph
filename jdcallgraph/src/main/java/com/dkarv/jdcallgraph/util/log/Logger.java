@@ -22,13 +22,11 @@
  * SOFTWARE.
  */
 
-package com.dkarv.jdcallgraph.util;
+package com.dkarv.jdcallgraph.util.log;
 
-import com.dkarv.jdcallgraph.util.log.ConsoleTarget;
-import com.dkarv.jdcallgraph.util.log.FileTarget;
-import com.dkarv.jdcallgraph.util.log.LogTarget;
+import com.dkarv.jdcallgraph.util.config.Config;
 
-import java.io.*;
+import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -55,7 +53,7 @@ public class Logger {
     TARGETS.clear();
     if (Config.getInst().logLevel() > 0) {
       TARGETS.add(new FileTarget(Config.getInst().outDir(), Config.getInst().logLevel()));
-      if (Config.getInst().logStdout()) {
+      if (Config.getInst().logConsole()) {
         TARGETS.add(new ConsoleTarget());
       }
     }
@@ -119,6 +117,7 @@ public class Logger {
         }
       } catch (IOException ioe) {
         System.err.println("Error in logger: " + ioe.getMessage());
+        ioe.printStackTrace();
       }
     }
   }
