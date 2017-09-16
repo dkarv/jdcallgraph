@@ -33,11 +33,17 @@ import java.util.Map;
 
 public class ConfigReader {
 
-  public static void read(File file) throws IOException {
+  private final File from;
+
+  public ConfigReader(final File from) {
+    this.from = from;
+  }
+
+  public void read() throws IOException {
     Map<String, Field> fields = ConfigReader.parseFields();
     Config conf = Config.getInst();
 
-    for (String line : Files.readAllLines(file.toPath(), Charset.defaultCharset())) {
+    for (String line : Files.readAllLines(from.toPath(), Charset.defaultCharset())) {
       line = line.trim();
       if (line.isEmpty() || line.startsWith("#")) {
         continue;
@@ -73,9 +79,5 @@ public class ConfigReader {
     }
 
     return fields;
-  }
-
-  public static void reset() {
-    Config.instance = new Config();
   }
 }

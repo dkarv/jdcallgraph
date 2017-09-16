@@ -3,6 +3,7 @@ package com.dkarv.jdcallgraph.util.log;
 import com.dkarv.jdcallgraph.helper.Console;
 import com.dkarv.jdcallgraph.helper.TestUtils;
 import com.dkarv.jdcallgraph.util.config.ConfigReader;
+import com.dkarv.jdcallgraph.util.config.ConfigUtils;
 import org.hamcrest.text.MatchesPattern;
 import org.junit.Rule;
 import org.junit.Test;
@@ -20,9 +21,7 @@ public class LoggerTest {
 
   private Logger init(int logLevel, boolean stdOut) {
     try {
-      ConfigReader.reset();
-      ConfigReader.read(TestUtils.writeFile(tmp, "outDir: " + tmp.getRoot(), "logLevel: " + logLevel,
-          "logConsole: " + stdOut));
+      ConfigUtils.replace(tmp, true, "logLevel: " + logLevel, "logConsole: " + stdOut);
     } catch (IOException e) {
       fail("Error initializing config");
     }

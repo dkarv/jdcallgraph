@@ -16,25 +16,25 @@ public class ConfigTest {
   public TemporaryFolder tmp = new TemporaryFolder();
 
   private File writeConfig(String... config) throws IOException {
-    ConfigReader.reset();
+    Config.reset();
     return TestUtils.writeFile(tmp, config);
   }
 
   @Test
   public void testLoad() throws IOException {
-    ConfigReader.read(writeConfig("outDir: abc/"));
+    ConfigUtils.replace(tmp, true);
     Assert.assertNotNull(Config.getInst());
   }
 
   @Test
   public void testInvalidConfig() throws IOException {
     try {
-      ConfigReader.read(writeConfig("outDir test"));
+      ConfigUtils.replace(tmp, false, "outDir test");
       Assert.fail("Line without : not detected");
     } catch (IllegalArgumentException e) {
     }
     try {
-      ConfigReader.read(writeConfig("outDir: abc/", "asdf: 123"));
+      ConfigUtils.replace(tmp, true, "asdf: 123");
       Assert.fail("Invalid option not detected");
     } catch (IllegalArgumentException e) {
     }
@@ -42,26 +42,25 @@ public class ConfigTest {
 
   @Test
   public void testIgnoreWhitespace() throws IOException {
-    ConfigReader.read(writeConfig("outDir: abc/", "", ""));
+    ConfigUtils.replace(tmp, true, "", "");
+
+    ConfigUtils.replace(tmp, false, "outDir: abc/", "#outDir: xyz");
     Assert.assertEquals("abc/", Config.getInst().outDir());
 
-    ConfigReader.read(writeConfig("outDir: abc/", "#outDir: xyz"));
-    Assert.assertEquals("abc/", Config.getInst().outDir());
-
-    ConfigReader.read(writeConfig("      \t    outDir:    abc/    ", " \t "));
+    ConfigUtils.replace(tmp, false, "      \t    outDir:    abc/    ", " \t ");
     Assert.assertEquals("abc/", Config.getInst().outDir());
   }
 
   @Test
   public void testOutDir() throws IOException {
-    ConfigReader.read(writeConfig("outDir: abc/"));
+    ConfigUtils.replace(tmp, false, "outDir: abc/");
     Assert.assertEquals("abc/", Config.getInst().outDir());
 
-    ConfigReader.read(writeConfig("outDir: abc"));
+    ConfigUtils.replace(tmp, false, "outDir: abc");
     Assert.assertEquals("abc/", Config.getInst().outDir());
 
     try {
-      ConfigReader.read(writeConfig());
+      ConfigUtils.replace(tmp, false);
       Assert.fail("Missing outDir not detected");
     } catch (IllegalArgumentException e) {
     }
@@ -69,17 +68,16 @@ public class ConfigTest {
 
   @Test
   public void testLogLevel() throws IOException {
-    ConfigReader.read(writeConfig("outDir: abc/", "logLevel: 4"));
+    ConfigUtils.replace(tmp, true, "logLevel: 4");
     Assert.assertEquals(4, Config.getInst().logLevel());
-    Assert.assertEquals("abc/", Config.getInst().outDir());
 
     try {
-      ConfigReader.read(writeConfig("outDir: abc/", "logLevel: -1"));
+      ConfigUtils.replace(tmp, true, "logLevel: -1");
       Assert.fail("Did not detect negative log level");
     } catch (IllegalArgumentException e) {
     }
     try {
-      ConfigReader.read(writeConfig("outDir: abc/", "logLevel: 100"));
+      ConfigUtils.replace(tmp, true, "logLevel: 7");
       Assert.fail("Did not detect too high loglevel");
     } catch (IllegalArgumentException e) {
     }
@@ -87,42 +85,36 @@ public class ConfigTest {
 
   @Test
   public void testLogConsole() throws IOException {
-    ConfigReader.read(writeConfig("outDir: abc/", "logConsole: true"));
+    ConfigUtils.replace(tmp, true, "logConsole: true");
     Assert.assertEquals(true, Config.getInst().logConsole());
-    Assert.assertEquals("abc/", Config.getInst().outDir());
 
 
-    ConfigReader.read(writeConfig("outDir: abc/", "logConsole: false"));
+    ConfigUtils.replace(tmp, true, "logConsole: false");
     Assert.assertEquals(false, Config.getInst().logConsole());
-    Assert.assertEquals("abc/", Config.getInst().outDir());
   }
 
   @Test
   public void testMultigraph() throws IOException {
-    ConfigReader.read(writeConfig("outDir: abc/", "multiGraph: true"));
+    ConfigUtils.replace(tmp, true, "multiGraph: true");
     Assert.assertEquals(true, Config.getInst().multiGraph());
-    Assert.assertEquals("abc/", Config.getInst().outDir());
 
-    ConfigReader.read(writeConfig("outDir: abc/", "multiGraph: false"));
+    ConfigUtils.replace(tmp, true, "multiGraph: false");
     Assert.assertEquals(false, Config.getInst().multiGraph());
-    Assert.assertEquals("abc/", Config.getInst().outDir());
   }
 
   @Test
   public void testWriteTo() throws IOException {
     for (Target t : Target.values()) {
-      ConfigReader.read(writeConfig("outDir: abc/", "writeTo: " + t.name()));
+      ConfigUtils.replace(tmp, true, "writeTo: " + t.name());
       Assert.assertEquals(t, Config.getInst().writeTo());
-      Assert.assertEquals("abc/", Config.getInst().outDir());
     }
   }
 
   @Test
   public void testGroupBy() throws IOException {
     for (GroupBy g : GroupBy.values()) {
-      ConfigReader.read(writeConfig("outDir: abc/", "groupBy: " + g.name()));
+      ConfigUtils.replace(tmp, true, "groupBy: " + g.name());
       Assert.assertEquals(g, Config.getInst().groupBy());
-      Assert.assertEquals("abc/", Config.getInst().outDir());
     }
   }
 }

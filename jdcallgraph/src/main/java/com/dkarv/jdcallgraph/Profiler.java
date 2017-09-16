@@ -58,7 +58,7 @@ public class Profiler implements ClassFileTransformer {
    * @throws IllegalAccessException problem loading the config options
    */
   public static void premain(String argument, Instrumentation instrumentation) throws IOException, IllegalAccessException {
-    ConfigReader.read(new File(argument));
+    new ConfigReader(new File(argument)).read();
 
     Logger.init();
 

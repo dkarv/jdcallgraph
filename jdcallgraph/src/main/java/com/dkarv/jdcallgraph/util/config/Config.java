@@ -37,6 +37,10 @@ public class Config {
     return instance;
   }
 
+  static void reset() {
+    instance = new Config();
+  }
+
   @Option("outDir")
   private String outDir;
 
