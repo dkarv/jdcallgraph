@@ -146,6 +146,7 @@ public class LoggerTest {
 
     Mockito.verify(target).printTrace(e, 2);
     Mockito.verify(target, Mockito.times(2)).print(Mockito.anyString(), Mockito.eq(2));
+    Mockito.verify(target).flush();
     Mockito.verifyNoMoreInteractions(target);
   }
 
