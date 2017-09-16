@@ -8,7 +8,7 @@ public class ConsoleTarget implements LogTarget {
     if (level > 2) {
       System.out.print(msg);
     } else {
-      System.err.println(msg);
+      System.err.print(msg);
     }
   }
 
