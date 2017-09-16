@@ -1,4 +1,4 @@
-/**
+/*
  * MIT License
  * <p>
  * Copyright (c) 2017 David Krebs
@@ -35,48 +35,59 @@ import java.util.Stack;
 public class CallGraph {
   private static final Logger LOG = new Logger(CallGraph.class);
   private final long threadId;
-  private GraphWriter writer;
-  private final Stack<StackItem> calls = new Stack<>();
+  GraphWriter writer;
+  final Stack<StackItem> calls = new Stack<>();
 
-  public CallGraph(long threadId) throws IOException {
+  public CallGraph(long threadId) {
     this.threadId = threadId;
   }
 
-  private void createWriter(String identifier) {
+  void createWriter() {
     switch (Config.getInst().writeTo()) {
       case DOT:
         this.writer = new DotFileWriter();
         break;
       default:
-        throw new IllegalArgumentException("Unknown writeTo " + Config.getInst().writeTo());
+        throw new IllegalArgumentException("Unknown writeTo: " + Config.getInst().writeTo());
+    }
+  }
+
+  void newWriter(StackItem method, boolean isTest) throws IOException {
+    switch (Config.getInst().groupBy()) {
+      case ENTRY:
+        createWriter();
+        this.writer.start(method.toString());
+        break;
+      case TEST:
+        if (isTest) {
+          createWriter();
+          this.writer.start(method.toString());
+        } else {
+          LOG.warn("Skipping entry {} because it is no test", method);
+        }
+        break;
+      case THREAD:
+        createWriter();
+        this.writer.start(Long.toString(threadId));
+        break;
+      default:
+        throw new IllegalArgumentException("Unknown groupBy: " + Config.getInst().groupBy());
     }
   }
 
   public void called(StackItem method, boolean isTest) throws IOException {
     if (writer == null) {
-      switch (Config.getInst().groupBy()) {
-        case ENTRY:
-          createWriter(method.toString());
-          break;
-        case TEST:
-          if (isTest) {
-            createWriter(method.toString());
-          } else {
-            LOG.warn("Skipping entry {} because it is no test", method);
-          }
-          break;
-        case THREAD:
-          createWriter(Long.toString(threadId));
-          break;
-      }
+      newWriter(method, isTest);
     }
 
-    if (calls.isEmpty()) {
-      this.writer.node(method, isTest);
-      calls.push(method);
-    } else {
-      this.writer.edge(calls.peek(), method);
-      calls.push(method);
+    if (writer != null) {
+      if (calls.isEmpty()) {
+        this.writer.node(method, isTest);
+        calls.push(method);
+      } else {
+        this.writer.edge(calls.peek(), method);
+        calls.push(method);
+      }
     }
   }
 

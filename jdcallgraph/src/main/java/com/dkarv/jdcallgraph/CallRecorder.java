@@ -37,7 +37,7 @@ public class CallRecorder {
   /**
    * Collect the call graph per thread.
    */
-  private static Map<Long, CallGraph> GRAPHS = new HashMap<>();
+  static final Map<Long, CallGraph> GRAPHS = new HashMap<>();
 
   static {
     // initialize
