@@ -7,4 +7,4 @@ jdk:
 script: mvn clean install -f jdcallgraph/pom.xml
 
 after_success:
-  - mvn clean cobertura:cobertura coveralls:report
+  - mvn clean cobertura:cobertura coveralls:report -f jdcallgraph/pom.xml
