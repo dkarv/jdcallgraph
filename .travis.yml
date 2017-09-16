@@ -4,4 +4,7 @@ dist: trusty
 jdk:
   - openjdk8
   - oraclejdk8
-script: mvn install -f jdcallgraph/pom.xml
+script: mvn clean install -f jdcallgraph/pom.xml
+
+after_success:
+  - mvn clean cobertura:cobertura coveralls:report
