@@ -20,4 +20,9 @@ public class ConsoleTarget implements LogTarget {
       e.printStackTrace(System.err);
     }
   }
+
+  @Override
+  public void flush() throws IOException {
+    // Nothing to do
+  }
 }

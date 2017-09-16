@@ -94,6 +94,8 @@ public class Logger {
     try {
       for (LogTarget target : TARGETS) {
         target.print(msg, level);
+        // Not too important, flush can happen later automatically
+        // target.flush();
       }
     } catch (IOException e) {
       System.err.println("Error in logger: " + e.getMessage());
@@ -114,6 +116,7 @@ public class Logger {
         for (LogTarget target : TARGETS) {
           target.print(err, level);
           target.printTrace(e, level);
+          target.flush();
         }
       } catch (IOException ioe) {
         System.err.println("Error in logger: " + ioe.getMessage());

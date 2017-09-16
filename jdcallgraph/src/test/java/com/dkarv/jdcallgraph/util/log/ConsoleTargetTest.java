@@ -42,4 +42,10 @@ public class ConsoleTargetTest {
     Mockito.verify(e).printStackTrace(System.err);
     Mockito.verifyNoMoreInteractions(e);
   }
+
+  @Test
+  public void testFlush() throws IOException {
+    ConsoleTarget target = new ConsoleTarget();
+    target.flush();
+  }
 }
