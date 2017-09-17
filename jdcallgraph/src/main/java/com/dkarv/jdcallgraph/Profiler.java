@@ -33,6 +33,7 @@ import java.io.IOException;
 import java.lang.annotation.Annotation;
 import java.lang.instrument.ClassFileTransformer;
 import java.lang.instrument.Instrumentation;
+import java.security.ProtectionDomain;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.regex.Matcher;
@@ -78,7 +79,7 @@ public class Profiler implements ClassFileTransformer {
   }
 
   public byte[] transform(ClassLoader loader, String className, Class clazz,
-                          java.security.ProtectionDomain domain, byte[] bytes) {
+                          ProtectionDomain domain, byte[] bytes) {
     boolean enhanceClass = true;
 
     String name = className.replace("/", ".");
@@ -93,18 +94,18 @@ public class Profiler implements ClassFileTransformer {
     }
 
     if (enhanceClass) {
-      return enhanceClass(className, bytes);
-    } else {
-      return bytes;
+      byte[] b = enhanceClass(className, bytes);
+      if (b != null) return b;
     }
+    return bytes;
   }
 
-  byte[] enhanceClass(String name, byte[] b) {
+  byte[] enhanceClass(String name, byte[] bytes) {
     ClassPool pool = ClassPool.getDefault();
     CtClass clazz = null;
     try {
       boolean ignore = false;
-      clazz = pool.makeClass(new ByteArrayInputStream(b));
+      clazz = pool.makeClass(new ByteArrayInputStream(bytes));
       CtClass[] interfaces = clazz.getInterfaces();
       for (CtClass i : interfaces) {
         // ignore Mockito classes because modifying them results in errors
@@ -119,7 +120,7 @@ public class Profiler implements ClassFileTransformer {
             enhanceMethod(methods[i], clazz.getName());
           }
         }
-        b = clazz.toBytecode();
+        return clazz.toBytecode();
       } else {
         LOG.trace("Ignore class {}", name);
       }
@@ -134,7 +135,8 @@ public class Profiler implements ClassFileTransformer {
         clazz.detach();
       }
     }
-    return b;
+
+    return null;
   }
 
   void enhanceMethod(CtBehavior method, String className)
