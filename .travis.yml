@@ -17,3 +17,4 @@ deploy:
   on:
     tags: true
     repo: dkarv/jdcallgraph
+    jdk: 'openjdk8'
