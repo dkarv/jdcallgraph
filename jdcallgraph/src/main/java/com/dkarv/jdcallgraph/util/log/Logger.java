@@ -1,4 +1,4 @@
-/**
+/*
  * MIT License
  * <p>
  * Copyright (c) 2017 David Krebs
@@ -21,7 +21,6 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-
 package com.dkarv.jdcallgraph.util.log;
 
 import com.dkarv.jdcallgraph.util.config.Config;

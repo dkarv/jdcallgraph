@@ -119,6 +119,9 @@ public class CallGraph {
   public void finish() throws IOException {
     if (!calls.isEmpty()) {
       LOG.error("Shutdown but call graph not empty: {}", calls);
+      if (this.writer != null) {
+        this.writer.end();
+      }
     }
   }
 }
