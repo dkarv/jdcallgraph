@@ -14,4 +14,5 @@ deploy:
   file_glob: true
   file: jdcallgraph/target/jdcallgraph-*-agent.jar
   on:
+    tags: true
     repo: dkarv/jdcallgraph
