@@ -147,13 +147,9 @@ public class Profiler implements ClassFileTransformer {
       throws NotFoundException, CannotCompileException {
     String clazzName = className.substring(className.lastIndexOf('.') + 1, className.length());
     StringBuilder methodName = new StringBuilder();
-    boolean isConstructor = method.getName().equals(clazzName);
+    // boolean isConstructor = method.getMethodInfo().isConstructor();
 
-    if (isConstructor) {
-      methodName.append("<init>");
-    } else {
-      methodName.append(method.getName());
-    }
+    methodName.append(method.getName());
     methodName.append('(');
     CtClass[] params = method.getParameterTypes();
     for (int i = 0; i < params.length; i++) {
@@ -190,11 +186,11 @@ public class Profiler implements ClassFileTransformer {
     String srcAfter = "com.dkarv.jdcallgraph.CallRecorder.afterMethod(" + args + ");";
 
     method.insertBefore(srcBefore);
-    method.insertAfter(srcAfter, !isConstructor);
-    if (isConstructor) {
-      CtClass etype = ClassPool.getDefault().get("java.lang.Exception");
-      method.addCatch("{ " + srcAfter + " throw $e; }", etype);
-    }
+    method.insertAfter(srcAfter, true);
+    //if (isConstructor) {
+    //  CtClass etype = ClassPool.getDefault().get("java.lang.Exception");
+    //  method.addCatch("{ " + srcAfter + " throw $e; }", etype);
+    //}
   }
 
   static String getShortName(final CtClass clazz) {
