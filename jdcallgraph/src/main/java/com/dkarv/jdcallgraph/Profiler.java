@@ -94,18 +94,22 @@ public class Profiler implements ClassFileTransformer {
     }
 
     if (enhanceClass) {
-      byte[] b = enhanceClass(className, bytes);
+      byte[] b = enhanceClass(bytes);
       if (b != null) return b;
     }
     return bytes;
   }
 
-  byte[] enhanceClass(String name, byte[] bytes) {
-    ClassPool pool = ClassPool.getDefault();
+  CtClass makeClass(ClassPool pool, byte[] bytes) throws IOException {
+    return pool.makeClass(new ByteArrayInputStream(bytes));
+  }
+
+  byte[] enhanceClass(byte[] bytes) {
     CtClass clazz = null;
     try {
       boolean ignore = false;
-      clazz = pool.makeClass(new ByteArrayInputStream(bytes));
+      clazz = makeClass(ClassPool.getDefault(), bytes);
+
       CtClass[] interfaces = clazz.getInterfaces();
       for (CtClass i : interfaces) {
         // ignore Mockito classes because modifying them results in errors
@@ -113,7 +117,7 @@ public class Profiler implements ClassFileTransformer {
       }
       ignore = ignore || clazz.isInterface();
       if (!ignore) {
-        LOG.trace("Enhancing class: {}", name);
+        LOG.trace("Enhancing class: {}", clazz.getName());
         CtBehavior[] methods = clazz.getDeclaredBehaviors();
         for (int i = 0; i < methods.length; i++) {
           if (!methods[i].isEmpty()) {
@@ -122,12 +126,12 @@ public class Profiler implements ClassFileTransformer {
         }
         return clazz.toBytecode();
       } else {
-        LOG.trace("Ignore class {}", name);
+        LOG.trace("Ignore class {}", clazz.getName());
       }
     } catch (CannotCompileException e) {
-      LOG.error("Cannot compile {}", name, e);
+      LOG.error("Cannot compile", e);
     } catch (NotFoundException e) {
-      LOG.error("Cannot find {}", name, e);
+      LOG.error("Cannot find", e);
     } catch (IOException e) {
       LOG.error("IO error", e);
     } finally {

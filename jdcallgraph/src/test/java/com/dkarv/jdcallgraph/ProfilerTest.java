@@ -1,13 +1,15 @@
 package com.dkarv.jdcallgraph;
 
 import com.dkarv.jdcallgraph.util.config.ConfigUtils;
-import javassist.CtClass;
+import javassist.*;
 import org.junit.Assert;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.TemporaryFolder;
+import org.mockito.ArgumentCaptor;
 import org.mockito.Mockito;
 
+import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.IOException;
 import java.lang.instrument.Instrumentation;
@@ -56,18 +58,34 @@ public class ProfilerTest {
     byte[] output = new byte[]{5, 4, 3, 2, 1};
 
     Profiler p = Mockito.spy(new Profiler(excludes));
-    Mockito.doReturn(output).when(p).enhanceClass(Mockito.anyString(), Mockito.any(byte[].class));
+    Mockito.doReturn(output).when(p).enhanceClass(Mockito.any(byte[].class));
 
     // Ignore class test
     Mockito.when(m.matches()).thenReturn(true);
     byte[] result = p.transform(null, className, null, null, input);
     Assert.assertArrayEquals(input, result);
-    Mockito.verify(p, Mockito.never()).enhanceClass(Mockito.any(), Mockito.any());
+    Mockito.verify(p, Mockito.never()).enhanceClass(Mockito.any());
 
     // Do not ignore class test
     Mockito.when(m.matches()).thenReturn(false);
     result = p.transform(null, className, null, null, input);
     Assert.assertArrayEquals(output, result);
-    Mockito.verify(p).enhanceClass(Mockito.eq(className), Mockito.eq(input));
+    Mockito.verify(p).enhanceClass(Mockito.eq(input));
   }
+
+  @Test
+  public void testMakeClass() throws IOException {
+    byte[] input = new byte[]{1, 2, 3, 4, 5};
+    ClassPool pool = Mockito.mock(ClassPool.class);
+    (new Profiler(new ArrayList<>())).makeClass(pool, input);
+
+    ArgumentCaptor<ByteArrayInputStream> captor = ArgumentCaptor.forClass(ByteArrayInputStream.class);
+    Mockito.verify(pool).makeClass(captor.capture());
+    ByteArrayInputStream stream = captor.getValue();
+    byte[] array = new byte[stream.available()];
+    stream.read(array);
+    Assert.assertArrayEquals(input, array);
+  }
+
+
 }
