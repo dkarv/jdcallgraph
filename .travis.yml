@@ -6,5 +6,13 @@ jdk:
   - oraclejdk8
 script: mvn clean install -f jdcallgraph/pom.xml
 
+deploy:
+  provider: releases
+  api_key: "$GH_KEY"
+  file: "jdcallgraph/target/jdcallgraph-0.1.jar"
+  skip_cleanup: true
+  on:
+    tags: true
+
 after_success:
   - mvn clean cobertura:cobertura coveralls:report -f jdcallgraph/pom.xml
