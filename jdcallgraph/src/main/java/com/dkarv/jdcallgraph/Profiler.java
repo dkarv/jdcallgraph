@@ -45,15 +45,15 @@ public class Profiler implements ClassFileTransformer {
   private final static Logger LOG = new Logger(Profiler.class);
   private final List<Pattern> excludes;
 
-  private Profiler(List<Pattern> excludes) {
+  Profiler(List<Pattern> excludes) {
     this.excludes = excludes;
   }
 
   /**
-   * Program entry point. Loads the config and starts itself as intrumentation.
+   * Program entry point. Loads the config and starts itself as instrumentation.
    *
    * @param argument        command line argument. Should specify a config file
-   * @param instrumentation intrumentation
+   * @param instrumentation instrumentation
    * @throws IOException            io error
    * @throws IllegalAccessException problem loading the config options
    */
@@ -99,7 +99,7 @@ public class Profiler implements ClassFileTransformer {
     }
   }
 
-  private byte[] enhanceClass(String name, byte[] b) {
+  byte[] enhanceClass(String name, byte[] b) {
     ClassPool pool = ClassPool.getDefault();
     CtClass clazz = null;
     try {
@@ -137,7 +137,7 @@ public class Profiler implements ClassFileTransformer {
     return b;
   }
 
-  private void enhanceMethod(CtBehavior method, String className)
+  void enhanceMethod(CtBehavior method, String className)
       throws NotFoundException, CannotCompileException {
     String clazzName = className.substring(className.lastIndexOf('.') + 1, className.length());
     StringBuilder methodName = new StringBuilder();
@@ -191,11 +191,11 @@ public class Profiler implements ClassFileTransformer {
     }
   }
 
-  private static String getShortName(final CtClass clazz) {
+  static String getShortName(final CtClass clazz) {
     return getShortName(clazz.getName());
   }
 
-  private static String getShortName(final String className) {
+  static String getShortName(final String className) {
     return className.substring(className.lastIndexOf('.') + 1, className.length());
   }
 }
