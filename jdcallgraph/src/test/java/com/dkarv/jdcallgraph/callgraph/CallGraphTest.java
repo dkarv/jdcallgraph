@@ -40,4 +40,44 @@ public class CallGraphTest {
     graph.finish();
     Mockito.verify(writer).end();
   }
+
+  @Test
+  public void testReturned() throws IOException {
+    CallGraph graph = new CallGraph(1);
+    GraphWriter writer = Mockito.mock(GraphWriter.class);
+    StackItem[] items = new StackItem[]{
+        Mockito.mock(StackItem.class),
+        Mockito.mock(StackItem.class),
+        Mockito.mock(StackItem.class),
+        Mockito.mock(StackItem.class)
+    };
+
+    // Calling with unknown item should clear the whole stack
+    graph.writer = writer;
+    for (StackItem item : items) {
+      graph.calls.push(item);
+    }
+    graph.returned(Mockito.mock(StackItem.class));
+    Assert.assertTrue(graph.calls.isEmpty());
+    Mockito.verify(writer).end();
+
+    // It should stop removing when the equal item was found
+    graph.writer = writer;
+    for (StackItem item : items) {
+      graph.calls.push(item);
+    }
+    graph.returned(items[1]);
+    Assert.assertEquals(1, graph.calls.size());
+    Mockito.verifyNoMoreInteractions(writer);
+
+    // It should call writer.end when the stack is empty
+    graph.writer = writer;
+    graph.calls.clear();
+    for (StackItem item : items) {
+      graph.calls.push(item);
+    }
+    graph.returned(items[0]);
+    Assert.assertTrue(graph.calls.isEmpty());
+    Mockito.verify(writer, Mockito.times(2)).end();
+  }
 }

@@ -110,7 +110,7 @@ public class CallGraph {
     if (!found) {
       LOG.error("Couldn't find the returned method call on stack");
     }
-    if (calls.isEmpty()) {
+    if (calls.isEmpty() && this.writer != null) {
       this.writer.end();
       this.writer = null;
     }
