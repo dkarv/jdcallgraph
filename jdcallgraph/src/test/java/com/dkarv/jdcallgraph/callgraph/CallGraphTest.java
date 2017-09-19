@@ -35,10 +35,10 @@ public class CallGraphTest {
 
 
     graph.finish();
-    Mockito.verifyNoMoreInteractions(writer);
+    Mockito.verify(writer).end();
     graph.calls.push(item);
     graph.finish();
-    Mockito.verify(writer).end();
+    Mockito.verify(writer, Mockito.times(2)).end();
   }
 
   @Test

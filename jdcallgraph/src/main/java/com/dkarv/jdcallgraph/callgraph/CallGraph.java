@@ -77,6 +77,7 @@ public class CallGraph {
 
   public void called(StackItem method, boolean isTest) throws IOException {
     if (writer == null) {
+      LOG.debug("Creating new writer");
       newWriter(method, isTest);
     }
 
@@ -119,9 +120,9 @@ public class CallGraph {
   public void finish() throws IOException {
     if (!calls.isEmpty()) {
       LOG.error("Shutdown but call graph not empty: {}", calls);
-      if (this.writer != null) {
-        this.writer.end();
-      }
+    }
+    if (this.writer != null) {
+      this.writer.end();
     }
   }
 }
