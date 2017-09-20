@@ -30,13 +30,17 @@ import com.dkarv.jdcallgraph.util.config.Config;
 import com.dkarv.jdcallgraph.util.log.Logger;
 
 import java.io.*;
+import java.util.HashSet;
+import java.util.Set;
 import java.util.Stack;
 
 public class CallGraph {
   private static final Logger LOG = new Logger(CallGraph.class);
   private final long threadId;
-  GraphWriter writer;
   final Stack<StackItem> calls = new Stack<>();
+
+  Set<String> edges = new HashSet<>();
+  GraphWriter writer;
 
   public CallGraph(long threadId) {
     this.threadId = threadId;
@@ -73,6 +77,9 @@ public class CallGraph {
       default:
         throw new IllegalArgumentException("Unknown groupBy: " + Config.getInst().groupBy());
     }
+    if (!Config.getInst().multiGraph()) {
+      edges.clear();
+    }
   }
 
   public void called(StackItem method, boolean isTest) throws IOException {
@@ -86,7 +93,11 @@ public class CallGraph {
         this.writer.node(method, isTest);
         calls.push(method);
       } else {
-        this.writer.edge(calls.peek(), method);
+        boolean write = Config.getInst().multiGraph() ||
+            !edges.contains(method.toString());
+        if (write) {
+          this.writer.edge(calls.peek(), method);
+        }
         calls.push(method);
       }
     }
