@@ -52,5 +52,6 @@ public class DotFileWriter extends FileWriter {
   @Override
   public void end() throws IOException {
     super.write("}\n");
+    super.end();
   }
 }
