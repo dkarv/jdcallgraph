@@ -95,6 +95,9 @@ public class CallGraph {
       } else {
         boolean write = Config.getInst().multiGraph() ||
             !edges.contains(method.toString());
+        if (!Config.getInst().multiGraph()) {
+          edges.add(method.toString());
+        }
         if (write) {
           this.writer.edge(calls.peek(), method);
         }
