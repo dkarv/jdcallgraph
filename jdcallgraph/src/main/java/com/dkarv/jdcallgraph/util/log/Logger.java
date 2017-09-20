@@ -23,6 +23,7 @@
  */
 package com.dkarv.jdcallgraph.util.log;
 
+import com.dkarv.jdcallgraph.callgraph.CallGraph;
 import com.dkarv.jdcallgraph.util.config.Config;
 
 import java.io.IOException;
@@ -56,6 +57,19 @@ public class Logger {
         TARGETS.add(new ConsoleTarget());
       }
     }
+
+    Runtime.getRuntime().addShutdownHook(new Thread() {
+      public void run() {
+        // flush all logs before shutting down
+        for (LogTarget t : TARGETS) {
+          try {
+            t.flush();
+          } catch (IOException e) {
+            System.err.println("Error flushing log before shutdown");
+          }
+        }
+      }
+    });
   }
 
   private String build(int level, String msg) {

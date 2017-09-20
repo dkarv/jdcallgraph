@@ -81,8 +81,14 @@ def transform(target):
   for file in files:
     (name, ext) = os.path.splitext(file)
     if ext == ".dot":
-      print "Transforming {0}".format(file)
-      cmd("awk '!a[$0]++' '{0}/{1}.dot' | dot -Tpng -o '{0}/{1}.png'".format(target,name))
+      if os.stat("{0}/{1}".format(target,file)).st_size == 0:
+        print "Skipping empty {0}".format(file);
+      else:
+        print "Transforming {0}".format(file)
+        try:
+          cmd("awk '!a[$0]++' '{0}/{1}.dot' | dot -Tpng -o '{0}/{1}.png'".format(target,name))
+        except subprocess.CalledProcessError as e:
+          print "Error transforming {0}: {1}".format(file,e)
 
 
 

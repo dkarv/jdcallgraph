@@ -24,6 +24,7 @@
 package com.dkarv.jdcallgraph.callgraph.writer;
 
 import com.dkarv.jdcallgraph.util.config.Config;
+import com.dkarv.jdcallgraph.util.log.Logger;
 
 import java.io.BufferedWriter;
 import java.io.FileOutputStream;
@@ -31,6 +32,7 @@ import java.io.IOException;
 import java.io.OutputStreamWriter;
 
 public abstract class FileWriter implements GraphWriter {
+  private static final Logger LOG = new Logger(FileWriter.class);
 
   /**
    * File writeTo.
@@ -41,7 +43,7 @@ public abstract class FileWriter implements GraphWriter {
 
   @Override
   public void start(String identifier) throws IOException {
-    writer = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(Config.getInst().outDir() + identifier + this.getExtension()), "UTF-8"));
+    writer = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(Config.getInst().outDir() + identifier + this.getExtension(), true), "UTF-8"), 512);
   }
 
   @Override
@@ -51,6 +53,8 @@ public abstract class FileWriter implements GraphWriter {
   }
 
   protected void write(String text) throws IOException {
+    // LOG.trace("Write {} to file", text);
     writer.write(text);
+    // writer.flush();
   }
 }
