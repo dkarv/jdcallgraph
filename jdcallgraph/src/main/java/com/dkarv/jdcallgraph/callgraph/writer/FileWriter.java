@@ -37,7 +37,7 @@ public abstract class FileWriter implements GraphWriter {
   /**
    * File writeTo.
    */
-  private BufferedWriter writer;
+  BufferedWriter writer;
 
   protected abstract String getExtension();
 
