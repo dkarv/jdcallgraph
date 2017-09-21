@@ -28,7 +28,6 @@ import com.dkarv.jdcallgraph.util.StackItem;
 import java.io.IOException;
 
 public interface GraphWriter {
-
   /**
    * Start a new graph with the given name.
    *

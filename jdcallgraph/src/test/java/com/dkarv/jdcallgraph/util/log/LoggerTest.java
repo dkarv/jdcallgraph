@@ -1,8 +1,6 @@
 package com.dkarv.jdcallgraph.util.log;
 
 import com.dkarv.jdcallgraph.helper.Console;
-import com.dkarv.jdcallgraph.helper.TestUtils;
-import com.dkarv.jdcallgraph.util.config.ConfigReader;
 import com.dkarv.jdcallgraph.util.config.ConfigUtils;
 import org.hamcrest.text.MatchesPattern;
 import org.junit.Rule;

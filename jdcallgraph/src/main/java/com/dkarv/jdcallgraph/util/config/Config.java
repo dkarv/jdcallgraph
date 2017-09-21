@@ -27,6 +27,7 @@ import com.dkarv.jdcallgraph.util.GroupBy;
 import com.dkarv.jdcallgraph.util.Target;
 
 import java.io.File;
+import java.lang.reflect.Array;
 import java.lang.reflect.Field;
 
 public class Config {
@@ -54,24 +55,36 @@ public class Config {
   private GroupBy groupBy = GroupBy.THREAD;
 
   @Option("writeTo")
-  private Target writeTo = Target.DOT;
+  private Target[] writeTo = new Target[]{Target.DOT};
 
   @Option("multiGraph")
   private boolean multiGraph = true;
 
   void set(Field f, String value) throws IllegalAccessException {
     Class<?> c = f.getType();
+    Object elem = cast(c, value);
+    f.set(this, elem);
+  }
+
+  Object cast(Class<?> c, String value) {
     if (c.isAssignableFrom(String.class)) {
-      f.set(this, value);
+      return value;
     } else if (c.isAssignableFrom(Integer.TYPE)) {
-      f.setInt(this, Integer.parseInt(value));
+      return Integer.parseInt(value);
     } else if (c.isAssignableFrom(Boolean.TYPE)) {
-      f.setBoolean(this, Boolean.parseBoolean(value));
+      return Boolean.parseBoolean(value);
     } else if (c.isEnum()) {
-      Enum<?> val = Enum.valueOf(c.asSubclass(Enum.class), value);
-      f.set(this, val);
+      return Enum.valueOf(c.asSubclass(Enum.class), value);
+    } else if (c.isArray()) {
+      Class<?> inner = c.getComponentType();
+      String[] elems = value.split(",");
+      Object[] array = (Object[]) Array.newInstance(inner, elems.length);
+      for (int i = 0; i < elems.length; i++) {
+        array[i] = cast(inner, elems[i]);
+      }
+      return array;
     } else {
-      throw new IllegalArgumentException("Cannot assign field of type " + c);
+      throw new IllegalArgumentException("Cannot cast to field of type " + c);
     }
   }
 
@@ -107,7 +120,7 @@ public class Config {
     return groupBy;
   }
 
-  public Target writeTo() {
+  public Target[] writeTo() {
     return writeTo;
   }
 

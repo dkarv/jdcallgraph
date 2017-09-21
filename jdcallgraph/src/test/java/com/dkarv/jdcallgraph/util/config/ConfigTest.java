@@ -1,6 +1,5 @@
 package com.dkarv.jdcallgraph.util.config;
 
-import com.dkarv.jdcallgraph.helper.TestUtils;
 import com.dkarv.jdcallgraph.util.GroupBy;
 import com.dkarv.jdcallgraph.util.Target;
 import org.junit.Assert;
@@ -8,17 +7,11 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.TemporaryFolder;
 
-import java.io.File;
 import java.io.IOException;
 
 public class ConfigTest {
   @Rule
   public TemporaryFolder tmp = new TemporaryFolder();
-
-  private File writeConfig(String... config) throws IOException {
-    Config.reset();
-    return TestUtils.writeFile(tmp, config);
-  }
 
   @Test
   public void testLoad() throws IOException {
@@ -106,8 +99,11 @@ public class ConfigTest {
   public void testWriteTo() throws IOException {
     for (Target t : Target.values()) {
       ConfigUtils.replace(tmp, true, "writeTo: " + t.name());
-      Assert.assertEquals(t, Config.getInst().writeTo());
+      Assert.assertEquals(t, Config.getInst().writeTo()[0]);
     }
+
+    ConfigUtils.replace(tmp, true, "writeTo: " + Target.DOT +
+        "," + Target.MATRIX);
   }
 
   @Test

@@ -25,6 +25,8 @@ package com.dkarv.jdcallgraph.callgraph;
 
 import com.dkarv.jdcallgraph.callgraph.writer.DotFileWriter;
 import com.dkarv.jdcallgraph.callgraph.writer.GraphWriter;
+import com.dkarv.jdcallgraph.callgraph.writer.MatrixFileWriter;
+import com.dkarv.jdcallgraph.callgraph.writer.RemoveDuplicatesWriter;
 import com.dkarv.jdcallgraph.util.*;
 import com.dkarv.jdcallgraph.util.config.Config;
 import com.dkarv.jdcallgraph.util.log.Logger;
@@ -40,67 +42,74 @@ public class CallGraph {
   final Stack<StackItem> calls = new Stack<>();
 
   Set<String> edges = new HashSet<>();
-  GraphWriter writer;
+  final GraphWriter[] writers;
 
   public CallGraph(long threadId) {
     this.threadId = threadId;
-  }
-
-  void createWriter() {
-    switch (Config.getInst().writeTo()) {
-      case DOT:
-        this.writer = new DotFileWriter();
-        break;
-      default:
-        throw new IllegalArgumentException("Unknown writeTo: " + Config.getInst().writeTo());
+    Target[] targets = Config.getInst().writeTo();
+    writers = new GraphWriter[targets.length];
+    for (int i = 0; i < targets.length; i++) {
+      writers[i] = createWriter(targets[i], Config.getInst().multiGraph());
     }
   }
 
-  void newWriter(StackItem method, boolean isTest) throws IOException {
+  static GraphWriter createWriter(Target t, boolean multiGraph) {
+    switch (t) {
+      case DOT:
+        if (multiGraph) {
+          return new DotFileWriter();
+        } else {
+          return new RemoveDuplicatesWriter(new DotFileWriter());
+        }
+      case MATRIX:
+        return new MatrixFileWriter();
+      default:
+        throw new IllegalArgumentException("Unknown writeTo: " + t);
+    }
+  }
+
+  /**
+   * Check whether the method is a valid start condition.
+   *
+   * @param method called method
+   * @param isTest called method is test
+   * @return identifier if method is a valid start condition, null otherwise
+   */
+  String checkStartCondition(StackItem method, boolean isTest) {
     switch (Config.getInst().groupBy()) {
+      case THREAD:
+        return String.valueOf(threadId);
       case ENTRY:
-        createWriter();
-        this.writer.start(method.toString());
-        break;
+        return method.toString();
       case TEST:
         if (isTest) {
-          createWriter();
-          this.writer.start(method.toString());
-        } else {
-          LOG.warn("Skipping entry {} because it is no test", method);
+          return method.toString();
         }
-        break;
-      case THREAD:
-        createWriter();
-        this.writer.start(Long.toString(threadId));
         break;
       default:
         throw new IllegalArgumentException("Unknown groupBy: " + Config.getInst().groupBy());
     }
-    if (!Config.getInst().multiGraph()) {
-      edges.clear();
-    }
+    return null;
   }
 
   public void called(StackItem method, boolean isTest) throws IOException {
-    if (writer == null) {
-      LOG.debug("Creating new writer");
-      newWriter(method, isTest);
-    }
-
-    if (writer != null) {
-      if (calls.isEmpty()) {
-        this.writer.node(method, isTest);
+    if (calls.isEmpty()) {
+      // First node
+      LOG.debug("Test start condition");
+      String identifier = checkStartCondition(method, isTest);
+      if (identifier != null) {
         calls.push(method);
+        for (GraphWriter w : writers) {
+          w.start(identifier);
+          w.node(method, isTest);
+        }
       } else {
-        boolean write = Config.getInst().multiGraph() ||
-            !edges.contains(method.toString());
-        if (!Config.getInst().multiGraph()) {
-          edges.add(method.toString());
-        }
-        if (write) {
-          this.writer.edge(calls.peek(), method);
-        }
+        LOG.info("Skip first node {} because start condition not fulfilled", method);
+      }
+    } else {
+      // There already is at least one node, so this is an edge
+      for (GraphWriter w : writers) {
+        w.edge(calls.peek(), method);
         calls.push(method);
       }
     }
@@ -125,18 +134,19 @@ public class CallGraph {
     if (!found) {
       LOG.error("Couldn't find the returned method call on stack");
     }
-    if (calls.isEmpty() && this.writer != null) {
-      this.writer.end();
-      this.writer = null;
+    if (calls.isEmpty()) {
+      for (GraphWriter w : writers) {
+        w.end();
+      }
     }
   }
 
   public void finish() throws IOException {
     if (!calls.isEmpty()) {
       LOG.error("Shutdown but call graph not empty: {}", calls);
-    }
-    if (this.writer != null) {
-      this.writer.end();
+      for (GraphWriter w : writers) {
+        w.end();
+      }
     }
   }
 }

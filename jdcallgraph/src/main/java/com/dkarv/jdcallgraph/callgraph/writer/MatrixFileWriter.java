@@ -21,18 +21,39 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package com.dkarv.jdcallgraph.util;
+package com.dkarv.jdcallgraph.callgraph.writer;
 
-/**
- * Group the call graphs by the given strategy.
- */
-public enum Target {
-  /**
-   * Output a test coverage matrix.
-   */
-  MATRIX,
-  /**
-   * Output the call graph in dot format.
-   */
-  DOT
+import com.dkarv.jdcallgraph.util.StackItem;
+
+import java.io.IOException;
+
+public class MatrixFileWriter extends FileWriter {
+
+
+  @Override
+  protected String getExtension() {
+    return ".csv";
+  }
+
+  @Override
+  public void start(String identifier) throws IOException {
+    super.start("matrix");
+  }
+
+  @Override
+  public void node(StackItem method, boolean isTest) throws IOException {
+    super.write(method.toString() + ";");
+  }
+
+  @Override
+  public void edge(StackItem from, StackItem to) throws IOException {
+
+    super.write("\t\"" + from.toString() + "\" -> \"" + to.toString() + "\";\n");
+  }
+
+  @Override
+  public void end() throws IOException {
+    super.write("}\n");
+    super.end();
+  }
 }

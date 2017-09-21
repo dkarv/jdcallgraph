@@ -2,6 +2,9 @@ package com.dkarv.jdcallgraph.callgraph;
 
 import com.dkarv.jdcallgraph.callgraph.writer.DotFileWriter;
 import com.dkarv.jdcallgraph.callgraph.writer.GraphWriter;
+import com.dkarv.jdcallgraph.callgraph.writer.MatrixFileWriter;
+import com.dkarv.jdcallgraph.callgraph.writer.RemoveDuplicatesWriter;
+import com.dkarv.jdcallgraph.util.GroupBy;
 import com.dkarv.jdcallgraph.util.StackItem;
 import com.dkarv.jdcallgraph.util.Target;
 import com.dkarv.jdcallgraph.util.config.Config;
@@ -9,6 +12,8 @@ import com.dkarv.jdcallgraph.util.config.ConfigUtils;
 import org.hamcrest.CoreMatchers;
 import org.junit.Assert;
 import org.junit.Test;
+import org.mockito.AdditionalAnswers;
+import org.mockito.AdditionalMatchers;
 import org.mockito.Mockito;
 
 import java.io.IOException;
@@ -17,13 +22,17 @@ public class CallGraphTest {
 
   @Test
   public void testCreateWriter() {
-    Config c = Mockito.mock(Config.class);
-    ConfigUtils.inject(c);
-    CallGraph graph = new CallGraph(1);
+    GraphWriter w = CallGraph.createWriter(Target.DOT, true);
+    Assert.assertThat(w, CoreMatchers.instanceOf(DotFileWriter.class));
 
-    Mockito.when(c.writeTo()).thenReturn(Target.DOT);
-    graph.createWriter();
-    Assert.assertThat(graph.writer, CoreMatchers.instanceOf(DotFileWriter.class));
+    w = CallGraph.createWriter(Target.DOT, false);
+    Assert.assertThat(w, CoreMatchers.instanceOf(RemoveDuplicatesWriter.class));
+
+    w = CallGraph.createWriter(Target.MATRIX, false);
+    Assert.assertThat(w, CoreMatchers.instanceOf(MatrixFileWriter.class));
+
+    w = CallGraph.createWriter(Target.MATRIX, true);
+    Assert.assertThat(w, CoreMatchers.instanceOf(MatrixFileWriter.class));
   }
 
   @Test
@@ -31,18 +40,21 @@ public class CallGraphTest {
     CallGraph graph = new CallGraph(1);
     GraphWriter writer = Mockito.mock(GraphWriter.class);
     StackItem item = Mockito.mock(StackItem.class);
-    graph.writer = writer;
-
+    graph.writers[0] = writer;
 
     graph.finish();
-    Mockito.verify(writer).end();
+    Mockito.verify(writer, Mockito.never()).end();
     graph.calls.push(item);
     graph.finish();
-    Mockito.verify(writer, Mockito.times(2)).end();
+    Mockito.verify(writer).end();
   }
 
   @Test
   public void testReturned() throws IOException {
+    Config c = Mockito.mock(Config.class);
+    Mockito.when(c.writeTo()).thenReturn(new Target[]{Target.DOT});
+    ConfigUtils.inject(c);
+
     CallGraph graph = new CallGraph(1);
     GraphWriter writer = Mockito.mock(GraphWriter.class);
     StackItem[] items = new StackItem[]{
@@ -53,7 +65,7 @@ public class CallGraphTest {
     };
 
     // Calling with unknown item should clear the whole stack
-    graph.writer = writer;
+    graph.writers[0] = writer;
     for (StackItem item : items) {
       graph.calls.push(item);
     }
@@ -62,7 +74,7 @@ public class CallGraphTest {
     Mockito.verify(writer).end();
 
     // It should stop removing when the equal item was found
-    graph.writer = writer;
+    graph.writers[0] = writer;
     for (StackItem item : items) {
       graph.calls.push(item);
     }
@@ -71,7 +83,7 @@ public class CallGraphTest {
     Mockito.verifyNoMoreInteractions(writer);
 
     // It should call writer.end when the stack is empty
-    graph.writer = writer;
+    graph.writers[0] = writer;
     graph.calls.clear();
     for (StackItem item : items) {
       graph.calls.push(item);
@@ -79,5 +91,31 @@ public class CallGraphTest {
     graph.returned(items[0]);
     Assert.assertTrue(graph.calls.isEmpty());
     Mockito.verify(writer, Mockito.times(2)).end();
+  }
+
+  @Test
+  public void testCheckStartCondition() {
+    Config c = Mockito.mock(Config.class);
+    Mockito.when(c.writeTo()).thenReturn(new Target[]{});
+    ConfigUtils.inject(c);
+    StackItem item = Mockito.mock(StackItem.class);
+    Mockito.when(item.toString()).thenReturn("method()");
+    CallGraph graph = new CallGraph(1);
+
+    Mockito.when(c.groupBy()).thenReturn(GroupBy.THREAD);
+    String result = graph.checkStartCondition(item, false);
+    Assert.assertEquals("1", result);
+
+    Mockito.when(c.groupBy()).thenReturn(GroupBy.ENTRY);
+    result = graph.checkStartCondition(item, false);
+    Assert.assertEquals("method()", result);
+
+    Mockito.when(c.groupBy()).thenReturn(GroupBy.TEST);
+    result = graph.checkStartCondition(item, true);
+    Assert.assertEquals("method()", result);
+
+    Mockito.when(c.groupBy()).thenReturn(GroupBy.TEST);
+    result = graph.checkStartCondition(item, false);
+    Assert.assertNull(result);
   }
 }

@@ -87,7 +87,7 @@ def transform(target):
         print "Transforming {0}".format(file)
         try:
           # cmd("awk '!a[$0]++' '{0}/{1}.dot' | dot -Tpng -o '{0}/{1}.png'".format(target,name))
-          cmd("dot -Tpng {0}/{1}.dot -o '{0}/{1}.png'".format(target,name))
+          cmd("dot -Tpng '{0}/{1}.dot' -o '{0}/{1}.png'".format(target,name))
         except subprocess.CalledProcessError as e:
           print "Error transforming {0}: {1}".format(file,e)
 
