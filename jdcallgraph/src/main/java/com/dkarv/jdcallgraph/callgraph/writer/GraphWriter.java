@@ -55,4 +55,9 @@ public interface GraphWriter {
    * Finish the graph.
    */
   void end() throws IOException;
+
+  /**
+   * Finally called after all graphs are written.
+   */
+  void close() throws IOException;
 }

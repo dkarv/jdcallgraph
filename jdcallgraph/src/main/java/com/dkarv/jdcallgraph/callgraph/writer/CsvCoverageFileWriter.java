@@ -26,34 +26,51 @@ package com.dkarv.jdcallgraph.callgraph.writer;
 import com.dkarv.jdcallgraph.util.StackItem;
 
 import java.io.IOException;
+import java.util.*;
 
-public class MatrixFileWriter extends FileWriter {
+public class CsvCoverageFileWriter implements GraphWriter {
+  FileWriter writer;
 
-
-  @Override
-  protected String getExtension() {
-    return ".csv";
-  }
+  private final Map<StackItem, List<StackItem>> usedIn = new HashMap<>();
+  private StackItem currentItem;
 
   @Override
   public void start(String identifier) throws IOException {
-    super.start("matrix");
+    if (writer == null) {
+      writer = new FileWriter("coverage.csv");
+    }
   }
 
   @Override
   public void node(StackItem method, boolean isTest) throws IOException {
-    super.write(method.toString() + ";");
+    currentItem = method;
   }
 
   @Override
   public void edge(StackItem from, StackItem to) throws IOException {
-
-    super.write("\t\"" + from.toString() + "\" -> \"" + to.toString() + "\";\n");
+    List<StackItem> list = usedIn.get(to);
+    if (list == null) {
+      list = new ArrayList<>();
+      usedIn.put(to, list);
+    }
+    list.add(currentItem);
   }
 
   @Override
   public void end() throws IOException {
-    super.write("}\n");
-    super.end();
+  }
+
+  @Override
+  public void close() throws IOException {
+    for (Map.Entry<StackItem, List<StackItem>> entry : usedIn.entrySet()) {
+      writer.append(entry.getKey().toString());
+      writer.append(';');
+      for (StackItem item : entry.getValue()) {
+        writer.append(item.toString());
+        writer.append(';');
+      }
+      writer.append('\n');
+    }
+    writer.close();
   }
 }

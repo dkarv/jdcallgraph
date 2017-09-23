@@ -26,57 +26,63 @@ package com.dkarv.jdcallgraph.callgraph.writer;
 import com.dkarv.jdcallgraph.util.StackItem;
 
 import java.io.IOException;
-import java.util.HashMap;
-import java.util.HashSet;
+import java.util.*;
 
-/**
- * A writer that can wrap another writer and forwards nodes and edges
- * only if they did not happen before.
- */
-public class RemoveDuplicatesWriter implements GraphWriter {
-  private final GraphWriter parentWriter;
-  private final HashSet<StackItem> nodes = new HashSet<>();
-  private final HashMap<StackItem, HashSet<StackItem>> edges = new HashMap<>();
+public class CsvMatrixFileWriter implements GraphWriter {
+  FileWriter writer;
 
-  public RemoveDuplicatesWriter(GraphWriter parentWriter) {
-    this.parentWriter = parentWriter;
-  }
+  private final Map<StackItem, Integer> indexes = new HashMap<>();
+  private SortedSet<Integer> used;
+  private int nextIndex = 0;
 
   @Override
   public void start(String identifier) throws IOException {
-    parentWriter.start(identifier);
+    if (writer == null) {
+      writer = new FileWriter("matrix.csv");
+    }
   }
 
   @Override
   public void node(StackItem method, boolean isTest) throws IOException {
-    if (!nodes.contains(method)) {
-      parentWriter.node(method, isTest);
-      nodes.add(method);
-    }
+    used = new TreeSet<>();
+    writer.append(method.toString() + ";");
   }
 
   @Override
   public void edge(StackItem from, StackItem to) throws IOException {
-    HashSet<StackItem> set = edges.get(from);
-    if (set != null) {
-      if (!set.contains(to)) {
-        parentWriter.edge(from, to);
-        set.add(to);
-      }
-    } else {
-      set = new HashSet<>();
-      set.add(to);
-      edges.put(from, set);
+    Integer i = indexes.get(to);
+    if (i == null) {
+      i = nextIndex++;
+      indexes.put(to, i);
     }
+    used.add(i);
   }
 
   @Override
   public void end() throws IOException {
-    parentWriter.end();
+    int pos = 0;
+    for (Integer i : used) {
+      for (int x = pos; x < i; x++) {
+        writer.append(';');
+      }
+      writer.append("X;");
+      pos = i + 1;
+    }
+    writer.append(";\n");
   }
 
   @Override
   public void close() throws IOException {
-    parentWriter.close();
+    String[] methods = new String[indexes.size()];
+    for (Map.Entry<StackItem, Integer> entry : indexes.entrySet()) {
+      methods[entry.getValue()] = entry.getKey().toString();
+    }
+    writer.append(';');
+    for (String m : methods) {
+      writer.append(m);
+      writer.append(';');
+    }
+    writer.append('\n');
+    writer.close();
   }
 }

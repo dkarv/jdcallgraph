@@ -34,5 +34,9 @@ public enum Target {
   /**
    * Output the call graph in dot format.
    */
-  DOT
+  DOT,
+  /**
+   * Coverage csv.
+   */
+  COVERAGE;
 }

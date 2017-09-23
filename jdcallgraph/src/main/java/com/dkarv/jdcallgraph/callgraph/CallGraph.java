@@ -23,10 +23,7 @@
  */
 package com.dkarv.jdcallgraph.callgraph;
 
-import com.dkarv.jdcallgraph.callgraph.writer.DotFileWriter;
-import com.dkarv.jdcallgraph.callgraph.writer.GraphWriter;
-import com.dkarv.jdcallgraph.callgraph.writer.MatrixFileWriter;
-import com.dkarv.jdcallgraph.callgraph.writer.RemoveDuplicatesWriter;
+import com.dkarv.jdcallgraph.callgraph.writer.*;
 import com.dkarv.jdcallgraph.util.*;
 import com.dkarv.jdcallgraph.util.config.Config;
 import com.dkarv.jdcallgraph.util.log.Logger;
@@ -62,7 +59,9 @@ public class CallGraph {
           return new RemoveDuplicatesWriter(new DotFileWriter());
         }
       case MATRIX:
-        return new MatrixFileWriter();
+        return new CsvMatrixFileWriter();
+      case COVERAGE:
+        return new CsvCoverageFileWriter();
       default:
         throw new IllegalArgumentException("Unknown writeTo: " + t);
     }
@@ -147,6 +146,10 @@ public class CallGraph {
       for (GraphWriter w : writers) {
         w.end();
       }
+    }
+
+    for (GraphWriter w : writers) {
+      w.close();
     }
   }
 }

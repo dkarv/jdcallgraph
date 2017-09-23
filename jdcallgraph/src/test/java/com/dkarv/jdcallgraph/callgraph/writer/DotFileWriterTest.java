@@ -31,16 +31,10 @@ public class DotFileWriterTest {
   }
 
   @Test
-  public void testExtension() {
-    DotFileWriter writer = new DotFileWriter();
-    Assert.assertEquals(".dot", writer.getExtension());
-  }
-
-  @Test
   public void testStart() throws IOException {
     DotFileWriter writer = new DotFileWriter();
     writer.start("start");
-    writer.writer.flush();
+    writer.writer.writer.flush();
     Assert.assertEquals("digraph \"start\"\n{\n", read("start.dot"));
   }
 
@@ -50,10 +44,10 @@ public class DotFileWriterTest {
     StackItem item = Mockito.mock(StackItem.class);
     Mockito.when(item.toString()).thenReturn("method()");
     writer.start("node");
-    writer.writer.flush();
+    writer.writer.writer.flush();
     clear("node.dot");
     writer.node(item, false);
-    writer.writer.flush();
+    writer.writer.writer.flush();
     Assert.assertEquals("\t\"method()\" [style=filled,fillcolor=red];\n", read("node.dot"));
 
   }
@@ -66,10 +60,10 @@ public class DotFileWriterTest {
     StackItem item2 = Mockito.mock(StackItem.class);
     Mockito.when(item2.toString()).thenReturn("to()");
     writer.start("edge");
-    writer.writer.flush();
+    writer.writer.writer.flush();
     clear("edge.dot");
     writer.edge(item, item2);
-    writer.writer.flush();
+    writer.writer.writer.flush();
     Assert.assertEquals("\t\"from()\" -> \"to()\";\n", read("edge.dot"));
   }
 
@@ -77,7 +71,7 @@ public class DotFileWriterTest {
   public void testEnd() throws IOException {
     DotFileWriter writer = new DotFileWriter();
     writer.start("end");
-    writer.writer.flush();
+    writer.writer.writer.flush();
     clear("end.dot");
     writer.end();
     Assert.assertEquals("}\n", read("end.dot"));

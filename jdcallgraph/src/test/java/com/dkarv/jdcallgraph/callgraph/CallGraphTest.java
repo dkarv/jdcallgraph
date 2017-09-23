@@ -2,7 +2,7 @@ package com.dkarv.jdcallgraph.callgraph;
 
 import com.dkarv.jdcallgraph.callgraph.writer.DotFileWriter;
 import com.dkarv.jdcallgraph.callgraph.writer.GraphWriter;
-import com.dkarv.jdcallgraph.callgraph.writer.MatrixFileWriter;
+import com.dkarv.jdcallgraph.callgraph.writer.CsvMatrixFileWriter;
 import com.dkarv.jdcallgraph.callgraph.writer.RemoveDuplicatesWriter;
 import com.dkarv.jdcallgraph.util.GroupBy;
 import com.dkarv.jdcallgraph.util.StackItem;
@@ -12,8 +12,6 @@ import com.dkarv.jdcallgraph.util.config.ConfigUtils;
 import org.hamcrest.CoreMatchers;
 import org.junit.Assert;
 import org.junit.Test;
-import org.mockito.AdditionalAnswers;
-import org.mockito.AdditionalMatchers;
 import org.mockito.Mockito;
 
 import java.io.IOException;
@@ -29,10 +27,10 @@ public class CallGraphTest {
     Assert.assertThat(w, CoreMatchers.instanceOf(RemoveDuplicatesWriter.class));
 
     w = CallGraph.createWriter(Target.MATRIX, false);
-    Assert.assertThat(w, CoreMatchers.instanceOf(MatrixFileWriter.class));
+    Assert.assertThat(w, CoreMatchers.instanceOf(CsvMatrixFileWriter.class));
 
     w = CallGraph.createWriter(Target.MATRIX, true);
-    Assert.assertThat(w, CoreMatchers.instanceOf(MatrixFileWriter.class));
+    Assert.assertThat(w, CoreMatchers.instanceOf(CsvMatrixFileWriter.class));
   }
 
   @Test

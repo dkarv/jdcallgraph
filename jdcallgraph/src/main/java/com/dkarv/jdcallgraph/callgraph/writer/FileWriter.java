@@ -26,12 +26,9 @@ package com.dkarv.jdcallgraph.callgraph.writer;
 import com.dkarv.jdcallgraph.util.config.Config;
 import com.dkarv.jdcallgraph.util.log.Logger;
 
-import java.io.BufferedWriter;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.OutputStreamWriter;
+import java.io.*;
 
-public abstract class FileWriter implements GraphWriter {
+public class FileWriter {
   private static final Logger LOG = new Logger(FileWriter.class);
 
   /**
@@ -39,22 +36,20 @@ public abstract class FileWriter implements GraphWriter {
    */
   BufferedWriter writer;
 
-  protected abstract String getExtension();
-
-  @Override
-  public void start(String identifier) throws IOException {
-    writer = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(Config.getInst().outDir() + identifier + this.getExtension(), true), "UTF-8"), 512);
+  FileWriter(String fileName) throws FileNotFoundException, UnsupportedEncodingException {
+    writer = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(Config.getInst().outDir() + fileName, true), "UTF-8"), 512);
   }
 
-  @Override
-  public void end() throws IOException {
+  public void close() throws IOException {
     writer.flush();
     writer.close();
   }
 
-  protected void write(String text) throws IOException {
-    // LOG.trace("Write {} to file", text);
+  void append(String text) throws IOException {
     writer.write(text);
-    // writer.flush();
+  }
+
+  void append(char c) throws IOException {
+    writer.append(c);
   }
 }
