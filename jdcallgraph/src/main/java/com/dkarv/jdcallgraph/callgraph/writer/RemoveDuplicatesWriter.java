@@ -24,6 +24,7 @@
 package com.dkarv.jdcallgraph.callgraph.writer;
 
 import com.dkarv.jdcallgraph.util.StackItem;
+import com.dkarv.jdcallgraph.util.log.Logger;
 
 import java.io.IOException;
 import java.util.HashMap;
@@ -34,6 +35,8 @@ import java.util.HashSet;
  * only if they did not happen before.
  */
 public class RemoveDuplicatesWriter implements GraphWriter {
+  private final static Logger LOG = new Logger(RemoveDuplicatesWriter.class);
+
   private final GraphWriter parentWriter;
   private final HashMap<StackItem, HashSet<StackItem>> edges = new HashMap<>();
 

@@ -61,7 +61,7 @@ def clean(target):
   files = os.listdir(target)
   for file in files:
     ext = os.path.splitext(file)[1]
-    if ext in ['.png','.dot','.log']:
+    if ext in ['.png','.dot','.log','.csv']:
       os.remove(os.path.join(target,file))
 
 
@@ -91,7 +91,7 @@ def transform(target):
   files = filter(lambda x: os.stat(x + ".dot") > 0, files)
   files = map(lambda x: "dot -Tpng '{0}.dot' -o '{0}.png'".format(x), files)
 
-  pool = Pool(10)
+  pool = Pool(20)
   with tqdm(total=len(files)) as pbar:
     for i, _ in tqdm(enumerate(pool.imap_unordered(cmd, files))):
       pbar.update()
