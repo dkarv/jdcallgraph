@@ -132,9 +132,9 @@ def main(argv):
     show_help()
     sys.exit(2)
 
-#  clean(target)
-#  checkout(workdir, proj, bug)
-#  run(workdir, proj, bug, onlyFailing)
+  clean(target)
+  checkout(workdir, proj, bug)
+  run(workdir, proj, bug, onlyFailing)
   transform(target)
 
 
