@@ -38,7 +38,6 @@ public class CallGraph {
   private final long threadId;
   final Stack<StackItem> calls = new Stack<>();
 
-  Set<String> edges = new HashSet<>();
   final GraphWriter[] writers;
 
   public CallGraph(long threadId) {
@@ -109,8 +108,8 @@ public class CallGraph {
       // There already is at least one node, so this is an edge
       for (GraphWriter w : writers) {
         w.edge(calls.peek(), method);
-        calls.push(method);
       }
+      calls.push(method);
     }
   }
 
