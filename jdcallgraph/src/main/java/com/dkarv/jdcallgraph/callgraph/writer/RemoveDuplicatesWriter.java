@@ -35,7 +35,6 @@ import java.util.HashSet;
  */
 public class RemoveDuplicatesWriter implements GraphWriter {
   private final GraphWriter parentWriter;
-  private final HashSet<StackItem> nodes = new HashSet<>();
   private final HashMap<StackItem, HashSet<StackItem>> edges = new HashMap<>();
 
   public RemoveDuplicatesWriter(GraphWriter parentWriter) {
@@ -49,18 +48,15 @@ public class RemoveDuplicatesWriter implements GraphWriter {
 
   @Override
   public void node(StackItem method, boolean isTest) throws IOException {
-    if (!nodes.contains(method)) {
-      parentWriter.node(method, isTest);
-      nodes.add(method);
-    }
+    parentWriter.node(method, isTest);
   }
 
   @Override
   public void edge(StackItem from, StackItem to) throws IOException {
     boolean duplicate = false;
     HashSet<StackItem> set = edges.get(from);
-    if(set != null){
-      if(set.contains(to)){
+    if (set != null) {
+      if (set.contains(to)) {
         duplicate = true;
       } else {
         set.add(to);
@@ -71,7 +67,7 @@ public class RemoveDuplicatesWriter implements GraphWriter {
       edges.put(from, set);
     }
 
-    if(!duplicate){
+    if (!duplicate) {
       parentWriter.edge(from, to);
     }
   }
@@ -79,6 +75,7 @@ public class RemoveDuplicatesWriter implements GraphWriter {
   @Override
   public void end() throws IOException {
     parentWriter.end();
+    edges.clear();
   }
 
   @Override
