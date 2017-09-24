@@ -23,6 +23,9 @@
 # SOFTWARE.
 
 import sys, getopt, os, subprocess, re
+import time
+from tqdm import *
+from multiprocessing import Pool
 
 def show_help():
   print """Usage: <script> -p <project> -b <bug> [OPTIONS]
@@ -36,7 +39,10 @@ Valid options are:
 """
 # Run a command in the shell
 def cmd(cmd):
-  return subprocess.check_output(cmd, shell=True)
+  try:
+    return subprocess.check_output(cmd, shell=True)
+  except CalledProcessError as e:
+    print "Error in command: " + e
 
 # Return all failing tests in that version
 def failing_tests(proj, bug):
@@ -75,21 +81,23 @@ def run(target, proj, bug, onlyFailing):
   else:
     cmd("defects4j test -w {0}/{1}/{2}b".format(target,proj,bug))
 
+
 # Transform the graph results to images
 def transform(target):
   files = os.listdir(target)
-  for file in files:
-    (name, ext) = os.path.splitext(file)
-    if ext == ".dot":
-      if os.stat("{0}/{1}".format(target,file)).st_size == 0:
-        print "Skipping empty {0}".format(file);
-      else:
-        print "Transforming {0}".format(file)
-        try:
-          # cmd("awk '!a[$0]++' '{0}/{1}.dot' | dot -Tpng -o '{0}/{1}.png'".format(target,name))
-          cmd("dot -Tpng '{0}/{1}.dot' -o '{0}/{1}.png'".format(target,name))
-        except subprocess.CalledProcessError as e:
-          print "Error transforming {0}: {1}".format(file,e)
+  files = map(os.path.splitext, files)
+  files = filter(lambda x: x[1] == ".dot", files)
+  files = map(lambda x: target + "/" + x[0], files)
+  files = filter(lambda x: os.stat(x + ".dot") > 0, files)
+  files = map(lambda x: "dot -Tpng '{0}.dot' -o '{0}.png'".format(x), files)
+
+  pool = Pool(10)
+  with tqdm(total=len(files)) as pbar:
+    for i, _ in tqdm(enumerate(pool.imap_unordered(cmd, files))):
+      pbar.update()
+  pbar.close()
+  pool.close()
+  pool.join()
 
 
 
@@ -124,9 +132,9 @@ def main(argv):
     show_help()
     sys.exit(2)
 
-  clean(target)
-  checkout(workdir, proj, bug)
-  run(workdir, proj, bug, onlyFailing)
+#  clean(target)
+#  checkout(workdir, proj, bug)
+#  run(workdir, proj, bug, onlyFailing)
   transform(target)
 
 
