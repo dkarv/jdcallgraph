@@ -31,7 +31,7 @@ import java.util.*;
 public class CsvCoverageFileWriter implements GraphWriter {
   FileWriter writer;
 
-  private final Map<StackItem, List<StackItem>> usedIn = new HashMap<>();
+  private final Map<StackItem, Set<StackItem>> usedIn = new HashMap<>();
   private StackItem currentItem;
 
   @Override
@@ -48,9 +48,9 @@ public class CsvCoverageFileWriter implements GraphWriter {
 
   @Override
   public void edge(StackItem from, StackItem to) throws IOException {
-    List<StackItem> list = usedIn.get(to);
+    Set<StackItem> list = usedIn.get(to);
     if (list == null) {
-      list = new ArrayList<>();
+      list = new HashSet<>();
       usedIn.put(to, list);
     }
     list.add(currentItem);
@@ -62,7 +62,7 @@ public class CsvCoverageFileWriter implements GraphWriter {
 
   @Override
   public void close() throws IOException {
-    for (Map.Entry<StackItem, List<StackItem>> entry : usedIn.entrySet()) {
+    for (Map.Entry<StackItem, Set<StackItem>> entry : usedIn.entrySet()) {
       writer.append(entry.getKey().toString());
       writer.append(';');
       for (StackItem item : entry.getValue()) {
