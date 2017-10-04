@@ -61,6 +61,8 @@ public class CallGraph {
         return new CsvMatrixFileWriter();
       case COVERAGE:
         return new CsvCoverageFileWriter();
+      case TRACE:
+        return new CsvTraceFileWriter();
       default:
         throw new IllegalArgumentException("Unknown writeTo: " + t);
     }

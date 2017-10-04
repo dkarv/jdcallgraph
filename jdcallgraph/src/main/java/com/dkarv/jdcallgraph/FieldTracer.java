@@ -21,26 +21,39 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package com.dkarv.jdcallgraph.util;
+package com.dkarv.jdcallgraph;
+
+import javassist.CannotCompileException;
+import javassist.CtBehavior;
+import javassist.NotFoundException;
+import javassist.expr.ExprEditor;
+import javassist.expr.FieldAccess;
 
 /**
- * Group the call graphs by the given strategy.
+ * Go through all field accesses to build a dynamic data dependence graph.
  */
-public enum Target {
-  /**
-   * Output a test coverage matrix.
-   */
-  MATRIX,
-  /**
-   * Output the call graph in dot format.
-   */
-  DOT,
-  /**
-   * Coverage csv.
-   */
-  COVERAGE,
-  /**
-   * All methods used per entry.
-   */
-  TRACE;
+public class FieldTracer extends ExprEditor {
+
+  public final void edit(FieldAccess f) throws CannotCompileException {
+    CtBehavior method = f.where();
+    String className = f.getEnclosingClass().getName();
+    String methodName;
+    try {
+      methodName = Tracer.getMethodName(method);
+    } catch (NotFoundException e) {
+      methodName = "<error>";
+    }
+    String from = "\"" + className + "\",\"" + methodName + "\",";
+    String field = "\"" + f.getClassName() + "\",\"" + f.getFieldName() + "\"";
+
+    boolean write = f.isWriter();
+    if (write) {
+      f.replace("{ com.dkarv.jdcallgraph.FieldAccessRecorder.write(" +
+          from + field + "); $_ = $proceed($$); }");
+    } else {
+      f.replace("{ com.dkarv.jdcallgraph.FieldAccessRecorder.read(" +
+          from + field + "); $_ = $proceed($$); }");
+    }
+  }
+
 }

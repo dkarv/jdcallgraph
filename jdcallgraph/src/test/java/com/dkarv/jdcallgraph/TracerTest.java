@@ -19,7 +19,7 @@ import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-public class ProfilerTest {
+public class TracerTest {
   @Rule
   public TemporaryFolder tmp = new TemporaryFolder();
 
@@ -28,22 +28,22 @@ public class ProfilerTest {
     String name = "abc.def.ghi.Example";
     CtClass cl = new CtClass(name) {
     };
-    Assert.assertEquals("Example", Profiler.getShortName(cl));
-    Assert.assertEquals("Example", Profiler.getShortName(name));
+    Assert.assertEquals("Example", Tracer.getShortName(cl));
+    Assert.assertEquals("Example", Tracer.getShortName(name));
   }
 
   @Test
   public void testPremain() throws IOException, IllegalAccessException {
     Instrumentation instrumentation = Mockito.mock(Instrumentation.class);
     try {
-      Profiler.premain("notexistingfile", instrumentation);
+      Tracer.premain("notexistingfile", instrumentation);
       Assert.fail("Should throw FileNotFoundException");
     } catch (NoSuchFileException e) {
     }
 
     File config = ConfigUtils.write(tmp, true);
-    Profiler.premain(config.getCanonicalPath(), instrumentation);
-    Mockito.verify(instrumentation).addTransformer(Mockito.any(Profiler.class));
+    Tracer.premain(config.getCanonicalPath(), instrumentation);
+    Mockito.verify(instrumentation).addTransformer(Mockito.any(Tracer.class));
   }
 
   @Test
@@ -57,7 +57,7 @@ public class ProfilerTest {
     byte[] input = new byte[]{1, 2, 3, 4, 5};
     byte[] output = new byte[]{5, 4, 3, 2, 1};
 
-    Profiler p = Mockito.spy(new Profiler(excludes));
+    Tracer p = Mockito.spy(new Tracer(excludes));
     Mockito.doReturn(output).when(p).enhanceClass(Mockito.any(byte[].class));
 
     // Ignore class test
@@ -77,7 +77,7 @@ public class ProfilerTest {
   public void testMakeClass() throws IOException {
     byte[] input = new byte[]{1, 2, 3, 4, 5};
     ClassPool pool = Mockito.mock(ClassPool.class);
-    (new Profiler(new ArrayList<>())).makeClass(pool, input);
+    (new Tracer(new ArrayList<>())).makeClass(pool, input);
 
     ArgumentCaptor<ByteArrayInputStream> captor = ArgumentCaptor.forClass(ByteArrayInputStream.class);
     Mockito.verify(pool).makeClass(captor.capture());

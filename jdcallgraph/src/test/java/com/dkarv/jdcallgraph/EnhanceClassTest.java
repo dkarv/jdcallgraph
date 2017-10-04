@@ -18,13 +18,13 @@ public class EnhanceClassTest {
   byte[] output = new byte[]{5, 4, 3, 2, 1};
   CtClass ct;
   CtClass interf;
-  Profiler p;
+  Tracer p;
 
   @Before
   public void before() throws IOException, NotFoundException, CannotCompileException {
     ct = Mockito.mock(CtClass.class);
     interf = Mockito.mock(CtClass.class);
-    p = Mockito.spy(new Profiler(new ArrayList<>()));
+    p = Mockito.spy(new Tracer(new ArrayList<>()));
     Mockito.doReturn(ct).when(p).makeClass(Mockito.any(), Mockito.eq(input));
     Mockito.doNothing().when(p).enhanceMethod(Mockito.any(), Mockito.anyString());
     Mockito.doReturn(new CtClass[]{interf}).when(ct).getInterfaces();

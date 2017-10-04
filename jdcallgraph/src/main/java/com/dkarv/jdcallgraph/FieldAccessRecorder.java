@@ -21,26 +21,18 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package com.dkarv.jdcallgraph.util;
+package com.dkarv.jdcallgraph;
 
-/**
- * Group the call graphs by the given strategy.
- */
-public enum Target {
-  /**
-   * Output a test coverage matrix.
-   */
-  MATRIX,
-  /**
-   * Output the call graph in dot format.
-   */
-  DOT,
-  /**
-   * Coverage csv.
-   */
-  COVERAGE,
-  /**
-   * All methods used per entry.
-   */
-  TRACE;
+import com.dkarv.jdcallgraph.util.log.Logger;
+
+public class FieldAccessRecorder {
+  private static final Logger LOG = new Logger(FieldAccessRecorder.class);
+
+  public static void read(String fromClass, String fromMethod, String fieldClass, String fieldName) {
+    LOG.trace("Read to {}::{} from {}::{}", fieldClass, fieldName, fromClass, fromMethod);
+  }
+
+  public static void write(String fromClass, String fromMethod, String fieldClass, String fieldName) {
+    LOG.trace("Write to {}::{} from {}::{}", fieldClass, fieldName, fromClass, fromMethod);
+  }
 }

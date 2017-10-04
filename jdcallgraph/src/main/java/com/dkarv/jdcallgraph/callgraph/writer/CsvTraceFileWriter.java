@@ -21,26 +21,50 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package com.dkarv.jdcallgraph.util;
+package com.dkarv.jdcallgraph.callgraph.writer;
 
-/**
- * Group the call graphs by the given strategy.
- */
-public enum Target {
-  /**
-   * Output a test coverage matrix.
-   */
-  MATRIX,
-  /**
-   * Output the call graph in dot format.
-   */
-  DOT,
-  /**
-   * Coverage csv.
-   */
-  COVERAGE,
-  /**
-   * All methods used per entry.
-   */
-  TRACE;
+import com.dkarv.jdcallgraph.util.StackItem;
+
+import java.io.IOException;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
+
+public class CsvTraceFileWriter implements GraphWriter {
+  FileWriter writer;
+
+  private final Set<StackItem> trace = new HashSet<>();
+
+  @Override
+  public void start(String identifier) throws IOException {
+    if (writer == null) {
+      writer = new FileWriter("trace.csv");
+    }
+  }
+
+  @Override
+  public void node(StackItem method, boolean isTest) throws IOException {
+    writer.append(method.toString());
+    trace.clear();
+  }
+
+  @Override
+  public void edge(StackItem from, StackItem to) throws IOException {
+    if (!trace.contains(to)) {
+      writer.append(';');
+      writer.append(to.toString());
+      trace.add(to);
+    }
+  }
+
+  @Override
+  public void end() throws IOException {
+    writer.append('\n');
+  }
+
+  @Override
+  public void close() throws IOException {
+    writer.close();
+  }
 }

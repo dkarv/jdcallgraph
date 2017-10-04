@@ -42,11 +42,13 @@ import java.util.regex.Pattern;
 /**
  * Instrument the target classes.
  */
-public class Profiler implements ClassFileTransformer {
-  private final static Logger LOG = new Logger(Profiler.class);
+public class Tracer implements ClassFileTransformer {
+  private final static Logger LOG = new Logger(Tracer.class);
   private final List<Pattern> excludes;
 
-  Profiler(List<Pattern> excludes) {
+  private final FieldTracer fieldTracer = new FieldTracer();
+
+  Tracer(List<Pattern> excludes) {
     this.excludes = excludes;
   }
 
@@ -59,7 +61,12 @@ public class Profiler implements ClassFileTransformer {
    * @throws IllegalAccessException problem loading the config options
    */
   public static void premain(String argument, Instrumentation instrumentation) throws IOException, IllegalAccessException {
-    new ConfigReader(new File(argument)).read();
+    if (argument != null) {
+      new ConfigReader(new File(argument)).read();
+    } else {
+      System.err.println("You did not specify a config file. Will use the default config options instead.");
+    }
+
 
     Logger.init();
 
@@ -75,7 +82,7 @@ public class Profiler implements ClassFileTransformer {
       excludes.add(Pattern.compile(exclude + "$"));
     }
 
-    instrumentation.addTransformer(new Profiler(excludes));
+    instrumentation.addTransformer(new Tracer(excludes));
   }
 
   public byte[] transform(ClassLoader loader, String className, Class clazz,
@@ -146,21 +153,7 @@ public class Profiler implements ClassFileTransformer {
   void enhanceMethod(CtBehavior method, String className)
       throws NotFoundException, CannotCompileException {
     String clazzName = className.substring(className.lastIndexOf('.') + 1, className.length());
-    StringBuilder methodName = new StringBuilder();
-    // boolean isConstructor = method.getMethodInfo().isConstructor();
-
-    methodName.append(method.getName());
-    methodName.append('(');
-    CtClass[] params = method.getParameterTypes();
-    for (int i = 0; i < params.length; i++) {
-      if (i != 0) {
-        methodName.append(',');
-      }
-      methodName.append(getShortName(params[i]));
-    }
-    methodName.append(')');
-
-    String mName = methodName.toString();
+    String mName = getMethodName(method);
     LOG.trace("Enhancing {}", mName);
 
     boolean isTest = false;
@@ -178,6 +171,8 @@ public class Profiler implements ClassFileTransformer {
       LOG.error("Class {} not found", clazzName, e);
     }
 
+    method.instrument(fieldTracer);
+
     int lineNumber = method.getMethodInfo().getLineNumber(0);
 
     String args = '"' + className + '"' + ',' + '"' + mName + '"' + ',' + lineNumber;
@@ -191,6 +186,23 @@ public class Profiler implements ClassFileTransformer {
     //  CtClass etype = ClassPool.getDefault().get("java.lang.Exception");
     //  method.addCatch("{ " + srcAfter + " throw $e; }", etype);
     //}
+  }
+
+  public static String getMethodName(CtBehavior method) throws NotFoundException {
+    StringBuilder methodName = new StringBuilder();
+    // boolean isConstructor = method.getMethodInfo().isConstructor();
+
+    methodName.append(method.getName());
+    methodName.append('(');
+    CtClass[] params = method.getParameterTypes();
+    for (int i = 0; i < params.length; i++) {
+      if (i != 0) {
+        methodName.append(',');
+      }
+      methodName.append(getShortName(params[i]));
+    }
+    methodName.append(')');
+    return methodName.toString();
   }
 
   static String getShortName(final CtClass clazz) {

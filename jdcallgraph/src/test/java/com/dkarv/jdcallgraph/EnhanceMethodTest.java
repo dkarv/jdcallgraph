@@ -4,7 +4,6 @@ import javassist.CannotCompileException;
 import javassist.CtBehavior;
 import javassist.CtClass;
 import javassist.NotFoundException;
-import javassist.bytecode.MethodInfo;
 import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
@@ -19,7 +18,7 @@ import java.util.ArrayList;
 public class EnhanceMethodTest {
   CtBehavior behavior;
   String className = "abc.def.Example";
-  Profiler p;
+  Tracer p;
   int lineNumber = 12;
 
   @Before
@@ -31,7 +30,7 @@ public class EnhanceMethodTest {
 
     Mockito.when(behavior.getMethodInfo().getLineNumber(0)).thenReturn(lineNumber);
 
-    p = new Profiler(new ArrayList<>());
+    p = new Tracer(new ArrayList<>());
   }
 
   private String expected(String cName, String mName, boolean isTest) {
