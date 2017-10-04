@@ -52,11 +52,8 @@ public class ConfigTest {
     ConfigUtils.replace(tmp, false, "outDir: abc");
     Assert.assertEquals("abc/", Config.getInst().outDir());
 
-    try {
-      ConfigUtils.replace(tmp, false);
-      Assert.fail("Missing outDir not detected");
-    } catch (IllegalArgumentException e) {
-    }
+    ConfigUtils.replace(tmp, false);
+    Assert.assertEquals("./", Config.getInst().outDir());
   }
 
   @Test

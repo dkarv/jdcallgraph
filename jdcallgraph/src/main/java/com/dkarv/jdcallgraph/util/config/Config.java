@@ -43,13 +43,13 @@ public class Config {
   }
 
   @Option("outDir")
-  private String outDir;
+  private String outDir = "./";
 
   @Option("logLevel")
-  private int logLevel = 6;
+  private int logLevel = 5;
 
   @Option("logConsole")
-  private boolean logConsole = false;
+  private boolean logConsole = true;
 
   @Option("groupBy")
   private GroupBy groupBy = GroupBy.THREAD;
@@ -92,9 +92,6 @@ public class Config {
    * Check whether everything is set and fix options if necessary.
    */
   void check() {
-    if (outDir == null) {
-      throw new IllegalArgumentException("Please specify an outDir");
-    }
     if (!outDir.endsWith(File.separator)) {
       outDir = outDir + File.separator;
     }
