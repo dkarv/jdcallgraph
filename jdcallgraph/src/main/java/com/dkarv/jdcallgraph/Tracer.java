@@ -23,6 +23,7 @@
  */
 package com.dkarv.jdcallgraph;
 
+import com.dkarv.jdcallgraph.util.config.Config;
 import com.dkarv.jdcallgraph.util.log.Logger;
 import com.dkarv.jdcallgraph.util.config.ConfigReader;
 import javassist.*;
@@ -126,9 +127,9 @@ public class Tracer implements ClassFileTransformer {
       if (!ignore) {
         LOG.trace("Enhancing class: {}", clazz.getName());
         CtBehavior[] methods = clazz.getDeclaredBehaviors();
-        for (int i = 0; i < methods.length; i++) {
-          if (!methods[i].isEmpty()) {
-            enhanceMethod(methods[i], clazz.getName());
+        for (CtBehavior method : methods) {
+          if (!method.isEmpty()) {
+            enhanceMethod(method, clazz.getName());
           }
         }
         return clazz.toBytecode();
@@ -171,9 +172,11 @@ public class Tracer implements ClassFileTransformer {
       LOG.error("Class {} not found", clazzName, e);
     }
 
-    method.instrument(fieldTracer);
+    if (Config.getInst().dataDependency()) {
+      method.instrument(fieldTracer);
+    }
 
-    int lineNumber = method.getMethodInfo().getLineNumber(0);
+    int lineNumber = getLineNumber(method);
 
     String args = '"' + className + '"' + ',' + '"' + mName + '"' + ',' + lineNumber;
 
@@ -186,6 +189,10 @@ public class Tracer implements ClassFileTransformer {
     //  CtClass etype = ClassPool.getDefault().get("java.lang.Exception");
     //  method.addCatch("{ " + srcAfter + " throw $e; }", etype);
     //}
+  }
+
+  public static int getLineNumber(CtBehavior method) {
+    return method.getMethodInfo().getLineNumber(0);
   }
 
   public static String getMethodName(CtBehavior method) throws NotFoundException {

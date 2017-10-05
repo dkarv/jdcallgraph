@@ -42,5 +42,13 @@ public enum Target {
   /**
    * All methods used per entry.
    */
-  TRACE;
+  TRACE,
+  /**
+   * Data dependence graph.
+   */
+  DATA;
+
+  public boolean isDataDependency() {
+    return this == Target.DATA;
+  }
 }

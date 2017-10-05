@@ -1,7 +1,6 @@
 package com.dkarv.jdcallgraph.callgraph;
 
-import com.dkarv.jdcallgraph.callgraph.writer.GraphWriter;
-import com.dkarv.jdcallgraph.util.GroupBy;
+import com.dkarv.jdcallgraph.writer.GraphWriter;
 import com.dkarv.jdcallgraph.util.StackItem;
 import com.dkarv.jdcallgraph.util.Target;
 import com.dkarv.jdcallgraph.util.config.Config;
@@ -27,14 +26,14 @@ public class CallGraph2Test {
     writer = Mockito.mock(GraphWriter.class);
     ConfigUtils.inject(c);
     graph = Mockito.spy(new CallGraph(123));
-    graph.writers[0] = writer;
+    graph.writers.set(0, writer);
   }
 
   @Test
   public void testCalledNode() throws IOException {
     Mockito.doReturn("").when(graph).checkStartCondition(item, true);
     graph.called(item, true);
-    Mockito.verify(writer).node(item, true);
+    Mockito.verify(writer).node(item);
     Assert.assertEquals(item, graph.calls.peek());
   }
 
@@ -42,7 +41,7 @@ public class CallGraph2Test {
   public void testCalledNotNode() throws IOException {
     Mockito.doReturn(null).when(graph).checkStartCondition(item, true);
     graph.called(item, true);
-    Mockito.verify(writer, Mockito.never()).node(item, true);
+    Mockito.verify(writer, Mockito.never()).node(item);
     Assert.assertTrue(graph.calls.isEmpty());
   }
 

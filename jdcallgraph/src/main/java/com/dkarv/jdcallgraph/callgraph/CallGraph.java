@@ -23,29 +23,29 @@
  */
 package com.dkarv.jdcallgraph.callgraph;
 
-import com.dkarv.jdcallgraph.callgraph.writer.*;
+import com.dkarv.jdcallgraph.writer.*;
 import com.dkarv.jdcallgraph.util.*;
 import com.dkarv.jdcallgraph.util.config.Config;
 import com.dkarv.jdcallgraph.util.log.Logger;
 
 import java.io.*;
-import java.util.HashSet;
-import java.util.Set;
-import java.util.Stack;
+import java.util.*;
 
 public class CallGraph {
   private static final Logger LOG = new Logger(CallGraph.class);
   private final long threadId;
   final Stack<StackItem> calls = new Stack<>();
 
-  final GraphWriter[] writers;
+  final List<GraphWriter> writers = new ArrayList<>();
 
   public CallGraph(long threadId) {
     this.threadId = threadId;
     Target[] targets = Config.getInst().writeTo();
-    writers = new GraphWriter[targets.length];
-    for (int i = 0; i < targets.length; i++) {
-      writers[i] = createWriter(targets[i], Config.getInst().multiGraph());
+    for (Target target : targets) {
+      if (!target.isDataDependency()) {
+        // Do not handle the DATA dependence graphf
+        writers.add(createWriter(target, Config.getInst().multiGraph()));
+      }
     }
   }
 
@@ -101,7 +101,7 @@ public class CallGraph {
         calls.push(method);
         for (GraphWriter w : writers) {
           w.start(identifier);
-          w.node(method, isTest);
+          w.node(method);
         }
       } else {
         LOG.info("Skip first node {} because start condition not fulfilled", method);

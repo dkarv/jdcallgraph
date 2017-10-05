@@ -21,56 +21,44 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package com.dkarv.jdcallgraph.callgraph.writer;
+package com.dkarv.jdcallgraph.writer;
 
 import com.dkarv.jdcallgraph.util.StackItem;
 
+import java.io.Closeable;
 import java.io.IOException;
-import java.util.*;
 
-public class CsvCoverageFileWriter implements GraphWriter {
-  FileWriter writer;
+public interface GraphWriter extends Closeable {
+  /**
+   * Start a new graph with the given name.
+   *
+   * @param identifier name of the graph
+   */
+  void start(String identifier) throws IOException;
 
-  private final Map<StackItem, Set<StackItem>> usedIn = new HashMap<>();
-  private StackItem currentItem;
+  /**
+   * Add a node.This is only called once at the beginning of the graph.
+   *
+   * @param method method
+   */
+  void node(StackItem method) throws IOException;
 
+  /**
+   * Add an edge from one method to the other.
+   *
+   * @param from source node
+   * @param to   target node
+   */
+  void edge(StackItem from, StackItem to) throws IOException;
+
+  /**
+   * Finish the graph.
+   */
+  void end() throws IOException;
+
+  /**
+   * Finally called after all graphs are written.
+   */
   @Override
-  public void start(String identifier) throws IOException {
-    if (writer == null) {
-      writer = new FileWriter("coverage.csv");
-    }
-  }
-
-  @Override
-  public void node(StackItem method, boolean isTest) throws IOException {
-    currentItem = method;
-  }
-
-  @Override
-  public void edge(StackItem from, StackItem to) throws IOException {
-    Set<StackItem> list = usedIn.get(to);
-    if (list == null) {
-      list = new HashSet<>();
-      usedIn.put(to, list);
-    }
-    list.add(currentItem);
-  }
-
-  @Override
-  public void end() throws IOException {
-  }
-
-  @Override
-  public void close() throws IOException {
-    for (Map.Entry<StackItem, Set<StackItem>> entry : usedIn.entrySet()) {
-      writer.append(entry.getKey().toString());
-      writer.append(';');
-      for (StackItem item : entry.getValue()) {
-        writer.append(item.toString());
-        writer.append(';');
-      }
-      writer.append('\n');
-    }
-    writer.close();
-  }
+  void close() throws IOException;
 }

@@ -37,14 +37,15 @@ public class FieldTracer extends ExprEditor {
   public final void edit(FieldAccess f) throws CannotCompileException {
     CtBehavior method = f.where();
     String className = f.getEnclosingClass().getName();
+    int lineNumber = Tracer.getLineNumber(method);
     String methodName;
     try {
       methodName = Tracer.getMethodName(method);
     } catch (NotFoundException e) {
       methodName = "<error>";
     }
-    String from = "\"" + className + "\",\"" + methodName + "\",";
-    String field = "\"" + f.getClassName() + "\",\"" + f.getFieldName() + "\"";
+    String from = "\"" + className + "\",\"" + methodName + "\"," + lineNumber;
+    String field = ",\"" + f.getClassName() + "\",\"" + f.getFieldName() + "\"";
 
     boolean write = f.isWriter();
     if (write) {

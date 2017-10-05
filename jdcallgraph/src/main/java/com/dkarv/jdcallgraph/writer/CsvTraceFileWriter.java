@@ -21,68 +21,48 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package com.dkarv.jdcallgraph.callgraph.writer;
+package com.dkarv.jdcallgraph.writer;
 
 import com.dkarv.jdcallgraph.util.StackItem;
 
 import java.io.IOException;
-import java.util.*;
+import java.util.HashSet;
+import java.util.Set;
 
-public class CsvMatrixFileWriter implements GraphWriter {
+public class CsvTraceFileWriter implements GraphWriter {
   FileWriter writer;
 
-  private final Map<StackItem, Integer> indexes = new HashMap<>();
-  private SortedSet<Integer> used;
-  private int nextIndex = 0;
+  private final Set<StackItem> trace = new HashSet<>();
 
   @Override
   public void start(String identifier) throws IOException {
     if (writer == null) {
-      writer = new FileWriter("matrix.csv");
+      writer = new FileWriter("trace.csv");
     }
   }
 
   @Override
-  public void node(StackItem method, boolean isTest) throws IOException {
-    used = new TreeSet<>();
-    writer.append(method.toString() + ";");
+  public void node(StackItem method) throws IOException {
+    writer.append(method.toString());
+    trace.clear();
   }
 
   @Override
   public void edge(StackItem from, StackItem to) throws IOException {
-    Integer i = indexes.get(to);
-    if (i == null) {
-      i = nextIndex++;
-      indexes.put(to, i);
+    if (!trace.contains(to)) {
+      writer.append(';');
+      writer.append(to.toString());
+      trace.add(to);
     }
-    used.add(i);
   }
 
   @Override
   public void end() throws IOException {
-    int pos = 0;
-    for (Integer i : used) {
-      for (int x = pos; x < i; x++) {
-        writer.append(';');
-      }
-      writer.append("X;");
-      pos = i + 1;
-    }
-    writer.append(";\n");
+    writer.append('\n');
   }
 
   @Override
   public void close() throws IOException {
-    String[] methods = new String[indexes.size()];
-    for (Map.Entry<StackItem, Integer> entry : indexes.entrySet()) {
-      methods[entry.getValue()] = entry.getKey().toString();
-    }
-    writer.append(';');
-    for (String m : methods) {
-      writer.append(m);
-      writer.append(';');
-    }
-    writer.append('\n');
     writer.close();
   }
 }

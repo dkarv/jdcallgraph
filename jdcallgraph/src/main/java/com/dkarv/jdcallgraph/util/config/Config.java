@@ -60,6 +60,8 @@ public class Config {
   @Option("multiGraph")
   private boolean multiGraph = true;
 
+  private boolean dataDependency = false;
+
   void set(Field f, String value) throws IllegalAccessException {
     Class<?> c = f.getType();
     Object elem = cast(c, value);
@@ -99,6 +101,13 @@ public class Config {
     if (logLevel < 0 || logLevel > 6) {
       throw new IllegalArgumentException("Invalid log level: " + logLevel);
     }
+
+    for (Target t : writeTo) {
+      if (t.isDataDependency()) {
+        dataDependency = true;
+        break;
+      }
+    }
   }
 
   public String outDir() {
@@ -123,5 +132,9 @@ public class Config {
 
   public boolean multiGraph() {
     return multiGraph;
+  }
+
+  public boolean dataDependency() {
+    return dataDependency;
   }
 }

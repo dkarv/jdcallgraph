@@ -1,9 +1,9 @@
 package com.dkarv.jdcallgraph.callgraph;
 
-import com.dkarv.jdcallgraph.callgraph.writer.DotFileWriter;
-import com.dkarv.jdcallgraph.callgraph.writer.GraphWriter;
-import com.dkarv.jdcallgraph.callgraph.writer.CsvMatrixFileWriter;
-import com.dkarv.jdcallgraph.callgraph.writer.RemoveDuplicatesWriter;
+import com.dkarv.jdcallgraph.writer.DotFileWriter;
+import com.dkarv.jdcallgraph.writer.GraphWriter;
+import com.dkarv.jdcallgraph.writer.CsvMatrixFileWriter;
+import com.dkarv.jdcallgraph.writer.RemoveDuplicatesWriter;
 import com.dkarv.jdcallgraph.util.GroupBy;
 import com.dkarv.jdcallgraph.util.StackItem;
 import com.dkarv.jdcallgraph.util.Target;
@@ -38,7 +38,7 @@ public class CallGraphTest {
     CallGraph graph = new CallGraph(1);
     GraphWriter writer = Mockito.mock(GraphWriter.class);
     StackItem item = Mockito.mock(StackItem.class);
-    graph.writers[0] = writer;
+    graph.writers.set(0, writer);
 
     graph.finish();
     Mockito.verify(writer, Mockito.never()).end();
@@ -63,7 +63,7 @@ public class CallGraphTest {
     };
 
     // Calling with unknown item should clear the whole stack
-    graph.writers[0] = writer;
+    graph.writers.set(0, writer);
     for (StackItem item : items) {
       graph.calls.push(item);
     }
@@ -72,7 +72,7 @@ public class CallGraphTest {
     Mockito.verify(writer).end();
 
     // It should stop removing when the equal item was found
-    graph.writers[0] = writer;
+    graph.writers.set(0, writer);
     for (StackItem item : items) {
       graph.calls.push(item);
     }
@@ -81,7 +81,7 @@ public class CallGraphTest {
     Mockito.verifyNoMoreInteractions(writer);
 
     // It should call writer.end when the stack is empty
-    graph.writers[0] = writer;
+    graph.writers.set(0, writer);
     graph.calls.clear();
     for (StackItem item : items) {
       graph.calls.push(item);

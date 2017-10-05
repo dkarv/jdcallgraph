@@ -35,7 +35,7 @@ public class StackItem {
     this.methodName = methodName;
     this.lineNumber = lineNumber;
 
-    this.formatted = Formatter.join(className, methodName, lineNumber);
+    this.formatted = Formatter.join(this);
   }
 
   public String getClassName() {

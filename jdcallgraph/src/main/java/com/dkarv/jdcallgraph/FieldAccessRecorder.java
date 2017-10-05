@@ -23,16 +23,67 @@
  */
 package com.dkarv.jdcallgraph;
 
+import com.dkarv.jdcallgraph.callgraph.CallGraph;
+import com.dkarv.jdcallgraph.data.DataDependenceGraph;
+import com.dkarv.jdcallgraph.util.StackItem;
 import com.dkarv.jdcallgraph.util.log.Logger;
+
+import java.io.IOException;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Stack;
 
 public class FieldAccessRecorder {
   private static final Logger LOG = new Logger(FieldAccessRecorder.class);
 
-  public static void read(String fromClass, String fromMethod, String fieldClass, String fieldName) {
-    LOG.trace("Read to {}::{} from {}::{}", fieldClass, fieldName, fromClass, fromMethod);
+  /**
+   * Collect the call graph per thread.
+   */
+  static final Map<Long, DataDependenceGraph> GRAPHS = new HashMap<>();
+
+  static {
+    // initialize
+    Runtime.getRuntime().addShutdownHook(new Thread() {
+      public void run() {
+        LOG.debug("JVM Shutdown triggered");
+        for (DataDependenceGraph g : GRAPHS.values()) {
+          try {
+            g.finish();
+          } catch (IOException e) {
+            LOG.error("Error finishing call graph {}", g, e);
+          }
+        }
+      }
+    });
   }
 
-  public static void write(String fromClass, String fromMethod, String fieldClass, String fieldName) {
-    LOG.trace("Write to {}::{} from {}::{}", fieldClass, fieldName, fromClass, fromMethod);
+  public static void write(String fromClass, String fromMethod, int lineNumber, String fieldClass, String fieldName) {
+    try {
+      LOG.trace("Write to {}::{} from {}::{}", fieldClass, fieldName, fromClass, fromMethod);
+      long threadId = Thread.currentThread().getId();
+      DataDependenceGraph graph = GRAPHS.get(threadId);
+      if (graph == null) {
+        graph = new DataDependenceGraph(threadId);
+        GRAPHS.put(threadId, graph);
+      }
+      graph.addWrite(new StackItem(fromClass, fromMethod, lineNumber), fieldClass + "::" + fieldName);
+    } catch (Exception e) {
+      LOG.error("Error in write", e);
+    }
+  }
+
+  public static void read(String fromClass, String fromMethod, int lineNumber, String fieldClass, String fieldName) {
+    try {
+      LOG.trace("Read to {}::{} from {}::{}", fieldClass, fieldName, fromClass, fromMethod);
+      long threadId = Thread.currentThread().getId();
+      DataDependenceGraph graph = GRAPHS.get(threadId);
+      if (graph == null) {
+        LOG.trace("Read not interesting because there was no write before");
+        return;
+      }
+      graph.addRead(new StackItem(fromClass, fromMethod, lineNumber), fieldClass + "::" + fieldName);
+    } catch (Exception e) {
+      LOG.error("Error in read", e);
+    }
   }
 }

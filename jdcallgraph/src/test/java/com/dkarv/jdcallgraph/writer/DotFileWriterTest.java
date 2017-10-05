@@ -1,10 +1,13 @@
-package com.dkarv.jdcallgraph.callgraph.writer;
+package com.dkarv.jdcallgraph.writer;
 
 import com.dkarv.jdcallgraph.helper.TestUtils;
 import com.dkarv.jdcallgraph.util.StackItem;
 import com.dkarv.jdcallgraph.util.config.Config;
 import com.dkarv.jdcallgraph.util.config.ConfigUtils;
-import org.junit.*;
+import org.junit.Assert;
+import org.junit.Before;
+import org.junit.Rule;
+import org.junit.Test;
 import org.junit.rules.TemporaryFolder;
 import org.mockito.Mockito;
 
@@ -46,7 +49,7 @@ public class DotFileWriterTest {
     writer.start("node");
     writer.writer.writer.flush();
     clear("node.dot");
-    writer.node(item, false);
+    writer.node(item);
     writer.writer.writer.flush();
     Assert.assertEquals("\t\"method()\" [style=filled,fillcolor=red];\n", read("node.dot"));
 

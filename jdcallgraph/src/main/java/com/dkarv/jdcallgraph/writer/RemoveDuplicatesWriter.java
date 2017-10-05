@@ -21,50 +21,68 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package com.dkarv.jdcallgraph.callgraph.writer;
+package com.dkarv.jdcallgraph.writer;
 
 import com.dkarv.jdcallgraph.util.StackItem;
+import com.dkarv.jdcallgraph.util.log.Logger;
 
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
 
-public class CsvTraceFileWriter implements GraphWriter {
-  FileWriter writer;
+/**
+ * A writer that can wrap another writer and forwards nodes and edges
+ * only if they did not happen before.
+ */
+public class RemoveDuplicatesWriter implements GraphWriter {
+  private final static Logger LOG = new Logger(RemoveDuplicatesWriter.class);
 
-  private final Set<StackItem> trace = new HashSet<>();
+  private final GraphWriter parentWriter;
+  private final HashMap<StackItem, HashSet<StackItem>> edges = new HashMap<>();
 
-  @Override
-  public void start(String identifier) throws IOException {
-    if (writer == null) {
-      writer = new FileWriter("trace.csv");
-    }
+  public RemoveDuplicatesWriter(GraphWriter parentWriter) {
+    this.parentWriter = parentWriter;
   }
 
   @Override
-  public void node(StackItem method, boolean isTest) throws IOException {
-    writer.append(method.toString());
-    trace.clear();
+  public void start(String identifier) throws IOException {
+    parentWriter.start(identifier);
+  }
+
+  @Override
+  public void node(StackItem method) throws IOException {
+    parentWriter.node(method);
   }
 
   @Override
   public void edge(StackItem from, StackItem to) throws IOException {
-    if (!trace.contains(to)) {
-      writer.append(';');
-      writer.append(to.toString());
-      trace.add(to);
+    boolean duplicate = false;
+    HashSet<StackItem> set = edges.get(from);
+    if (set != null) {
+      if (set.contains(to)) {
+        duplicate = true;
+      } else {
+        set.add(to);
+      }
+    } else {
+      set = new HashSet<>();
+      set.add(to);
+      edges.put(from, set);
+    }
+
+    if (!duplicate) {
+      parentWriter.edge(from, to);
     }
   }
 
   @Override
   public void end() throws IOException {
-    writer.append('\n');
+    parentWriter.end();
+    edges.clear();
   }
 
   @Override
   public void close() throws IOException {
-    writer.close();
+    parentWriter.close();
   }
 }
