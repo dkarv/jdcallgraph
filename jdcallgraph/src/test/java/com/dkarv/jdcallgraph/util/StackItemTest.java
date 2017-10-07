@@ -4,7 +4,7 @@ import org.junit.Assert;
 import org.junit.Test;
 
 public class StackItemTest {
-  private final static String className = "abd.def.Example";
+  private final static String className = "abc.def.Example";
   private final static String methodName = "method(String)";
   private final static int lineNumber = 123;
 
@@ -14,8 +14,6 @@ public class StackItemTest {
     Assert.assertEquals(className, item.getClassName());
     Assert.assertEquals(methodName, item.getMethodName());
     Assert.assertEquals(lineNumber, item.getLineNumber());
-
-    Assert.assertEquals(Formatter.join(className, methodName, lineNumber), item.toString());
   }
 
   @Test
@@ -29,4 +27,29 @@ public class StackItemTest {
     Assert.assertTrue(i1.equals(i1));
     Assert.assertFalse(i1.hashCode() == new StackItem(className, methodName, lineNumber + 1).hashCode());
   }
+
+  @Test
+  public void testShortClassName() {
+    StackItem item = new StackItem(className, methodName, lineNumber);
+    Assert.assertEquals("Example", item.getShortClassName());
+  }
+
+  @Test
+  public void testPackageName() {
+    StackItem item = new StackItem(className, methodName, lineNumber);
+    Assert.assertEquals("abc.def", item.getPackageName());
+  }
+
+  @Test
+  public void testShortMethodName() {
+    StackItem item = new StackItem(className, methodName, lineNumber);
+    Assert.assertEquals("method", item.getShortMethodName());
+  }
+
+  @Test
+  public void testMethodParameters() {
+    StackItem item = new StackItem(className, methodName, lineNumber);
+    Assert.assertEquals("String", item.getMethodParameters());
+  }
+
 }

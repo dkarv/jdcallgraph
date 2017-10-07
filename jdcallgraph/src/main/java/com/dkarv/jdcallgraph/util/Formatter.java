@@ -23,13 +23,43 @@
  */
 package com.dkarv.jdcallgraph.util;
 
+import com.dkarv.jdcallgraph.util.config.Config;
+
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
 public class Formatter {
-  public static String join(StackItem item) {
-    return join(item.getClassName(), item.getMethodName(), item.getLineNumber());
+  private static final Pattern P = Pattern.compile("\\{(.+)}");
+
+  public static String format(StackItem item) {
+    Matcher m = P.matcher(Config.getInst().format());
+    StringBuffer result = new StringBuffer();
+    while (m.find()) {
+      String replacement = replace(m.group(1), item);
+      m.appendReplacement(result, replacement);
+    }
+    return result.toString();
   }
 
-  public static String join(String className, String methodName, int lineNumber) {
-    // TODO make configurable
-    return className + "::" + methodName + "#" + lineNumber;
+  public static String replace(String id, StackItem item) {
+    switch (id) {
+      case "package":
+        return item.getPackageName();
+      case "class":
+        return item.getClassName();
+      case "classname":
+        return item.getShortClassName();
+      case "line":
+        return Integer.toString(item.getLineNumber());
+      case "method":
+        return item.getMethodName();
+      case "methodname":
+        return item.getShortMethodName();
+      case "parameters":
+        return item.getMethodParameters();
+      default:
+        // Unknown pattern, return without modification
+        return '{' + id + '}';
+    }
   }
 }

@@ -35,7 +35,7 @@ public class StackItem {
     this.methodName = methodName;
     this.lineNumber = lineNumber;
 
-    this.formatted = Formatter.join(this);
+    this.formatted = Formatter.format(this);
   }
 
   public String getClassName() {
@@ -74,5 +74,26 @@ public class StackItem {
     return className.equals(o.className) &&
         methodName.equals(o.methodName) &&
         lineNumber == o.lineNumber;
+  }
+
+  public String getPackageName() {
+    int indexDot = className.lastIndexOf('.');
+    return className.substring(0, indexDot);
+  }
+
+  public String getShortClassName() {
+    int indexDot = className.lastIndexOf('.');
+    return className.substring(indexDot + 1);
+  }
+
+  public String getShortMethodName() {
+    int indexBracket = methodName.indexOf('(');
+    return methodName.substring(0, indexBracket);
+  }
+
+  public String getMethodParameters() {
+    int openBracket = methodName.indexOf('(');
+    int closingBracket = methodName.indexOf(')');
+    return methodName.substring(openBracket + 1, closingBracket);
   }
 }

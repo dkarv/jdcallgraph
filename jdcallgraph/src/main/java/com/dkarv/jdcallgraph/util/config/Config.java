@@ -42,23 +42,26 @@ public class Config {
     instance = new Config();
   }
 
-  @Option("outDir")
+  @Option
   private String outDir = "./";
 
-  @Option("logLevel")
+  @Option
   private int logLevel = 5;
 
-  @Option("logConsole")
+  @Option
   private boolean logConsole = true;
 
-  @Option("groupBy")
+  @Option
   private GroupBy groupBy = GroupBy.THREAD;
 
-  @Option("writeTo")
+  @Option
   private Target[] writeTo = new Target[]{Target.DOT};
 
-  @Option("multiGraph")
+  @Option
   private boolean multiGraph = true;
+
+  @Option
+  private String format = "{class}::{method}#{line}";
 
   private boolean dataDependency = false;
 
@@ -136,5 +139,9 @@ public class Config {
 
   public boolean dataDependency() {
     return dataDependency;
+  }
+
+  public String format() {
+    return format;
   }
 }

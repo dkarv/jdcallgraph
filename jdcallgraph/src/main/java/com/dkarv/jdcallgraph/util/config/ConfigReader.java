@@ -73,8 +73,7 @@ public class ConfigReader {
 
     for (Field f : Config.class.getDeclaredFields()) {
       if (f.isAnnotationPresent(Option.class)) {
-        Option opt = f.getAnnotation(Option.class);
-        fields.put(opt.value(), f);
+        fields.put(f.getName(), f);
       }
     }
 
