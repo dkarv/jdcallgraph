@@ -77,6 +77,7 @@ public class DotFileWriterTest {
     writer.writer.writer.flush();
     clear("end.dot");
     writer.end();
+    writer.writer.writer.flush();
     Assert.assertEquals("}\n", read("end.dot"));
   }
 }

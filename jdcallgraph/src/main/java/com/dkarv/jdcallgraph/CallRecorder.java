@@ -39,22 +39,6 @@ public class CallRecorder {
    */
   static final Map<Long, CallGraph> GRAPHS = new HashMap<>();
 
-  static {
-    // initialize
-    Runtime.getRuntime().addShutdownHook(new Thread() {
-      public void run() {
-        LOG.debug("JVM Shutdown triggered");
-        for (CallGraph g : GRAPHS.values()) {
-          try {
-            g.finish();
-          } catch (IOException e) {
-            LOG.error("Error finishing call graph {}", g, e);
-          }
-        }
-      }
-    });
-  }
-
   public static void beforeMethod(String className, String methodName, int lineNumber, boolean isTest) {
     try {
       LOG.trace("beforeMethod: {}:{}", className, methodName);
@@ -85,6 +69,16 @@ public class CallRecorder {
       graph.returned(new StackItem(className, methodName, lineNumber));
     } catch (Exception e) {
       LOG.error("Error in afterMethod", e);
+    }
+  }
+
+  public static void shutdown() {
+    for (CallGraph g : GRAPHS.values()) {
+      try {
+        g.finish();
+      } catch (IOException e) {
+        LOG.error("Error finishing call graph {}", g, e);
+      }
     }
   }
 }

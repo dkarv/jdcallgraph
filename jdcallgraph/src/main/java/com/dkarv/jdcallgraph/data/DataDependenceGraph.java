@@ -39,13 +39,11 @@ import java.util.Map;
 
 public class DataDependenceGraph {
   private static final Logger LOG = new Logger(DataDependenceGraph.class);
-  private final long threadId;
   final List<GraphWriter> writers = new ArrayList<>();
 
   private Map<String, StackItem> lastWrites = new HashMap<>();
 
   public DataDependenceGraph(long threadId) throws IOException {
-    this.threadId = threadId;
     Target[] targets = Config.getInst().writeTo();
     for (Target target : targets) {
       if (target.isDataDependency()) {
@@ -65,26 +63,27 @@ public class DataDependenceGraph {
     }
   }
 
-  public void finish() throws IOException {
-    for (GraphWriter writer : writers) {
-      writer.close();
-    }
-  }
-
   public void addWrite(StackItem location, String field) throws IOException {
     this.lastWrites.put(field, location);
-    for (GraphWriter writer : writers) {
-      writer.node(location);
-    }
+    // for (GraphWriter writer : writers) {
+    //   writer.node(location);
+    // }
   }
 
   public void addRead(StackItem location, String field) throws IOException {
     StackItem lastWrite = lastWrites.get(field);
     if (lastWrite != null) {
-      LOG.debug("Location {} depends on {}", location, lastWrite);
+      // LOG.debug("Location {} depends on {}", location, lastWrite);
       for (GraphWriter writer : writers) {
-        writer.edge(lastWrite, location);
+        writer.edge(lastWrite, location, field);
       }
+    }
+  }
+
+  public void finish() throws IOException {
+    for (GraphWriter writer : writers) {
+      writer.end();
+      writer.close();
     }
   }
 }

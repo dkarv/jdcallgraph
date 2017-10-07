@@ -43,7 +43,7 @@ public class CallGraph {
     Target[] targets = Config.getInst().writeTo();
     for (Target target : targets) {
       if (!target.isDataDependency()) {
-        // Do not handle the DATA dependence graphf
+        // Do not handle the DATA dependence graph
         writers.add(createWriter(target, Config.getInst().multiGraph()));
       }
     }
@@ -137,6 +137,7 @@ public class CallGraph {
     if (calls.isEmpty()) {
       for (GraphWriter w : writers) {
         w.end();
+        w.close();
       }
     }
   }
@@ -146,11 +147,8 @@ public class CallGraph {
       LOG.error("Shutdown but call graph not empty: {}", calls);
       for (GraphWriter w : writers) {
         w.end();
+        w.close();
       }
-    }
-
-    for (GraphWriter w : writers) {
-      w.close();
     }
   }
 }

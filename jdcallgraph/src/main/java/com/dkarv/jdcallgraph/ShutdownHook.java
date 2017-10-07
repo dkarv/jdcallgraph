@@ -21,51 +21,29 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package com.dkarv.jdcallgraph.writer;
+package com.dkarv.jdcallgraph;
 
-import com.dkarv.jdcallgraph.util.StackItem;
+import com.dkarv.jdcallgraph.util.log.Logger;
 
-import java.io.Closeable;
-import java.io.IOException;
+public class ShutdownHook {
+  private static final Logger LOG = new Logger(ShutdownHook.class);
 
-public interface GraphWriter extends Closeable {
-  /**
-   * Start a new graph with the given name.
-   *
-   * @param identifier name of the graph
-   */
-  void start(String identifier) throws IOException;
-
-  /**
-   * Add a node.This is only called once at the beginning of the graph.
-   *
-   * @param method method
-   */
-  void node(StackItem method) throws IOException;
-
-  /**
-   * Add an edge from one method to the other.
-   *
-   * @param from source node
-   * @param to   target node
-   */
-  void edge(StackItem from, StackItem to) throws IOException;
-
-  /**
-   * Write an edge with a label. If the writer does not support labels it will write the edge without.
-   */
-  default void edge(StackItem from, StackItem to, String label) throws IOException {
-    this.edge(from, to);
+  public static void init() {
+    // initialize
+    Runtime.getRuntime().addShutdownHook(new Thread() {
+      public void run() {
+        LOG.info("JVM Shutdown triggered");
+        try {
+          CallRecorder.shutdown();
+        } catch (NoClassDefFoundError | ExceptionInInitializerError e) {
+          // might be triggered when shutdown already ongoing
+        }
+        try {
+          FieldAccessRecorder.shutdown();
+        } catch (NoClassDefFoundError | ExceptionInInitializerError e) {
+          // might be triggered when shutdown already ongoing
+        }
+      }
+    });
   }
-
-  /**
-   * Finish the graph.
-   */
-  void end() throws IOException;
-
-  /**
-   * Finally called after all graphs are written.
-   */
-  @Override
-  void close() throws IOException;
 }

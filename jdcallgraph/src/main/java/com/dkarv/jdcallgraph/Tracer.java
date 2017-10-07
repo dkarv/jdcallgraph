@@ -62,6 +62,7 @@ public class Tracer implements ClassFileTransformer {
    * @throws IllegalAccessException problem loading the config options
    */
   public static void premain(String argument, Instrumentation instrumentation) throws IOException, IllegalAccessException {
+    ShutdownHook.init();
     if (argument != null) {
       new ConfigReader(new File(argument)).read();
     } else {

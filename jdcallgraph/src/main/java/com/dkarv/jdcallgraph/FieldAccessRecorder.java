@@ -41,22 +41,6 @@ public class FieldAccessRecorder {
    */
   static final Map<Long, DataDependenceGraph> GRAPHS = new HashMap<>();
 
-  static {
-    // initialize
-    Runtime.getRuntime().addShutdownHook(new Thread() {
-      public void run() {
-        LOG.debug("JVM Shutdown triggered");
-        for (DataDependenceGraph g : GRAPHS.values()) {
-          try {
-            g.finish();
-          } catch (IOException e) {
-            LOG.error("Error finishing call graph {}", g, e);
-          }
-        }
-      }
-    });
-  }
-
   public static void write(String fromClass, String fromMethod, int lineNumber, String fieldClass, String fieldName) {
     try {
       LOG.trace("Write to {}::{} from {}::{}", fieldClass, fieldName, fromClass, fromMethod);
@@ -84,6 +68,16 @@ public class FieldAccessRecorder {
       graph.addRead(new StackItem(fromClass, fromMethod, lineNumber), fieldClass + "::" + fieldName);
     } catch (Exception e) {
       LOG.error("Error in read", e);
+    }
+  }
+
+  public static void shutdown() {
+    for (DataDependenceGraph g : GRAPHS.values()) {
+      try {
+        g.finish();
+      } catch (IOException e) {
+        LOG.error("Error finishing call graph {}", g, e);
+      }
     }
   }
 }

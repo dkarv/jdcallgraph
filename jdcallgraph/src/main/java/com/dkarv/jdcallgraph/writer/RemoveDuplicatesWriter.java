@@ -29,6 +29,8 @@ import com.dkarv.jdcallgraph.util.log.Logger;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
 
 /**
  * A writer that can wrap another writer and forwards nodes and edges
@@ -39,6 +41,7 @@ public class RemoveDuplicatesWriter implements GraphWriter {
 
   private final GraphWriter parentWriter;
   private final HashMap<StackItem, HashSet<StackItem>> edges = new HashMap<>();
+  private final HashMap<StackItem, HashMap<StackItem, HashSet<String>>> labels = new HashMap<>();
 
   public RemoveDuplicatesWriter(GraphWriter parentWriter) {
     this.parentWriter = parentWriter;
@@ -56,22 +59,20 @@ public class RemoveDuplicatesWriter implements GraphWriter {
 
   @Override
   public void edge(StackItem from, StackItem to) throws IOException {
-    boolean duplicate = false;
-    HashSet<StackItem> set = edges.get(from);
-    if (set != null) {
-      if (set.contains(to)) {
-        duplicate = true;
-      } else {
-        set.add(to);
-      }
-    } else {
-      set = new HashSet<>();
+    HashSet<StackItem> set = edges.computeIfAbsent(from, k -> new HashSet<StackItem>());
+    if (!set.contains(to)) {
       set.add(to);
-      edges.put(from, set);
-    }
-
-    if (!duplicate) {
       parentWriter.edge(from, to);
+    }
+  }
+
+  @Override
+  public void edge(StackItem from, StackItem to, String label) throws IOException {
+    HashMap<StackItem, HashSet<String>> sets = labels.computeIfAbsent(from, k -> new HashMap<>());
+    HashSet<String> set = sets.computeIfAbsent(to, k -> new HashSet<>());
+    if (!set.contains(label)) {
+      set.add(label);
+      parentWriter.edge(from, to, label);
     }
   }
 
