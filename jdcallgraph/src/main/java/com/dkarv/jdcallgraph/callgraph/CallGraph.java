@@ -33,6 +33,7 @@ import java.util.*;
 
 public class CallGraph {
   private static final Logger LOG = new Logger(CallGraph.class);
+  private static final String FOLDER = "cg/";
   private final long threadId;
   final Stack<StackItem> calls = new Stack<>();
 
@@ -78,12 +79,12 @@ public class CallGraph {
   String checkStartCondition(StackItem method, boolean isTest) {
     switch (Config.getInst().groupBy()) {
       case THREAD:
-        return String.valueOf(threadId);
+        return FOLDER + String.valueOf(threadId);
       case ENTRY:
-        return method.toString();
+        return FOLDER + method.toString();
       case TEST:
         if (isTest) {
-          return method.toString();
+          return FOLDER + method.toString();
         }
         break;
       default:

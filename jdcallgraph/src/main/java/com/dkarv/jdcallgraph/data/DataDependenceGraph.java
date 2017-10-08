@@ -27,6 +27,7 @@ import com.dkarv.jdcallgraph.util.StackItem;
 import com.dkarv.jdcallgraph.util.Target;
 import com.dkarv.jdcallgraph.util.config.Config;
 import com.dkarv.jdcallgraph.util.log.Logger;
+import com.dkarv.jdcallgraph.writer.CsvTraceFileWriter;
 import com.dkarv.jdcallgraph.writer.DotFileWriter;
 import com.dkarv.jdcallgraph.writer.GraphWriter;
 import com.dkarv.jdcallgraph.writer.RemoveDuplicatesWriter;
@@ -39,6 +40,7 @@ import java.util.Map;
 
 public class DataDependenceGraph {
   private static final Logger LOG = new Logger(DataDependenceGraph.class);
+  private static final String FOLDER = "ddg/";
   final List<GraphWriter> writers = new ArrayList<>();
 
   private Map<String, StackItem> lastWrites = new HashMap<>();
@@ -48,7 +50,7 @@ public class DataDependenceGraph {
     for (Target target : targets) {
       if (target.isDataDependency()) {
         GraphWriter writer = createWriter(target);
-        writer.start("data_" + threadId);
+        writer.start(FOLDER + "data_" + threadId);
         writers.add(writer);
       }
     }
@@ -56,8 +58,10 @@ public class DataDependenceGraph {
 
   private GraphWriter createWriter(Target target) {
     switch (target) {
-      case DATA:
+      case DD_DOT:
         return new RemoveDuplicatesWriter(new DotFileWriter());
+      case DD_TRACE:
+        return new CsvTraceFileWriter();
       default:
         throw new IllegalArgumentException("Unknown target for a data dependency graph: " + target);
     }

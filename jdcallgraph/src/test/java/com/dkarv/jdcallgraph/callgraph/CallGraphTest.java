@@ -103,15 +103,15 @@ public class CallGraphTest {
 
     Mockito.when(c.groupBy()).thenReturn(GroupBy.THREAD);
     String result = graph.checkStartCondition(item, false);
-    Assert.assertEquals("1", result);
+    Assert.assertEquals("cg/1", result);
 
     Mockito.when(c.groupBy()).thenReturn(GroupBy.ENTRY);
     result = graph.checkStartCondition(item, false);
-    Assert.assertEquals("method()", result);
+    Assert.assertEquals("cg/method()", result);
 
     Mockito.when(c.groupBy()).thenReturn(GroupBy.TEST);
     result = graph.checkStartCondition(item, true);
-    Assert.assertEquals("method()", result);
+    Assert.assertEquals("cg/method()", result);
 
     Mockito.when(c.groupBy()).thenReturn(GroupBy.TEST);
     result = graph.checkStartCondition(item, false);

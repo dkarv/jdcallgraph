@@ -44,11 +44,15 @@ public enum Target {
    */
   TRACE,
   /**
-   * Data dependence graph.
+   * Data Dependence graph as dot file.
    */
-  DATA;
+  DD_DOT,
+  /**
+   * Data dependence graph as csv.
+   */
+  DD_TRACE;
 
   public boolean isDataDependency() {
-    return this == Target.DATA;
+    return this == Target.DD_DOT || this == Target.DD_TRACE;
   }
 }

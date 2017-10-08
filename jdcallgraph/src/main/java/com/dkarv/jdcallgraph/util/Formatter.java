@@ -24,18 +24,21 @@
 package com.dkarv.jdcallgraph.util;
 
 import com.dkarv.jdcallgraph.util.config.Config;
+import com.dkarv.jdcallgraph.util.log.Logger;
 
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 public class Formatter {
-  private static final Pattern P = Pattern.compile("\\{(.+)}");
+  private static final Logger LOG = new Logger(Formatter.class);
+  private static final Pattern P = Pattern.compile("\\{(.+?)}");
 
   public static String format(StackItem item) {
     Matcher m = P.matcher(Config.getInst().format());
     StringBuffer result = new StringBuffer();
     while (m.find()) {
       String replacement = replace(m.group(1), item);
+      replacement = Matcher.quoteReplacement(replacement);
       m.appendReplacement(result, replacement);
     }
     return result.toString();
@@ -58,6 +61,7 @@ public class Formatter {
       case "parameters":
         return item.getMethodParameters();
       default:
+        LOG.error("Unknown pattern: {}", id);
         // Unknown pattern, return without modification
         return '{' + id + '}';
     }
