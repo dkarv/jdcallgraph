@@ -37,7 +37,8 @@ public class CsvCoverageFileWriter implements GraphWriter {
   @Override
   public void start(String identifier) throws IOException {
     if (writer == null) {
-      writer = new FileWriter("coverage.csv");
+      int index = identifier.lastIndexOf('/');
+      writer = new FileWriter(identifier.substring(0, index) + "coverage.csv");
     }
   }
 
