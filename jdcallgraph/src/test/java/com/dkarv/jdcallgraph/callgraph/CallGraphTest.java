@@ -70,7 +70,6 @@ public class CallGraphTest {
     graph.returned(Mockito.mock(StackItem.class));
     Assert.assertTrue(graph.calls.isEmpty());
     Mockito.verify(writer).end();
-    Mockito.verify(writer).close();
 
     // It should stop removing when the equal item was found
     graph.writers.set(0, writer);

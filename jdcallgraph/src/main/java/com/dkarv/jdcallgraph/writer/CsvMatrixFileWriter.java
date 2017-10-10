@@ -39,7 +39,7 @@ public class CsvMatrixFileWriter implements GraphWriter {
   public void start(String identifier) throws IOException {
     if (writer == null) {
       int index = identifier.lastIndexOf('/');
-      writer = new FileWriter(identifier.substring(0, index) + "matrix.csv");
+      writer = new FileWriter(identifier.substring(0, index) + "/matrix.csv");
     }
   }
 

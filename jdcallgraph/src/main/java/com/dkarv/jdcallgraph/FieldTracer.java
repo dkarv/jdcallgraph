@@ -45,15 +45,29 @@ public class FieldTracer extends ExprEditor {
       methodName = "<error>";
     }
     String from = "\"" + className + "\",\"" + methodName + "\"," + lineNumber;
-    String field = ",\"" + f.getClassName() + "\",\"" + f.getFieldName() + "\"";
 
-    boolean write = f.isWriter();
-    if (write) {
-      f.replace("{ com.dkarv.jdcallgraph.FieldAccessRecorder.write(" +
-          from + field + "); $_ = $proceed($$); }");
+    boolean isWrite = f.isWriter();
+    boolean isStatic = f.isStatic();
+    if (isStatic) {
+      String field = ",\"" + f.getClassName() + "\",\"" + f.getFieldName() + "\"";
+      if (isWrite) {
+        f.replace("{ com.dkarv.jdcallgraph.FieldAccessRecorder.write(" +
+            from + field + "); $proceed($$); }");
+      } else {
+        f.replace("{ com.dkarv.jdcallgraph.FieldAccessRecorder.read(" +
+            from + field + "); $_ = $proceed($$); }");
+      }
     } else {
-      f.replace("{ com.dkarv.jdcallgraph.FieldAccessRecorder.read(" +
-          from + field + "); $_ = $proceed($$); }");
+      String field = ",\"" + f.getClassName() + "@\"" +
+          "+ Integer.toHexString(System.identityHashCode($0))" +
+          ",\"" + f.getFieldName() + "\"";
+      if (isWrite) {
+        f.replace("{ com.dkarv.jdcallgraph.FieldAccessRecorder.write(" +
+            from + field + "); $proceed($$); }");
+      } else {
+        f.replace("{ com.dkarv.jdcallgraph.FieldAccessRecorder.read(" +
+            from + field + "); $_ = $proceed($$); }");
+      }
     }
   }
 

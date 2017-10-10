@@ -138,7 +138,6 @@ public class CallGraph {
     if (calls.isEmpty()) {
       for (GraphWriter w : writers) {
         w.end();
-        w.close();
       }
     }
   }
@@ -148,8 +147,11 @@ public class CallGraph {
       LOG.error("Shutdown but call graph not empty: {}", calls);
       for (GraphWriter w : writers) {
         w.end();
-        w.close();
       }
+    }
+
+    for (GraphWriter w : writers) {
+      w.close();
     }
   }
 }

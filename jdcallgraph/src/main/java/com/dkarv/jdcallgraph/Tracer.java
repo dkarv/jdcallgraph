@@ -174,6 +174,7 @@ public class Tracer implements ClassFileTransformer {
     }
 
     if (Config.getInst().dataDependency()) {
+      // TODO might be faster to do CtClass.instrument()
       method.instrument(fieldTracer);
     }
 
