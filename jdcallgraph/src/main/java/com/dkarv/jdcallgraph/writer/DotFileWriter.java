@@ -24,15 +24,21 @@
 package com.dkarv.jdcallgraph.writer;
 
 import com.dkarv.jdcallgraph.util.StackItem;
+import com.dkarv.jdcallgraph.util.log.Logger;
 
 import java.io.IOException;
 
 public class DotFileWriter implements GraphWriter {
+  private static final Logger LOG = new Logger(DotFileWriter.class);
 
   FileWriter writer;
 
   @Override
   public void start(String identifier) throws IOException {
+    if (writer != null) {
+      // close an old writer to make sure everything is flushed to disk
+      close();
+    }
     writer = new FileWriter(identifier + ".dot");
     writer.append("digraph \"" + identifier + "\"\n{\n");
   }

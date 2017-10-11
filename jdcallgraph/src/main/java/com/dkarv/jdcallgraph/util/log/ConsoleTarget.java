@@ -36,7 +36,7 @@ public class ConsoleTarget implements LogTarget {
   }
 
   @Override
-  public void printTrace(Exception e, int level) throws IOException {
+  public void printTrace(Throwable e, int level) throws IOException {
     if (level > 2) {
       e.printStackTrace(System.out);
     } else {

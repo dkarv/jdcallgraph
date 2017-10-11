@@ -96,7 +96,6 @@ public class CallGraph {
   public void called(StackItem method, boolean isTest) throws IOException {
     if (calls.isEmpty()) {
       // First node
-      LOG.debug("Test start condition");
       String identifier = checkStartCondition(method, isTest);
       if (identifier != null) {
         calls.push(method);

@@ -201,6 +201,7 @@ public class Tracer implements ClassFileTransformer {
     StringBuilder methodName = new StringBuilder();
     // boolean isConstructor = method.getMethodInfo().isConstructor();
 
+    // TODO replace with method.getLongName()
     methodName.append(method.getName());
     methodName.append('(');
     CtClass[] params = method.getParameterTypes();

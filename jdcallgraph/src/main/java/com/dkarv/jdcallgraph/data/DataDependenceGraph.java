@@ -68,6 +68,7 @@ public class DataDependenceGraph {
   }
 
   public void addWrite(StackItem location, String field) throws IOException {
+    LOG.trace("Write to {} from {}", field, location);
     this.lastWrites.put(field, location);
     // for (GraphWriter writer : writers) {
     //   writer.node(location);
@@ -75,11 +76,15 @@ public class DataDependenceGraph {
   }
 
   public void addRead(StackItem location, String field) throws IOException {
+    LOG.trace("Read to {} from {}", field, location);
     StackItem lastWrite = lastWrites.get(field);
     if (lastWrite != null) {
-      // LOG.debug("Location {} depends on {}", location, lastWrite);
-      for (GraphWriter writer : writers) {
-        writer.edge(lastWrite, location, field);
+      if (!lastWrite.equals(location)) {
+        // ignore dependency on itself
+        // LOG.debug("Location {} depends on {}", location, lastWrite);
+        for (GraphWriter writer : writers) {
+          writer.edge(lastWrite, location, field);
+        }
       }
     }
   }

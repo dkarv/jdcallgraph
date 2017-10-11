@@ -110,7 +110,7 @@ public class FileTargetTest {
 
   @Test
   public void testPrintTrace() throws IOException {
-    Exception e = new Exception() {
+    Throwable e = new Throwable() {
       @Override
       public void printStackTrace(PrintWriter writer) {
         writer.write(TEST);

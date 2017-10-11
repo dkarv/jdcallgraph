@@ -32,7 +32,7 @@ public class ConsoleTargetTest {
 
   @Test
   public void testPrintTrace() throws IOException {
-    Exception e = Mockito.mock(Exception.class);
+    Throwable e = Mockito.mock(Throwable.class);
     ConsoleTarget target = new ConsoleTarget();
 
     target.printTrace(e, 3);

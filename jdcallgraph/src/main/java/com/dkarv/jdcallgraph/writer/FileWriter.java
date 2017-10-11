@@ -29,6 +29,7 @@ import com.dkarv.jdcallgraph.util.log.Logger;
 import java.io.*;
 
 public class FileWriter {
+  private static final int BUFFER_SIZE = 8192;
   private static final Logger LOG = new Logger(FileWriter.class);
 
   /**
@@ -39,7 +40,7 @@ public class FileWriter {
   FileWriter(String fileName) throws FileNotFoundException, UnsupportedEncodingException {
     File target = new File(Config.getInst().outDir() + fileName);
     target.getParentFile().mkdirs();
-    writer = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(target, true), "UTF-8"), 512);
+    writer = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(target, true), "UTF-8"), BUFFER_SIZE);
   }
 
   public void close() throws IOException {

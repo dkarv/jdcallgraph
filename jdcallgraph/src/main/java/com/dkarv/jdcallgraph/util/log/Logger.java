@@ -65,7 +65,7 @@ public class Logger {
           try {
             t.flush();
           } catch (IOException e) {
-            System.err.println("Error flushing log before shutdown");
+            System.err.println("Error flushing log before shutdown: " + e.getMessage());
           }
         }
       }
@@ -107,8 +107,7 @@ public class Logger {
     try {
       for (LogTarget target : TARGETS) {
         target.print(msg, level);
-        // Not too important, flush can happen later automatically
-        // target.flush();
+        target.flush();
       }
     } catch (IOException e) {
       System.err.println("Error in logger: " + e.getMessage());
@@ -117,9 +116,9 @@ public class Logger {
   }
 
   void logE(int level, String msg, Object... args) {
-    Exception e = null;
-    if (args.length > 0 && args[args.length - 1] instanceof Exception) {
-      e = (Exception) args[args.length - 1];
+    Throwable e = null;
+    if (args.length > 0 && args[args.length - 1] instanceof Throwable) {
+      e = (Throwable) args[args.length - 1];
       args = Arrays.copyOfRange(args, 0, args.length - 1);
     }
     log(level, msg, args);

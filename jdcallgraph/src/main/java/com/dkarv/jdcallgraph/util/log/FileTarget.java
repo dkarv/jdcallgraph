@@ -60,7 +60,7 @@ public class FileTarget implements LogTarget {
   }
 
   @Override
-  public void printTrace(Exception e, int level) throws IOException {
+  public void printTrace(Throwable e, int level) throws IOException {
     if (debug != null) {
       e.printStackTrace(new PrintWriter(debug));
     }

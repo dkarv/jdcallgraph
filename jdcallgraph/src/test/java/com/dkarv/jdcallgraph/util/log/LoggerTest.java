@@ -144,7 +144,7 @@ public class LoggerTest {
 
     Mockito.verify(target).printTrace(e, 2);
     Mockito.verify(target, Mockito.times(2)).print(Mockito.anyString(), Mockito.eq(2));
-    Mockito.verify(target).flush();
+    Mockito.verify(target, Mockito.times(2)).flush();
     Mockito.verifyNoMoreInteractions(target);
   }
 
@@ -159,13 +159,11 @@ public class LoggerTest {
     logger.debug("test {}", arg);
     Mockito.verify(target).print(Mockito.matches("\\[.*] \\[DEBUG] \\[LoggerTest] test 123\n"),
         Mockito.eq(5));
-    Mockito.verifyNoMoreInteractions(target);
 
     arg = null;
     logger.debug("test {}", arg);
     Mockito.verify(target).print(Mockito.matches("\\[.*] \\[DEBUG] \\[LoggerTest] test null\n"),
         Mockito.eq(5));
-    Mockito.verifyNoMoreInteractions(target);
   }
 
   @Test

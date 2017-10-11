@@ -71,6 +71,10 @@ public class FieldAccessRecorder {
     }
   }
 
+  public static void log(Object o) {
+    LOG.info("log: {}", o);
+  }
+
   public static void shutdown() {
     for (DataDependenceGraph g : GRAPHS.values()) {
       try {

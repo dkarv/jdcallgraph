@@ -41,7 +41,7 @@ public class CallRecorder {
 
   public static void beforeMethod(String className, String methodName, int lineNumber, boolean isTest) {
     try {
-      LOG.trace("beforeMethod: {}:{}", className, methodName);
+      LOG.trace("beforeMethod: {}:{}#{}", className, methodName, lineNumber);
       long threadId = Thread.currentThread().getId();
       CallGraph graph = GRAPHS.get(threadId);
       if (graph == null) {
@@ -52,14 +52,14 @@ public class CallRecorder {
         LOG.debug("isTest: {}", methodName);
       }
       graph.called(new StackItem(className, methodName, lineNumber), isTest);
-    } catch (Exception e) {
+    } catch (Throwable e) {
       LOG.error("Error in beforeMethod", e);
     }
   }
 
   public static void afterMethod(String className, String methodName, int lineNumber) {
     try {
-      LOG.trace("afterMethod: {}:{}", className, methodName);
+      LOG.trace("afterMethod: {}:{}#{}", className, methodName, lineNumber);
       long threadId = Thread.currentThread().getId();
       CallGraph graph = GRAPHS.get(threadId);
       if (graph == null) {
@@ -67,7 +67,7 @@ public class CallRecorder {
         return;
       }
       graph.returned(new StackItem(className, methodName, lineNumber));
-    } catch (Exception e) {
+    } catch (Throwable e) {
       LOG.error("Error in afterMethod", e);
     }
   }
