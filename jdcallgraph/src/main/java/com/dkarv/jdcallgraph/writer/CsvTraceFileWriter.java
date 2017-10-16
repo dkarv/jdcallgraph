@@ -38,7 +38,7 @@ public class CsvTraceFileWriter implements GraphWriter {
   public void start(String identifier) throws IOException {
     if (writer == null) {
       int index = identifier.lastIndexOf('/');
-      writer = new FileWriter(identifier.substring(0,index) + "/trace.csv");
+      writer = new FileWriter(identifier.substring(0, index) + "/trace.csv");
     }
   }
 
@@ -55,6 +55,11 @@ public class CsvTraceFileWriter implements GraphWriter {
       writer.append(to.toString());
       trace.add(to);
     }
+  }
+
+  @Override
+  public void edge(StackItem from, StackItem to, String label) throws IOException {
+    this.edge(from, to);
   }
 
   @Override

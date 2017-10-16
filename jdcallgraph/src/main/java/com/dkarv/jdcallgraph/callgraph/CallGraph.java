@@ -64,6 +64,8 @@ public class CallGraph {
         return new CsvCoverageFileWriter();
       case TRACE:
         return new CsvTraceFileWriter();
+      case LINES:
+        return new LineNumberFileWriter();
       default:
         throw new IllegalArgumentException("Unknown writeTo: " + t);
     }

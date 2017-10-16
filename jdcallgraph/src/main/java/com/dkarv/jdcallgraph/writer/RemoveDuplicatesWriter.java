@@ -29,8 +29,6 @@ import com.dkarv.jdcallgraph.util.log.Logger;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
 
 /**
  * A writer that can wrap another writer and forwards nodes and edges
@@ -59,7 +57,11 @@ public class RemoveDuplicatesWriter implements GraphWriter {
 
   @Override
   public void edge(StackItem from, StackItem to) throws IOException {
-    HashSet<StackItem> set = edges.computeIfAbsent(from, k -> new HashSet<StackItem>());
+    HashSet<StackItem> set = edges.get(from);
+    if (set == null) {
+      set = new HashSet<>();
+      edges.put(from, set);
+    }
     if (!set.contains(to)) {
       set.add(to);
       parentWriter.edge(from, to);
@@ -68,8 +70,17 @@ public class RemoveDuplicatesWriter implements GraphWriter {
 
   @Override
   public void edge(StackItem from, StackItem to, String label) throws IOException {
-    HashMap<StackItem, HashSet<String>> sets = labels.computeIfAbsent(from, k -> new HashMap<>());
-    HashSet<String> set = sets.computeIfAbsent(to, k -> new HashSet<>());
+    HashMap<StackItem, HashSet<String>> sets = labels.get(from);
+    if (sets == null) {
+      sets = new HashMap<>();
+      labels.put(from, sets);
+    }
+
+    HashSet<String> set = sets.get(to);
+    if (set == null) {
+      set = new HashSet<>();
+      sets.put(to, set);
+    }
     if (!set.contains(label)) {
       set.add(label);
       parentWriter.edge(from, to, label);

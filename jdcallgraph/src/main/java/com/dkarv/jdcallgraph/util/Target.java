@@ -44,6 +44,10 @@ public enum Target {
    */
   TRACE,
   /**
+   * The line number of each entry (method/test).
+   */
+  LINES,
+  /**
    * Data Dependence graph as dot file.
    */
   DD_DOT,

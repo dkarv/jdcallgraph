@@ -54,9 +54,7 @@ public interface GraphWriter extends Closeable {
   /**
    * Write an edge with a label. If the writer does not support labels it will write the edge without.
    */
-  default void edge(StackItem from, StackItem to, String label) throws IOException {
-    this.edge(from, to);
-  }
+  void edge(StackItem from, StackItem to, String label) throws IOException;
 
   /**
    * Finish the graph.

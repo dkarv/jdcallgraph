@@ -58,6 +58,11 @@ public class CsvCoverageFileWriter implements GraphWriter {
   }
 
   @Override
+  public void edge(StackItem from, StackItem to, String label) throws IOException {
+    this.edge(from, to);
+  }
+
+  @Override
   public void end() throws IOException {
   }
 
