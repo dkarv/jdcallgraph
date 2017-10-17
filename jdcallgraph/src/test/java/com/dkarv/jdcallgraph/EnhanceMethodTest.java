@@ -34,43 +34,37 @@ public class EnhanceMethodTest {
     p = new Tracer(new ArrayList<Pattern>());
   }
 
-  private String expected(String cName, String mName, boolean isTest) {
+  private String expected(String cName, String mName) {
     String args = '"' + cName + '"' + ',' + '"' + mName + '"' + ',' + lineNumber;
-    return "com.dkarv.jdcallgraph.CallRecorder.beforeMethod(" + args + ',' + isTest + ");";
+    return "com.dkarv.jdcallgraph.CallRecorder.beforeMethod(" + args + ");";
   }
 
   @Test
   public void testConstructor() throws NotFoundException, CannotCompileException {
-    Mockito.when(behavior.getName()).thenReturn("Example");
+    Mockito.when(behavior.getLongName()).thenReturn("Example()");
 
     p.enhanceMethod(behavior, className);
 
     ArgumentCaptor<String> captor = ArgumentCaptor.forClass(String.class);
     Mockito.verify(behavior).insertBefore(captor.capture());
-    Assert.assertEquals(expected(className, "Example()", false), captor.getValue());
+    Assert.assertEquals(expected(className, "Example()"), captor.getValue());
   }
 
   @Test
   public void testParameters() throws NotFoundException, CannotCompileException {
-    Mockito.when(behavior.getName()).thenReturn("method");
-
-    CtClass[] parameters = new CtClass[]{Mockito.mock(CtClass.class), Mockito.mock(CtClass.class), Mockito.mock(CtClass.class)};
-    Mockito.when(parameters[0].getName()).thenReturn(String.class.getName());
-    Mockito.when(parameters[1].getName()).thenReturn(int.class.getName());
-    Mockito.when(parameters[2].getName()).thenReturn(byte.class.getName());
-    Mockito.when(behavior.getParameterTypes()).thenReturn(parameters);
+    Mockito.when(behavior.getLongName()).thenReturn("method(String,int,byte)");
 
     p.enhanceMethod(behavior, className);
 
     ArgumentCaptor<String> captor = ArgumentCaptor.forClass(String.class);
     Mockito.verify(behavior).insertBefore(captor.capture());
-    Assert.assertEquals(expected(className, "method(String,int,byte)", false), captor.getValue());
+    Assert.assertEquals(expected(className, "method(String,int,byte)"), captor.getValue());
   }
 
   @Test
   @SuppressWarnings("unchecked")
   public void testIsTest() throws NotFoundException, CannotCompileException, ClassNotFoundException {
-    Mockito.when(behavior.getName()).thenReturn("method");
+    Mockito.when(behavior.getLongName()).thenReturn("method()");
 
     Annotation[] annotations = new Annotation[]{
         Mockito.mock(Annotation.class, Mockito.RETURNS_DEEP_STUBS),
@@ -87,7 +81,7 @@ public class EnhanceMethodTest {
 
     ArgumentCaptor<String> captor = ArgumentCaptor.forClass(String.class);
     Mockito.verify(behavior).insertBefore(captor.capture());
-    Assert.assertEquals(expected(className, "method()", false), captor.getValue());
+    Assert.assertEquals(expected(className, "method()"), captor.getValue());
 
     annotation2 = Test.class;
     Mockito.when(annotations[1].annotationType()).thenReturn(annotation2);
@@ -96,6 +90,6 @@ public class EnhanceMethodTest {
 
     captor = ArgumentCaptor.forClass(String.class);
     Mockito.verify(behavior, Mockito.times(2)).insertBefore(captor.capture());
-    Assert.assertEquals(expected(className, "method()", true), captor.getValue());
+    Assert.assertEquals(expected(className, "method()"), captor.getValue());
   }
 }

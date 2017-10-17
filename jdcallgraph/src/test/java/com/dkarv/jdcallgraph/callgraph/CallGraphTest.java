@@ -101,19 +101,11 @@ public class CallGraphTest {
     CallGraph graph = new CallGraph(1);
 
     Mockito.when(c.groupBy()).thenReturn(GroupBy.THREAD);
-    String result = graph.checkStartCondition(item, false);
+    String result = graph.checkStartCondition(item);
     Assert.assertEquals("cg/1", result);
 
     Mockito.when(c.groupBy()).thenReturn(GroupBy.ENTRY);
-    result = graph.checkStartCondition(item, false);
+    result = graph.checkStartCondition(item);
     Assert.assertEquals("cg/method()", result);
-
-    Mockito.when(c.groupBy()).thenReturn(GroupBy.TEST);
-    result = graph.checkStartCondition(item, true);
-    Assert.assertEquals("cg/method()", result);
-
-    Mockito.when(c.groupBy()).thenReturn(GroupBy.TEST);
-    result = graph.checkStartCondition(item, false);
-    Assert.assertNull(result);
   }
 }

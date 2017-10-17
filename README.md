@@ -74,7 +74,6 @@ Note that JDCallgraph has to keep a list of known edges which might lead to memo
 Specify the criteria that is used to group the graphs. It will output one graph per category. Valid options are:
 - THREAD: The default. One graph per thread of the observed program.
 - ENTRY: A new graph for each entry method. An entry method is every interesting method with an empty stacktrace
-- TEST: Same as ENTRY. But additionally will filter all entry methods that are not JUnit test methods. They are identified using the @Test annotation
 
 #### Output format `writeTo` ([Enum])
 Specify one or multiple output formats. Multiple formats are separated by comma: `DOT,TRACE`. Valid options:

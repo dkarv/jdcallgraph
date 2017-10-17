@@ -31,16 +31,16 @@ public class CallGraph2Test {
 
   @Test
   public void testCalledNode() throws IOException {
-    Mockito.doReturn("").when(graph).checkStartCondition(item, true);
-    graph.called(item, true);
+    Mockito.doReturn("").when(graph).checkStartCondition(item);
+    graph.called(item);
     Mockito.verify(writer).node(item);
     Assert.assertEquals(item, graph.calls.peek());
   }
 
   @Test
   public void testCalledNotNode() throws IOException {
-    Mockito.doReturn(null).when(graph).checkStartCondition(item, true);
-    graph.called(item, true);
+    Mockito.doReturn(null).when(graph).checkStartCondition(item);
+    graph.called(item);
     Mockito.verify(writer, Mockito.never()).node(item);
     Assert.assertTrue(graph.calls.isEmpty());
   }
@@ -49,7 +49,7 @@ public class CallGraph2Test {
   public void testCalledEdge() throws IOException {
     StackItem item2 = Mockito.mock(StackItem.class);
     graph.calls.push(item2);
-    graph.called(item, true);
+    graph.called(item);
     Mockito.verify(writer).edge(item2, item);
     Assert.assertEquals(item, graph.calls.peek());
   }

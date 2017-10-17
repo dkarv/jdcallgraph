@@ -158,6 +158,7 @@ public class Tracer implements ClassFileTransformer {
     String mName = getMethodName(method);
     LOG.trace("Enhancing {}", mName);
 
+    /*
     boolean isTest = false;
     try {
       Object[] annotations = method.getAnnotations();
@@ -172,6 +173,7 @@ public class Tracer implements ClassFileTransformer {
     } catch (ClassNotFoundException e) {
       LOG.error("Class {} not found", clazzName, e);
     }
+    */
 
     if (Config.getInst().dataDependency()) {
       // TODO might be faster to do CtClass.instrument()
@@ -182,7 +184,7 @@ public class Tracer implements ClassFileTransformer {
 
     String args = '"' + className + '"' + ',' + '"' + mName + '"' + ',' + lineNumber;
 
-    String srcBefore = "com.dkarv.jdcallgraph.CallRecorder.beforeMethod(" + args + ',' + isTest + ");";
+    String srcBefore = "com.dkarv.jdcallgraph.CallRecorder.beforeMethod(" + args + ");";
     String srcAfter = "com.dkarv.jdcallgraph.CallRecorder.afterMethod(" + args + ");";
 
     method.insertBefore(srcBefore);
@@ -198,6 +200,9 @@ public class Tracer implements ClassFileTransformer {
   }
 
   public static String getMethodName(CtBehavior method) throws NotFoundException {
+    return method.getLongName();
+
+    /*
     StringBuilder methodName = new StringBuilder();
     // boolean isConstructor = method.getMethodInfo().isConstructor();
 
@@ -213,6 +218,7 @@ public class Tracer implements ClassFileTransformer {
     }
     methodName.append(')');
     return methodName.toString();
+    */
   }
 
   static String getShortName(final CtClass clazz) {

@@ -75,30 +75,23 @@ public class CallGraph {
    * Check whether the method is a valid start condition.
    *
    * @param method called method
-   * @param isTest called method is test
    * @return identifier if method is a valid start condition, null otherwise
    */
-  String checkStartCondition(StackItem method, boolean isTest) {
+  String checkStartCondition(StackItem method) {
     switch (Config.getInst().groupBy()) {
       case THREAD:
         return FOLDER + String.valueOf(threadId);
       case ENTRY:
         return FOLDER + method.toString();
-      case TEST:
-        if (isTest) {
-          return FOLDER + method.toString();
-        }
-        break;
       default:
         throw new IllegalArgumentException("Unknown groupBy: " + Config.getInst().groupBy());
     }
-    return null;
   }
 
-  public void called(StackItem method, boolean isTest) throws IOException {
+  public void called(StackItem method) throws IOException {
     if (calls.isEmpty()) {
       // First node
-      String identifier = checkStartCondition(method, isTest);
+      String identifier = checkStartCondition(method);
       if (identifier != null) {
         calls.push(method);
         for (GraphWriter w : writers) {
