@@ -64,7 +64,7 @@ public class TracerTest {
     Mockito.when(m.matches()).thenReturn(true);
     byte[] result = p.transform(null, className, null, null, input);
     Assert.assertArrayEquals(input, result);
-    Mockito.verify(p, Mockito.never()).enhanceClass(Mockito.any());
+    Mockito.verify(p, Mockito.never()).enhanceClass(Mockito.<byte[]>any());
 
     // Do not ignore class test
     Mockito.when(m.matches()).thenReturn(false);
@@ -77,7 +77,7 @@ public class TracerTest {
   public void testMakeClass() throws IOException {
     byte[] input = new byte[]{1, 2, 3, 4, 5};
     ClassPool pool = Mockito.mock(ClassPool.class);
-    (new Tracer(new ArrayList<>())).makeClass(pool, input);
+    (new Tracer(new ArrayList<Pattern>())).makeClass(pool, input);
 
     ArgumentCaptor<ByteArrayInputStream> captor = ArgumentCaptor.forClass(ByteArrayInputStream.class);
     Mockito.verify(pool).makeClass(captor.capture());

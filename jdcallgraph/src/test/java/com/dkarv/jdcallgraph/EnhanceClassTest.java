@@ -1,9 +1,6 @@
 package com.dkarv.jdcallgraph;
 
-import javassist.CannotCompileException;
-import javassist.CtBehavior;
-import javassist.CtClass;
-import javassist.NotFoundException;
+import javassist.*;
 import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
@@ -12,6 +9,7 @@ import org.mockito.Mockito;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.regex.Pattern;
 
 public class EnhanceClassTest {
   byte[] input = new byte[]{1, 2, 3, 4, 5};
@@ -24,9 +22,9 @@ public class EnhanceClassTest {
   public void before() throws IOException, NotFoundException, CannotCompileException {
     ct = Mockito.mock(CtClass.class);
     interf = Mockito.mock(CtClass.class);
-    p = Mockito.spy(new Tracer(new ArrayList<>()));
-    Mockito.doReturn(ct).when(p).makeClass(Mockito.any(), Mockito.eq(input));
-    Mockito.doNothing().when(p).enhanceMethod(Mockito.any(), Mockito.anyString());
+    p = Mockito.spy(new Tracer(new ArrayList<Pattern>()));
+    Mockito.doReturn(ct).when(p).makeClass(Mockito.<ClassPool>any(), Mockito.eq(input));
+    Mockito.doNothing().when(p).enhanceMethod(Mockito.<CtBehavior>any(), Mockito.anyString());
     Mockito.doReturn(new CtClass[]{interf}).when(ct).getInterfaces();
     Mockito.when(ct.toBytecode()).thenReturn(output);
     Mockito.when(ct.getName()).thenReturn("abc.def.ExampleClass");
@@ -39,7 +37,7 @@ public class EnhanceClassTest {
     Mockito.when(ct.getDeclaredBehaviors()).thenReturn(new CtBehavior[0]);
     byte[] result = p.enhanceClass(input);
     Assert.assertArrayEquals(output, result);
-    Mockito.verify(p, Mockito.never()).enhanceMethod(Mockito.any(), Mockito.any());
+    Mockito.verify(p, Mockito.never()).enhanceMethod(Mockito.<CtBehavior>any(), Mockito.<String>any());
   }
 
   @Test
@@ -48,7 +46,7 @@ public class EnhanceClassTest {
     Mockito.when(interf.getName()).thenReturn("org.mockito.cglib.proxy.Factory");
     byte[] result = p.enhanceClass(input);
     Assert.assertNull(result);
-    Mockito.verify(p, Mockito.never()).enhanceMethod(Mockito.any(), Mockito.any());
+    Mockito.verify(p, Mockito.never()).enhanceMethod(Mockito.<CtBehavior>any(), Mockito.<String>any());
   }
 
   @Test
@@ -57,7 +55,7 @@ public class EnhanceClassTest {
     Mockito.when(ct.isInterface()).thenReturn(true);
     byte[] result = p.enhanceClass(input);
     Assert.assertNull(result);
-    Mockito.verify(p, Mockito.never()).enhanceMethod(Mockito.any(), Mockito.any());
+    Mockito.verify(p, Mockito.never()).enhanceMethod(Mockito.<CtBehavior>any(), Mockito.<String>any());
   }
 
   @Test
@@ -68,7 +66,7 @@ public class EnhanceClassTest {
     Mockito.when(ct.getDeclaredBehaviors()).thenReturn(new CtBehavior[]{m});
     byte[] result = p.enhanceClass(input);
     Assert.assertArrayEquals(output, result);
-    Mockito.verify(p, Mockito.never()).enhanceMethod(Mockito.any(), Mockito.any());
+    Mockito.verify(p, Mockito.never()).enhanceMethod(Mockito.<CtBehavior>any(), Mockito.<String>any());
   }
 
   @Test

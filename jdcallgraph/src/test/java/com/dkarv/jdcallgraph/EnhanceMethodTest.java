@@ -14,12 +14,13 @@ import org.mockito.Mockito;
 import java.io.IOException;
 import java.lang.annotation.Annotation;
 import java.util.ArrayList;
+import java.util.regex.Pattern;
 
 public class EnhanceMethodTest {
-  CtBehavior behavior;
-  String className = "abc.def.Example";
-  Tracer p;
-  int lineNumber = 12;
+  private CtBehavior behavior;
+  private String className = "abc.def.Example";
+  private Tracer p;
+  private int lineNumber = 12;
 
   @Before
   public void before() throws IOException, NotFoundException, CannotCompileException, ClassNotFoundException {
@@ -30,7 +31,7 @@ public class EnhanceMethodTest {
 
     Mockito.when(behavior.getMethodInfo().getLineNumber(0)).thenReturn(lineNumber);
 
-    p = new Tracer(new ArrayList<>());
+    p = new Tracer(new ArrayList<Pattern>());
   }
 
   private String expected(String cName, String mName, boolean isTest) {
@@ -67,6 +68,7 @@ public class EnhanceMethodTest {
   }
 
   @Test
+  @SuppressWarnings("unchecked")
   public void testIsTest() throws NotFoundException, CannotCompileException, ClassNotFoundException {
     Mockito.when(behavior.getName()).thenReturn("method");
 
