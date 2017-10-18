@@ -28,22 +28,22 @@ public class TracerTest {
     String name = "abc.def.ghi.Example";
     CtClass cl = new CtClass(name) {
     };
-    Assert.assertEquals("Example", Tracer.getShortName(cl));
-    Assert.assertEquals("Example", Tracer.getShortName(name));
+    Assert.assertEquals("Example", TracerJavassist.getShortName(cl));
+    Assert.assertEquals("Example", TracerJavassist.getShortName(name));
   }
 
   @Test
   public void testPremain() throws IOException, IllegalAccessException {
     Instrumentation instrumentation = Mockito.mock(Instrumentation.class);
     try {
-      Tracer.premain("notexistingfile", instrumentation);
+      TracerJavassist.premain("notexistingfile", instrumentation);
       Assert.fail("Should throw FileNotFoundException");
     } catch (NoSuchFileException e) {
     }
 
     File config = ConfigUtils.write(tmp, true);
-    Tracer.premain(config.getCanonicalPath(), instrumentation);
-    Mockito.verify(instrumentation).addTransformer(Mockito.any(Tracer.class));
+    TracerJavassist.premain(config.getCanonicalPath(), instrumentation);
+    Mockito.verify(instrumentation).addTransformer(Mockito.any(TracerJavassist.class));
   }
 
   @Test
@@ -57,7 +57,7 @@ public class TracerTest {
     byte[] input = new byte[]{1, 2, 3, 4, 5};
     byte[] output = new byte[]{5, 4, 3, 2, 1};
 
-    Tracer p = Mockito.spy(new Tracer(excludes));
+    TracerJavassist p = Mockito.spy(new TracerJavassist(excludes));
     Mockito.doReturn(output).when(p).enhanceClass(Mockito.any(byte[].class));
 
     // Ignore class test
@@ -77,7 +77,7 @@ public class TracerTest {
   public void testMakeClass() throws IOException {
     byte[] input = new byte[]{1, 2, 3, 4, 5};
     ClassPool pool = Mockito.mock(ClassPool.class);
-    (new Tracer(new ArrayList<Pattern>())).makeClass(pool, input);
+    (new TracerJavassist(new ArrayList<Pattern>())).makeClass(pool, input);
 
     ArgumentCaptor<ByteArrayInputStream> captor = ArgumentCaptor.forClass(ByteArrayInputStream.class);
     Mockito.verify(pool).makeClass(captor.capture());

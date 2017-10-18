@@ -16,13 +16,13 @@ public class EnhanceClassTest {
   byte[] output = new byte[]{5, 4, 3, 2, 1};
   CtClass ct;
   CtClass interf;
-  Tracer p;
+  TracerJavassist p;
 
   @Before
   public void before() throws IOException, NotFoundException, CannotCompileException {
     ct = Mockito.mock(CtClass.class);
     interf = Mockito.mock(CtClass.class);
-    p = Mockito.spy(new Tracer(new ArrayList<Pattern>()));
+    p = Mockito.spy(new TracerJavassist(new ArrayList<Pattern>()));
     Mockito.doReturn(ct).when(p).makeClass(Mockito.<ClassPool>any(), Mockito.eq(input));
     Mockito.doNothing().when(p).enhanceMethod(Mockito.<CtBehavior>any(), Mockito.anyString());
     Mockito.doReturn(new CtClass[]{interf}).when(ct).getInterfaces();

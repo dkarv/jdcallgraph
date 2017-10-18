@@ -35,8 +35,8 @@ import java.util.regex.Pattern;
 /**
  * Go through all field accesses to build a dynamic data dependence graph.
  */
-public class FieldTracer extends ExprEditor {
-  private static final Logger LOG = new Logger(FieldTracer.class);
+public class FieldTracerJavassist extends ExprEditor {
+  private static final Logger LOG = new Logger(FieldTracerJavassist.class);
 
   /**
    * Ignore specific write accesses. This happens in anonymous classes
@@ -86,10 +86,10 @@ public class FieldTracer extends ExprEditor {
   public final void edit(FieldAccess f) throws CannotCompileException {
     CtBehavior method = f.where();
     String className = f.getEnclosingClass().getName();
-    int lineNumber = Tracer.getLineNumber(method);
+    int lineNumber = TracerJavassist.getLineNumber(method);
     String methodName;
     try {
-      methodName = Tracer.getMethodName(method);
+      methodName = TracerJavassist.getMethodName(method);
     } catch (NotFoundException e) {
       methodName = "<error>";
     }

@@ -27,6 +27,18 @@ import com.dkarv.jdcallgraph.util.config.Config;
 import com.dkarv.jdcallgraph.util.log.Logger;
 import com.dkarv.jdcallgraph.util.config.ConfigReader;
 import javassist.*;
+import net.bytebuddy.ByteBuddy;
+import net.bytebuddy.agent.builder.AgentBuilder;
+import net.bytebuddy.agent.builder.ResettableClassFileTransformer;
+import net.bytebuddy.asm.AsmVisitorWrapper;
+import net.bytebuddy.asm.MemberSubstitution;
+import net.bytebuddy.description.field.FieldDescription;
+import net.bytebuddy.description.method.MethodDescription;
+import net.bytebuddy.description.type.TypeDescription;
+import net.bytebuddy.dynamic.DynamicType;
+import net.bytebuddy.matcher.ElementMatcher;
+import net.bytebuddy.matcher.ElementMatchers;
+import net.bytebuddy.utility.JavaModule;
 
 import java.io.ByteArrayInputStream;
 import java.io.File;
@@ -34,6 +46,7 @@ import java.io.IOException;
 import java.lang.annotation.Annotation;
 import java.lang.instrument.ClassFileTransformer;
 import java.lang.instrument.Instrumentation;
+import java.lang.reflect.Method;
 import java.security.ProtectionDomain;
 import java.util.ArrayList;
 import java.util.List;
@@ -43,11 +56,9 @@ import java.util.regex.Pattern;
 /**
  * Instrument the target classes.
  */
-public class Tracer implements ClassFileTransformer {
+public class Tracer {
   private final static Logger LOG = new Logger(Tracer.class);
   private final List<Pattern> excludes;
-
-  private final FieldTracer fieldTracer = new FieldTracer();
 
   Tracer(List<Pattern> excludes) {
     this.excludes = excludes;
@@ -69,9 +80,9 @@ public class Tracer implements ClassFileTransformer {
       System.err.println("You did not specify a config file. Will use the default config options instead.");
     }
 
-
     Logger.init();
 
+    // TODO move this to config
     String[] excls = new String[]{
         "java.*", "sun.*", "com.sun.*", "jdk.internal.*",
         "com.dkarv.jdcallgraph.*", "org.xml.sax.*",
@@ -85,148 +96,66 @@ public class Tracer implements ClassFileTransformer {
       excludes.add(Pattern.compile(exclude + "$"));
     }
 
-    instrumentation.addTransformer(new Tracer(excludes));
-  }
-
-  public byte[] transform(ClassLoader loader, String className, Class clazz,
-                          ProtectionDomain domain, byte[] bytes) {
-    boolean enhanceClass = true;
-
-    String name = className.replace("/", ".");
-
-    for (Pattern p : excludes) {
-      Matcher m = p.matcher(name);
-      if (m.matches()) {
-        // LOG.trace("Skipping class {}", name);
-        enhanceClass = false;
-        break;
-      }
-    }
-
-    if (enhanceClass) {
-      byte[] b = enhanceClass(bytes);
-      if (b != null) return b;
-    }
-    return bytes;
-  }
-
-  CtClass makeClass(ClassPool pool, byte[] bytes) throws IOException {
-    return pool.makeClass(new ByteArrayInputStream(bytes));
-  }
-
-  byte[] enhanceClass(byte[] bytes) {
-    CtClass clazz = null;
+    Method m;
     try {
-      boolean ignore = false;
-      clazz = makeClass(ClassPool.getDefault(), bytes);
+      m = Recorder.class.getDeclaredMethod("log");
+    } catch (NoSuchMethodException e) {
+      System.out.println("Could not find method");
+      throw new IllegalStateException("Target method not found");
+    }
 
-      CtClass[] interfaces = clazz.getInterfaces();
-      for (CtClass i : interfaces) {
-        // ignore Mockito classes because modifying them results in errors
-        ignore = ignore || "org.mockito.cglib.proxy.Factory".equals(i.getName());
-      }
-      ignore = ignore || clazz.isInterface();
-      if (!ignore) {
-        LOG.trace("Enhancing class: {}", clazz.getName());
-        CtBehavior[] methods = clazz.getDeclaredBehaviors();
-        for (CtBehavior method : methods) {
-          if (!method.isEmpty()) {
-            enhanceMethod(method, clazz.getName());
+    // TODO try relaxed
+    final MemberSubstitution sub = MemberSubstitution.strict().field(
+        // TODO maybe there is another matcher that matches better
+        new ElementMatcher<FieldDescription.InDefinedShape>() {
+          @Override
+          public boolean matches(FieldDescription.InDefinedShape inDefinedShape) {
+            return true;
           }
-        }
-        return clazz.toBytecode();
-      } else {
-        LOG.trace("Ignore class {}", clazz.getName());
+        }).onRead().replaceWith(m);
+
+    AgentBuilder.Transformer transformer = new AgentBuilder.Transformer() {
+      @Override
+      public DynamicType.Builder<?> transform(DynamicType.Builder<?> builder, TypeDescription typeDescription, ClassLoader classLoader, JavaModule module) {
+        return builder.visit(new AsmVisitorWrapper.ForDeclaredMethods().method(new ElementMatcher<MethodDescription>() {
+          @Override
+          public boolean matches(MethodDescription target) {
+            return true;
+          }
+        }, sub));
       }
-    } catch (CannotCompileException e) {
-      LOG.error("Cannot compile", e);
-    } catch (NotFoundException e) {
-      LOG.error("Cannot find", e);
-    } catch (IOException e) {
-      LOG.error("IO error", e);
-    } finally {
-      if (clazz != null) {
-        clazz.detach();
-      }
-    }
+    };
 
-    return null;
-  }
+    ResettableClassFileTransformer agent = new AgentBuilder.Default()
+        .with(new AgentBuilder.Listener() {
 
-  void enhanceMethod(CtBehavior method, String className)
-      throws NotFoundException, CannotCompileException {
-    String clazzName = className.substring(className.lastIndexOf('.') + 1, className.length());
-    String mName = getMethodName(method);
-    LOG.trace("Enhancing {}", mName);
+          @Override
+          public void onDiscovery(String typeName, ClassLoader classLoader, JavaModule module, boolean loaded) {
+            LOG.debug("onDiscovery: {}, {}, {}", typeName, module, loaded);
+          }
 
-    /*
-    boolean isTest = false;
-    try {
-      Object[] annotations = method.getAnnotations();
-      for (Object o : annotations) {
-        Annotation a = (Annotation) o;
-        String annotationName = a.annotationType().getName();
-        if ("org.junit.Test".equals(annotationName)) {
-          // TODO also filter other test annotations (subclasses)
-          isTest = true;
-        }
-      }
-    } catch (ClassNotFoundException e) {
-      LOG.error("Class {} not found", clazzName, e);
-    }
-    */
+          @Override
+          public void onTransformation(TypeDescription typeDescription, ClassLoader classLoader, JavaModule module, boolean loaded, DynamicType dynamicType) {
+            LOG.debug("onTransformation: {}, {}, {}, {}", typeDescription, module, loaded, dynamicType);
+          }
 
-    if (Config.getInst().dataDependency()) {
-      // TODO might be faster to do CtClass.instrument()
-      method.instrument(fieldTracer);
-    }
+          @Override
+          public void onIgnored(TypeDescription typeDescription, ClassLoader classLoader, JavaModule module, boolean loaded) {
+            LOG.debug("onIgnored: {}, {}, {}", typeDescription, module, loaded);
+          }
 
-    int lineNumber = getLineNumber(method);
+          @Override
+          public void onError(String typeName, ClassLoader classLoader, JavaModule module, boolean loaded, Throwable throwable) {
+            LOG.error("onError: {}, {}, {}", typeName, module, loaded, throwable);
+          }
 
-    String args = '"' + className + '"' + ',' + '"' + mName + '"' + ',' + lineNumber;
-
-    String srcBefore = "com.dkarv.jdcallgraph.CallRecorder.beforeMethod(" + args + ");";
-    String srcAfter = "com.dkarv.jdcallgraph.CallRecorder.afterMethod(" + args + ");";
-
-    method.insertBefore(srcBefore);
-    method.insertAfter(srcAfter, true);
-    //if (isConstructor) {
-    //  CtClass etype = ClassPool.getDefault().get("java.lang.Exception");
-    //  method.addCatch("{ " + srcAfter + " throw $e; }", etype);
-    //}
-  }
-
-  public static int getLineNumber(CtBehavior method) {
-    return method.getMethodInfo().getLineNumber(0);
-  }
-
-  public static String getMethodName(CtBehavior method) throws NotFoundException {
-    return method.getLongName();
-
-    /*
-    StringBuilder methodName = new StringBuilder();
-    // boolean isConstructor = method.getMethodInfo().isConstructor();
-
-    // TODO replace with method.getLongName()
-    methodName.append(method.getName());
-    methodName.append('(');
-    CtClass[] params = method.getParameterTypes();
-    for (int i = 0; i < params.length; i++) {
-      if (i != 0) {
-        methodName.append(',');
-      }
-      methodName.append(getShortName(params[i]));
-    }
-    methodName.append(')');
-    return methodName.toString();
-    */
-  }
-
-  static String getShortName(final CtClass clazz) {
-    return getShortName(clazz.getName());
-  }
-
-  static String getShortName(final String className) {
-    return className.substring(className.lastIndexOf('.') + 1, className.length());
+          @Override
+          public void onComplete(String typeName, ClassLoader classLoader, JavaModule module, boolean loaded) {
+            LOG.debug("onComplete: {}, {}, {}", typeName, module, loaded);
+          }
+        })
+        .type(AgentBuilder.RawMatcher.Trivial.MATCHING)
+        .transform(transformer)
+        .installOn(instrumentation);
   }
 }

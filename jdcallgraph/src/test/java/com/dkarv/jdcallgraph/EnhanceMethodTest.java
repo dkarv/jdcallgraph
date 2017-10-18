@@ -19,7 +19,7 @@ import java.util.regex.Pattern;
 public class EnhanceMethodTest {
   private CtBehavior behavior;
   private String className = "abc.def.Example";
-  private Tracer p;
+  private TracerJavassist p;
   private int lineNumber = 12;
 
   @Before
@@ -31,7 +31,7 @@ public class EnhanceMethodTest {
 
     Mockito.when(behavior.getMethodInfo().getLineNumber(0)).thenReturn(lineNumber);
 
-    p = new Tracer(new ArrayList<Pattern>());
+    p = new TracerJavassist(new ArrayList<Pattern>());
   }
 
   private String expected(String cName, String mName) {

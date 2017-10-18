@@ -8,12 +8,11 @@
         <format>jar</format>
     </formats>
     <includeBaseDirectory>false</includeBaseDirectory>
-
     <dependencySets>
         <dependencySet>
             <unpack>true</unpack>
             <includes>
-                <include>org.javassist:javassist</include>
+                <include>net.bytebuddy:</include>
             </includes>
             <scope>provided</scope>
         </dependencySet>
@@ -24,7 +23,7 @@
                 <include>com/dkarv/jdcallgraph/**/*.class</include>
             </includes>
             <directory>target/classes</directory>
-            <outputDirectory></outputDirectory>
+            <outputDirectory/>
         </fileSet>
     </fileSets>
 </assembly>
