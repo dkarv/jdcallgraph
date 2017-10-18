@@ -75,7 +75,8 @@ public class Tracer implements ClassFileTransformer {
     String[] excls = new String[]{
         "java.*", "sun.*", "com.sun.*", "jdk.internal.*",
         "com.dkarv.jdcallgraph.*", "org.xml.sax.*",
-        "org.apache.maven.surefire.*", "org.apache.tools.*", "org.mockito.*",
+        "org.apache.maven.surefire.*", "org.apache.tools.*", /*"org.mockito.*",*/
+        "org.easymock.internal.*",
         "org.junit.*", "junit.framework.*", "org.hamcrest.*", /*"org.objenesis.*"*/
         "edu.washington.cs.mut.testrunner.Formatter"
     };

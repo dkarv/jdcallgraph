@@ -23,6 +23,8 @@
  */
 package com.dkarv.jdcallgraph.util;
 
+import com.dkarv.jdcallgraph.util.options.Formatter;
+
 public class StackItem {
   private final String className;
   private final String methodName;

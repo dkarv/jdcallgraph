@@ -2,11 +2,10 @@ package com.dkarv.jdcallgraph.util;
 
 import com.dkarv.jdcallgraph.util.config.Config;
 import com.dkarv.jdcallgraph.util.config.ConfigUtils;
+import com.dkarv.jdcallgraph.util.options.Formatter;
 import org.junit.Assert;
 import org.junit.Before;
-import org.junit.Rule;
 import org.junit.Test;
-import org.junit.rules.TemporaryFolder;
 import org.mockito.Mockito;
 
 public class FormatterTest {

@@ -1,7 +1,7 @@
 package com.dkarv.jdcallgraph.util.config;
 
-import com.dkarv.jdcallgraph.util.GroupBy;
-import com.dkarv.jdcallgraph.util.Target;
+import com.dkarv.jdcallgraph.util.options.GroupBy;
+import com.dkarv.jdcallgraph.util.options.Target;
 import org.junit.Assert;
 import org.junit.Rule;
 import org.junit.Test;

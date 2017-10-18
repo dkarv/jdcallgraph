@@ -21,7 +21,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package com.dkarv.jdcallgraph.util;
+package com.dkarv.jdcallgraph.util.options;
 
 /**
  * Group the call graphs by the given strategy.

@@ -24,7 +24,7 @@
 package com.dkarv.jdcallgraph.data;
 
 import com.dkarv.jdcallgraph.util.StackItem;
-import com.dkarv.jdcallgraph.util.Target;
+import com.dkarv.jdcallgraph.util.options.Target;
 import com.dkarv.jdcallgraph.util.config.Config;
 import com.dkarv.jdcallgraph.util.log.Logger;
 import com.dkarv.jdcallgraph.writer.CsvTraceFileWriter;

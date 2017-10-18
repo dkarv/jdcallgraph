@@ -1,7 +1,6 @@
 package com.dkarv.jdcallgraph.util.config;
 
 import com.dkarv.jdcallgraph.helper.TestUtils;
-import com.dkarv.jdcallgraph.util.Target;
 import org.junit.rules.TemporaryFolder;
 
 import java.io.File;

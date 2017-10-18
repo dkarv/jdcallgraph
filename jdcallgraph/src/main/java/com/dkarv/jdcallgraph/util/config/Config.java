@@ -23,8 +23,8 @@
  */
 package com.dkarv.jdcallgraph.util.config;
 
-import com.dkarv.jdcallgraph.util.GroupBy;
-import com.dkarv.jdcallgraph.util.Target;
+import com.dkarv.jdcallgraph.util.options.GroupBy;
+import com.dkarv.jdcallgraph.util.options.Target;
 
 import java.io.File;
 import java.lang.reflect.Array;

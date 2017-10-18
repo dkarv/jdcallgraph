@@ -23,6 +23,7 @@
  */
 package com.dkarv.jdcallgraph.callgraph;
 
+import com.dkarv.jdcallgraph.util.options.Target;
 import com.dkarv.jdcallgraph.writer.*;
 import com.dkarv.jdcallgraph.util.*;
 import com.dkarv.jdcallgraph.util.config.Config;
