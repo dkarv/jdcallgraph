@@ -40,6 +40,15 @@ public class StackItem {
     this.formatted = Formatter.format(this);
   }
 
+  public StackItem(String type, String method, String signature, int lineNumber) {
+    this.className = type;
+    // TODO store them separated
+    this.methodName = method + signature;
+    this.lineNumber = lineNumber;
+
+    this.formatted = Formatter.format(this);
+  }
+
   public String getClassName() {
     return className;
   }

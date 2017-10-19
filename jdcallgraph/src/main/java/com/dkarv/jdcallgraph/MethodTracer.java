@@ -23,9 +23,27 @@
  */
 package com.dkarv.jdcallgraph;
 
-public class Recorder {
-  public static int log() {
-    System.out.println("test");
-    return 1;
+import com.dkarv.jdcallgraph.util.StackItem;
+import com.dkarv.jdcallgraph.util.log.Logger;
+import net.bytebuddy.asm.Advice;
+
+import java.lang.reflect.Method;
+
+public class MethodTracer {
+  public static final Logger LOG = new Logger(MethodTracer.class);
+
+
+  @Advice.OnMethodEnter(inline = false)
+  public static StackItem enter(@Advice.Origin("#t") String type, @Advice.Origin("#m") String method, @Advice.Origin("#s") String signature) {
+    int lineNumber = Thread.currentThread().getStackTrace()[2].getLineNumber();
+
+    StackItem item = new StackItem(type, method, signature, lineNumber);
+    LOG.debug("Enter method: {}", item);
+    return item;
+  }
+
+  @Advice.OnMethodExit(inline = false, onThrowable = Throwable.class)
+  public static void exit(@Advice.Enter StackItem item) {
+    LOG.debug("Exit method: {}", item);
   }
 }

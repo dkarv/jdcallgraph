@@ -23,9 +23,19 @@
  */
 package com.dkarv.jdcallgraph;
 
-public class Recorder {
-  public static int log() {
-    System.out.println("test");
-    return 1;
+import com.dkarv.jdcallgraph.util.StackItem;
+import com.dkarv.jdcallgraph.util.log.Logger;
+import net.bytebuddy.asm.Advice;
+import net.bytebuddy.asm.AsmVisitorWrapper;
+import net.bytebuddy.description.field.FieldDescription;
+import net.bytebuddy.description.type.TypeDescription;
+import net.bytebuddy.jar.asm.FieldVisitor;
+
+public class FieldTracer implements AsmVisitorWrapper.ForDeclaredFields.FieldVisitorWrapper{
+  public static final Logger LOG = new Logger(FieldTracer.class);
+
+  @Override
+  public FieldVisitor wrap(TypeDescription instrumentedType, FieldDescription.InDefinedShape fieldDescription, FieldVisitor fieldVisitor) {
+    return null;
   }
 }

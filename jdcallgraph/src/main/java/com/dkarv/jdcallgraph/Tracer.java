@@ -30,6 +30,7 @@ import javassist.*;
 import net.bytebuddy.ByteBuddy;
 import net.bytebuddy.agent.builder.AgentBuilder;
 import net.bytebuddy.agent.builder.ResettableClassFileTransformer;
+import net.bytebuddy.asm.Advice;
 import net.bytebuddy.asm.AsmVisitorWrapper;
 import net.bytebuddy.asm.MemberSubstitution;
 import net.bytebuddy.description.field.FieldDescription;
@@ -96,6 +97,7 @@ public class Tracer {
       excludes.add(Pattern.compile(exclude + "$"));
     }
 
+/*
     Method m;
     try {
       m = Recorder.class.getDeclaredMethod("log");
@@ -112,50 +114,36 @@ public class Tracer {
           public boolean matches(FieldDescription.InDefinedShape inDefinedShape) {
             return true;
           }
-        }).onRead().replaceWith(m);
+        }).onRead()..replaceWith(m);
+        */
 
-    AgentBuilder.Transformer transformer = new AgentBuilder.Transformer() {
+
+    final Advice methodAdvice = Advice.to(MethodTracer.class);
+    final Advice constructorAdvice = Advice.to(ConstructorTracer.class);
+    //final Advice b = Advice.to(FieldTracer.class);
+
+    AgentBuilder.Transformer transformer1 = new AgentBuilder.Transformer() {
       @Override
       public DynamicType.Builder<?> transform(DynamicType.Builder<?> builder, TypeDescription typeDescription, ClassLoader classLoader, JavaModule module) {
-        return builder.visit(new AsmVisitorWrapper.ForDeclaredMethods().method(new ElementMatcher<MethodDescription>() {
-          @Override
-          public boolean matches(MethodDescription target) {
-            return true;
-          }
-        }, sub));
+        return builder
+            .visit(new AsmVisitorWrapper.ForDeclaredMethods().method(ElementMatchers.isMethod(), methodAdvice))
+            .visit(new AsmVisitorWrapper.ForDeclaredMethods().method(ElementMatchers.isConstructor(), constructorAdvice));
       }
     };
 
+    /*
+    AgentBuilder.Transformer transformer2 = new AgentBuilder.Transformer() {
+      @Override
+      public DynamicType.Builder<?> transform(DynamicType.Builder<?> builder, TypeDescription typeDescription, ClassLoader classLoader, JavaModule module) {
+        return builder.visit(new AsmVisitorWrapper.ForDeclaredMethods().method(ElementMatchers.isConstructor(), constructorAdvice));
+      }
+    };*/
+
     ResettableClassFileTransformer agent = new AgentBuilder.Default()
-        .with(new AgentBuilder.Listener() {
-
-          @Override
-          public void onDiscovery(String typeName, ClassLoader classLoader, JavaModule module, boolean loaded) {
-            LOG.debug("onDiscovery: {}, {}, {}", typeName, module, loaded);
-          }
-
-          @Override
-          public void onTransformation(TypeDescription typeDescription, ClassLoader classLoader, JavaModule module, boolean loaded, DynamicType dynamicType) {
-            LOG.debug("onTransformation: {}, {}, {}, {}", typeDescription, module, loaded, dynamicType);
-          }
-
-          @Override
-          public void onIgnored(TypeDescription typeDescription, ClassLoader classLoader, JavaModule module, boolean loaded) {
-            LOG.debug("onIgnored: {}, {}, {}", typeDescription, module, loaded);
-          }
-
-          @Override
-          public void onError(String typeName, ClassLoader classLoader, JavaModule module, boolean loaded, Throwable throwable) {
-            LOG.error("onError: {}, {}, {}", typeName, module, loaded, throwable);
-          }
-
-          @Override
-          public void onComplete(String typeName, ClassLoader classLoader, JavaModule module, boolean loaded) {
-            LOG.debug("onComplete: {}, {}, {}", typeName, module, loaded);
-          }
-        })
-        .type(AgentBuilder.RawMatcher.Trivial.MATCHING)
-        .transform(transformer)
+        .with(new TracerListener())
+        .type(ElementMatchers.not(ElementMatchers.nameStartsWith("com.dkarv.jdcallgraph.")))
+        .transform(transformer1)
+        //.transform(transformer2)
         .installOn(instrumentation);
   }
 }
