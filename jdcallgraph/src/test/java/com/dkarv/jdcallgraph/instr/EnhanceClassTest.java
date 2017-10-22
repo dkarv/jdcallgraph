@@ -1,5 +1,6 @@
-package com.dkarv.jdcallgraph;
+package com.dkarv.jdcallgraph.instr;
 
+import com.dkarv.jdcallgraph.instr.JavassistInstr;
 import javassist.*;
 import org.junit.After;
 import org.junit.Assert;
@@ -16,13 +17,13 @@ public class EnhanceClassTest {
   byte[] output = new byte[]{5, 4, 3, 2, 1};
   CtClass ct;
   CtClass interf;
-  TracerJavassist p;
+  JavassistInstr p;
 
   @Before
   public void before() throws IOException, NotFoundException, CannotCompileException {
     ct = Mockito.mock(CtClass.class);
     interf = Mockito.mock(CtClass.class);
-    p = Mockito.spy(new TracerJavassist(new ArrayList<Pattern>()));
+    p = Mockito.spy(new JavassistInstr(new ArrayList<Pattern>()));
     Mockito.doReturn(ct).when(p).makeClass(Mockito.<ClassPool>any(), Mockito.eq(input));
     Mockito.doNothing().when(p).enhanceMethod(Mockito.<CtBehavior>any(), Mockito.anyString());
     Mockito.doReturn(new CtClass[]{interf}).when(ct).getInterfaces();

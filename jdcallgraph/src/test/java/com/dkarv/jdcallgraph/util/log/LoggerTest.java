@@ -19,7 +19,7 @@ public class LoggerTest {
 
   private Logger init(int logLevel, boolean stdOut) {
     try {
-      ConfigUtils.replace(tmp, true, "logLevel: " + logLevel, "logConsole: " + stdOut);
+      ConfigUtils.replace( true, "logLevel: " + logLevel, "logConsole: " + stdOut);
     } catch (IOException e) {
       fail("Error initializing config");
     }

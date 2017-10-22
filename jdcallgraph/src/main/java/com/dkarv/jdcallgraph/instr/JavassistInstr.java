@@ -21,8 +21,10 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package com.dkarv.jdcallgraph;
+package com.dkarv.jdcallgraph.instr;
 
+import com.dkarv.jdcallgraph.instr.javassist.FieldTracer;
+import com.dkarv.jdcallgraph.ShutdownHook;
 import com.dkarv.jdcallgraph.util.config.Config;
 import com.dkarv.jdcallgraph.util.config.ConfigReader;
 import com.dkarv.jdcallgraph.util.log.Logger;
@@ -42,49 +44,30 @@ import java.util.regex.Pattern;
 /**
  * Instrument the target classes.
  */
-public class TracerJavassist implements ClassFileTransformer {
-  private final static Logger LOG = new Logger(TracerJavassist.class);
-  private final List<Pattern> excludes;
+public class JavassistInstr extends Instr implements ClassFileTransformer {
+  private final static Logger LOG = new Logger(JavassistInstr.class);
 
-  private final FieldTracerJavassist fieldTracer = new FieldTracerJavassist();
+  private final FieldTracer fieldTracer;
 
-  TracerJavassist(List<Pattern> excludes) {
-    this.excludes = excludes;
+  private final boolean callDependence;
+
+  public JavassistInstr(List<Pattern> excludes) {
+    super(excludes);
+    if (Config.getInst().dataDependence()) {
+      fieldTracer = new FieldTracer();
+    } else {
+      fieldTracer = null;
+    }
+    this.callDependence = Config.getInst().callDependence();
   }
 
   /**
    * Program entry point. Loads the config and starts itself as instrumentation.
    *
-   * @param argument        command line argument. Should specify a config file
    * @param instrumentation instrumentation
-   * @throws IOException            io error
-   * @throws IllegalAccessException problem loading the config options
    */
-  public static void premain(String argument, Instrumentation instrumentation) throws IOException, IllegalAccessException {
-    ShutdownHook.init();
-    if (argument != null) {
-      new ConfigReader(new File(argument)).read();
-    } else {
-      System.err.println("You did not specify a config file. Will use the default config options instead.");
-    }
-
-
-    Logger.init();
-
-    String[] excls = new String[]{
-        "java.*", "sun.*", "com.sun.*", "jdk.internal.*",
-        "com.dkarv.jdcallgraph.*", "org.xml.sax.*",
-        "org.apache.maven.surefire.*", "org.apache.tools.*", /*"org.mockito.*",*/
-        "org.easymock.internal.*",
-        "org.junit.*", "junit.framework.*", "org.hamcrest.*", /*"org.objenesis.*"*/
-        "edu.washington.cs.mut.testrunner.Formatter"
-    };
-    List<Pattern> excludes = new ArrayList<>();
-    for (String exclude : excls) {
-      excludes.add(Pattern.compile(exclude + "$"));
-    }
-
-    instrumentation.addTransformer(new TracerJavassist(excludes));
+  public void instrument(Instrumentation instrumentation) {
+    instrumentation.addTransformer(this);
   }
 
   public byte[] transform(ClassLoader loader, String className, Class clazz,
@@ -154,45 +137,26 @@ public class TracerJavassist implements ClassFileTransformer {
 
   void enhanceMethod(CtBehavior method, String className)
       throws NotFoundException, CannotCompileException {
-    String clazzName = className.substring(className.lastIndexOf('.') + 1, className.length());
     String mName = getMethodName(method);
     LOG.trace("Enhancing {}", mName);
 
-    /*
-    boolean isTest = false;
-    try {
-      Object[] annotations = method.getAnnotations();
-      for (Object o : annotations) {
-        Annotation a = (Annotation) o;
-        String annotationName = a.annotationType().getName();
-        if ("org.junit.Test".equals(annotationName)) {
-          // TODO also filter other test annotations (subclasses)
-          isTest = true;
-        }
-      }
-    } catch (ClassNotFoundException e) {
-      LOG.error("Class {} not found", clazzName, e);
-    }
-    */
-
-    if (Config.getInst().dataDependency()) {
+    if (fieldTracer != null) {
       // TODO might be faster to do CtClass.instrument()
       method.instrument(fieldTracer);
     }
 
-    int lineNumber = getLineNumber(method);
+    if (callDependence) {
+      int lineNumber = getLineNumber(method);
 
-    String args = '"' + className + '"' + ',' + '"' + mName + '"' + ',' + lineNumber;
+      String args = '"' + className + '"' + ',' + '"' + mName + '"' + ',' + lineNumber;
 
-    String srcBefore = "com.dkarv.jdcallgraph.CallRecorder.beforeMethod(" + args + ");";
-    String srcAfter = "com.dkarv.jdcallgraph.CallRecorder.afterMethod(" + args + ");";
+      // TODO detect constructors where the afterMethod detection might not work
+      String srcBefore = "com.dkarv.jdcallgraph.CallRecorder.beforeMethod(" + args + ");";
+      String srcAfter = "com.dkarv.jdcallgraph.CallRecorder.afterMethod(" + args + ");";
 
-    method.insertBefore(srcBefore);
-    method.insertAfter(srcAfter, true);
-    //if (isConstructor) {
-    //  CtClass etype = ClassPool.getDefault().get("java.lang.Exception");
-    //  method.addCatch("{ " + srcAfter + " throw $e; }", etype);
-    //}
+      method.insertBefore(srcBefore);
+      method.insertAfter(srcAfter, true);
+    }
   }
 
   public static int getLineNumber(CtBehavior method) {
@@ -201,24 +165,6 @@ public class TracerJavassist implements ClassFileTransformer {
 
   public static String getMethodName(CtBehavior method) throws NotFoundException {
     return method.getLongName();
-
-    /*
-    StringBuilder methodName = new StringBuilder();
-    // boolean isConstructor = method.getMethodInfo().isConstructor();
-
-    // TODO replace with method.getLongName()
-    methodName.append(method.getName());
-    methodName.append('(');
-    CtClass[] params = method.getParameterTypes();
-    for (int i = 0; i < params.length; i++) {
-      if (i != 0) {
-        methodName.append(',');
-      }
-      methodName.append(getShortName(params[i]));
-    }
-    methodName.append(')');
-    return methodName.toString();
-    */
   }
 
   static String getShortName(final CtClass clazz) {

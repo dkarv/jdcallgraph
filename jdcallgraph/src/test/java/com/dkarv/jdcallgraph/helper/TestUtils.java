@@ -2,10 +2,7 @@ package com.dkarv.jdcallgraph.helper;
 
 import org.junit.rules.TemporaryFolder;
 
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.IOException;
-import java.io.PrintWriter;
+import java.io.*;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
@@ -32,5 +29,9 @@ public class TestUtils {
    */
   public static void clear(TemporaryFolder tmp, String fileName) throws FileNotFoundException {
     (new PrintWriter(new File(tmp.getRoot(), fileName))).close();
+  }
+
+  public static InputStream writeInputStream(String content) throws UnsupportedEncodingException {
+    return new ByteArrayInputStream(content.getBytes(StandardCharsets.UTF_8.name()));
   }
 }

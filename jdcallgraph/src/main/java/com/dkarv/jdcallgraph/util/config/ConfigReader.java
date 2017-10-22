@@ -23,57 +23,111 @@
  */
 package com.dkarv.jdcallgraph.util.config;
 
-import java.io.File;
+import net.bytebuddy.ByteBuddy;
+import net.bytebuddy.dynamic.DynamicType;
+import net.bytebuddy.implementation.FixedValue;
+import net.bytebuddy.matcher.ElementMatchers;
+
+import java.io.BufferedReader;
 import java.io.IOException;
-import java.lang.reflect.Field;
-import java.nio.charset.Charset;
-import java.nio.file.Files;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.lang.reflect.Method;
 import java.util.HashMap;
 import java.util.Map;
 
 public class ConfigReader {
+  private final InputStream[] inputs;
 
-  private final File from;
-
-  public ConfigReader(final File from) {
-    this.from = from;
+  public ConfigReader(final InputStream... inputs) {
+    this.inputs = inputs;
   }
 
   public void read() throws IOException {
-    Map<String, Field> fields = ConfigReader.parseFields();
-    Config conf = Config.getInst();
+    Map<String, Method> targets = parseOptions();
 
-    for (String line : Files.readAllLines(from.toPath(), Charset.defaultCharset())) {
+    Map<String, Object> options = new HashMap<>();
+    for (InputStream input : inputs) {
+      BufferedReader reader = new BufferedReader(
+          new InputStreamReader(input));
+      this.read(reader, options, targets);
+    }
+
+    save(options);
+  }
+
+  void save(Map<String, Object> options) {
+    DynamicType.Builder<Config> builder = new ByteBuddy()
+        .subclass(Config.class);
+
+    for (Map.Entry<String, Object> option : options.entrySet()) {
+      builder = builder.method(ElementMatchers.named(option.getKey()))
+          .intercept(FixedValue.value(option.getValue()));
+    }
+
+    try {
+      Config.instance = builder
+          .make()
+          .load(ConfigReader.class.getClassLoader())
+          .getLoaded()
+          .newInstance();
+    } catch (InstantiationException | IllegalAccessException e) {
+      throw new IllegalStateException("Error instantiating the config");
+    }
+
+    Config.instance.check();
+  }
+
+  void read(BufferedReader input, Map<String, Object> options, Map<String, Method> targets) throws IOException {
+    String multiLineValue = null;
+
+    while (true) {
+      String line = input.readLine();
+      if (line == null) {
+        if (multiLineValue != null) {
+          throw new IllegalArgumentException("Error in config file: Did not finish multi line option");
+        }
+        break;
+      }
       line = line.trim();
       if (line.isEmpty() || line.startsWith("#")) {
         continue;
+      }
+      if (multiLineValue != null) {
+        line = multiLineValue + line;
+      }
+
+      if (line.endsWith(",")) {
+        // multiline option
+        multiLineValue = line;
+        continue;
+      } else {
+        multiLineValue = null;
       }
 
       String[] args = line.split(":", 2);
       if (args.length != 2) {
         throw new IllegalArgumentException("Invalid line in config file: " + line);
       }
+      String key = args[0].trim();
+      String val = args[1].trim();
 
-      Field f = fields.get(args[0]);
-      if (f == null) {
-        throw new IllegalArgumentException("Unknown config option: " + args[0]);
+      Method m = targets.get(key);
+      if (m == null) {
+        throw new IllegalArgumentException("Invalid config option: " + key);
       }
-      try {
-        conf.set(f, args[1].trim());
-      } catch (IllegalAccessException e) {
-        throw new IOException("Error accessing field " + f);
-      }
+
+      options.put(key, TypeUtils.cast(m.getReturnType(), val));
     }
-
-    conf.check();
   }
 
-  private static Map<String, Field> parseFields() {
-    Map<String, Field> fields = new HashMap<>();
+  private static Map<String, Method> parseOptions() {
+    Map<String, Method> fields = new HashMap<>();
 
-    for (Field f : Config.class.getDeclaredFields()) {
-      if (f.isAnnotationPresent(Option.class)) {
-        fields.put(f.getName(), f);
+    for (Method m : Config.class.getDeclaredMethods()) {
+      if (m.isAnnotationPresent(Option.class)) {
+        String property = m.getName();
+        fields.put(property, m);
       }
     }
 

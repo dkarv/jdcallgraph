@@ -48,6 +48,7 @@ public class CallGraph2Test {
   @Test
   public void testCalledEdge() throws IOException {
     StackItem item2 = Mockito.mock(StackItem.class);
+    Mockito.when(item2.isReturnSafe()).thenReturn(true);
     graph.calls.push(item2);
     graph.called(item);
     Mockito.verify(writer).edge(item2, item);

@@ -23,125 +23,70 @@
  */
 package com.dkarv.jdcallgraph.util.config;
 
+import com.dkarv.jdcallgraph.util.options.DuplicateDetection;
 import com.dkarv.jdcallgraph.util.options.GroupBy;
 import com.dkarv.jdcallgraph.util.options.Target;
 
 import java.io.File;
-import java.lang.reflect.Array;
-import java.lang.reflect.Field;
 
-public class Config {
+public abstract class Config {
 
-  static Config instance = new Config();
+  static Config instance;
 
   public static Config getInst() {
     return instance;
   }
 
-  static void reset() {
-    instance = new Config();
-  }
+  @Option
+  public abstract String outDir();
 
   @Option
-  private String outDir = "./";
+  public abstract int logLevel();
 
   @Option
-  private int logLevel = 5;
+  public abstract boolean logConsole();
 
   @Option
-  private boolean logConsole = true;
+  public abstract GroupBy groupBy();
 
   @Option
-  private GroupBy groupBy = GroupBy.THREAD;
+  public abstract Target[] writeTo();
 
   @Option
-  private Target[] writeTo = new Target[]{Target.DOT};
+  public abstract DuplicateDetection duplicateDetection();
 
   @Option
-  private boolean multiGraph = true;
+  public abstract String format();
 
-  @Option
-  private String format = "{class}::{method}#{line}";
-
-  private boolean dataDependency = false;
-
-  void set(Field f, String value) throws IllegalAccessException {
-    Class<?> c = f.getType();
-    Object elem = cast(c, value);
-    f.set(this, elem);
-  }
-
-  Object cast(Class<?> c, String value) {
-    if (c.isAssignableFrom(String.class)) {
-      return value;
-    } else if (c.isAssignableFrom(Integer.TYPE)) {
-      return Integer.parseInt(value);
-    } else if (c.isAssignableFrom(Boolean.TYPE)) {
-      return Boolean.parseBoolean(value);
-    } else if (c.isEnum()) {
-      return Enum.valueOf(c.asSubclass(Enum.class), value);
-    } else if (c.isArray()) {
-      Class<?> inner = c.getComponentType();
-      String[] elems = value.split(",");
-      Object[] array = (Object[]) Array.newInstance(inner, elems.length);
-      for (int i = 0; i < elems.length; i++) {
-        array[i] = cast(inner, elems[i]);
+  public boolean dataDependence() {
+    for (Target t : writeTo()) {
+      if (t.isDataDependency()) {
+        return true;
       }
-      return array;
-    } else {
-      throw new IllegalArgumentException("Cannot cast to field of type " + c);
     }
+    return false;
+  }
+
+  public boolean callDependence() {
+    for (Target t : writeTo()) {
+      if (!t.isDataDependency()) {
+        return true;
+      }
+    }
+    return false;
   }
 
   /**
    * Check whether everything is set and fix options if necessary.
    */
   void check() {
-    if (!outDir.endsWith(File.separator)) {
-      outDir = outDir + File.separator;
+    if (!outDir().endsWith(File.separator)) {
+      // TODO get rid of this by checking each location it is used
+      throw new IllegalArgumentException("outDir " + outDir() + " does not end with a file separator");
     }
 
-    if (logLevel < 0 || logLevel > 6) {
-      throw new IllegalArgumentException("Invalid log level: " + logLevel);
+    if (logLevel() < 0 || logLevel() > 6) {
+      throw new IllegalArgumentException("Invalid log level: " + logLevel());
     }
-
-    for (Target t : writeTo) {
-      if (t.isDataDependency()) {
-        dataDependency = true;
-        break;
-      }
-    }
-  }
-
-  public String outDir() {
-    return outDir;
-  }
-
-  public int logLevel() {
-    return logLevel;
-  }
-
-  public boolean logConsole() {
-    return logConsole;
-  }
-
-  public GroupBy groupBy() {
-    return groupBy;
-  }
-
-  public Target[] writeTo() {
-    return writeTo;
-  }
-
-  public boolean multiGraph() {
-    return multiGraph;
-  }
-
-  public boolean dataDependency() {
-    return dataDependency;
-  }
-
-  public String format() {
-    return format;
   }
 }

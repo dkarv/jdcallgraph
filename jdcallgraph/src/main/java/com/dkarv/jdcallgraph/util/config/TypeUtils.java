@@ -23,12 +23,28 @@
  */
 package com.dkarv.jdcallgraph.util.config;
 
-import java.lang.annotation.ElementType;
-import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
-import java.lang.annotation.Target;
+import java.lang.reflect.Array;
 
-@Target(ElementType.METHOD)
-@Retention(RetentionPolicy.RUNTIME)
-@interface Option {
+public class TypeUtils {
+  public static Object cast(Class<?> c, String value) {
+    if (c.isAssignableFrom(String.class)) {
+      return value;
+    } else if (c.isAssignableFrom(Integer.TYPE)) {
+      return Integer.parseInt(value);
+    } else if (c.isAssignableFrom(Boolean.TYPE)) {
+      return Boolean.parseBoolean(value);
+    } else if (c.isEnum()) {
+      return Enum.valueOf(c.asSubclass(Enum.class), value);
+    } else if (c.isArray()) {
+      Class<?> inner = c.getComponentType();
+      String[] elems = value.split(",");
+      Object[] array = (Object[]) Array.newInstance(inner, elems.length);
+      for (int i = 0; i < elems.length; i++) {
+        array[i] = cast(inner, elems[i]);
+      }
+      return array;
+    } else {
+      throw new IllegalArgumentException("Cannot cast to field of type " + c);
+    }
+  }
 }

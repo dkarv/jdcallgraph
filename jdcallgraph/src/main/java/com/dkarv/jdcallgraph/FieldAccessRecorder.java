@@ -23,7 +23,6 @@
  */
 package com.dkarv.jdcallgraph;
 
-import com.dkarv.jdcallgraph.callgraph.CallGraph;
 import com.dkarv.jdcallgraph.data.DataDependenceGraph;
 import com.dkarv.jdcallgraph.util.StackItem;
 import com.dkarv.jdcallgraph.util.log.Logger;
@@ -31,7 +30,6 @@ import com.dkarv.jdcallgraph.util.log.Logger;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Stack;
 
 public class FieldAccessRecorder {
   private static final Logger LOG = new Logger(FieldAccessRecorder.class);
@@ -69,6 +67,10 @@ public class FieldAccessRecorder {
     } catch (Exception e) {
       LOG.error("Error in read", e);
     }
+  }
+
+  public static void log(){
+    LOG.info("log");
   }
 
   public static void log(Object o) {

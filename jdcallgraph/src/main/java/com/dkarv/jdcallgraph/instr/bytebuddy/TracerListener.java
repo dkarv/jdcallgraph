@@ -21,7 +21,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package com.dkarv.jdcallgraph;
+package com.dkarv.jdcallgraph.instr.bytebuddy;
 
 import com.dkarv.jdcallgraph.util.log.Logger;
 import net.bytebuddy.agent.builder.AgentBuilder;
@@ -44,7 +44,7 @@ public class TracerListener implements AgentBuilder.Listener {
 
   @Override
   public void onIgnored(TypeDescription typeDescription, ClassLoader classLoader, JavaModule module, boolean loaded) {
-    LOG.debug("onIgnored: {}, {}, {}", typeDescription, module, loaded);
+    // LOG.debug("onIgnored: {}, {}, {}", typeDescription, module, loaded);
   }
 
   @Override

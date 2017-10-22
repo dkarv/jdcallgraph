@@ -21,21 +21,24 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package com.dkarv.jdcallgraph;
+package com.dkarv.jdcallgraph.util;
 
-import com.dkarv.jdcallgraph.util.StackItem;
-import com.dkarv.jdcallgraph.util.log.Logger;
-import net.bytebuddy.asm.Advice;
-import net.bytebuddy.asm.AsmVisitorWrapper;
-import net.bytebuddy.description.field.FieldDescription;
-import net.bytebuddy.description.type.TypeDescription;
-import net.bytebuddy.jar.asm.FieldVisitor;
+import java.util.Arrays;
 
-public class FieldTracer implements AsmVisitorWrapper.ForDeclaredFields.FieldVisitorWrapper{
-  public static final Logger LOG = new Logger(FieldTracer.class);
+public class StackTraceUtil {
 
-  @Override
-  public FieldVisitor wrap(TypeDescription instrumentedType, FieldDescription.InDefinedShape fieldDescription, FieldVisitor fieldVisitor) {
-    return null;
+  /**
+   * Return the nth stack trace item from the stack trace that is not in the com.dkarv.jdcallgraph package.
+   */
+  public static StackTraceElement get(int n) {
+    for (StackTraceElement element : Thread.currentThread().getStackTrace()) {
+      if (!element.getClassName().startsWith("com.dkarv.jdcallgraph")) {
+        n--;
+        if (n < 0) {
+          return element;
+        }
+      }
+    }
+    throw new IllegalArgumentException("Could not find " + n + "th element on the stack trace: " + Arrays.toString(Thread.currentThread().getStackTrace()));
   }
 }

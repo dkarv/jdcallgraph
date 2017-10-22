@@ -21,11 +21,18 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package com.dkarv.jdcallgraph;
+package com.dkarv.jdcallgraph.instr;
 
-public class Recorder {
-  public static int log() {
-    System.out.println("test");
-    return 1;
+import java.lang.instrument.Instrumentation;
+import java.util.List;
+import java.util.regex.Pattern;
+
+public abstract class Instr {
+  protected final List<Pattern> excludes;
+
+  public Instr(List<Pattern> excludes) {
+    this.excludes = excludes;
   }
+
+  public abstract void instrument(Instrumentation instrumentation);
 }

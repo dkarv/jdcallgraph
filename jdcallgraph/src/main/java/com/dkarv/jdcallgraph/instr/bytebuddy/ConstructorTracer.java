@@ -21,8 +21,9 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package com.dkarv.jdcallgraph;
+package com.dkarv.jdcallgraph.instr.bytebuddy;
 
+import com.dkarv.jdcallgraph.CallRecorder;
 import com.dkarv.jdcallgraph.util.StackItem;
 import com.dkarv.jdcallgraph.util.log.Logger;
 import net.bytebuddy.asm.Advice;
@@ -34,13 +35,13 @@ public class ConstructorTracer {
   public static StackItem enter(@Advice.Origin("#t") String type, @Advice.Origin("#m") String method, @Advice.Origin("#s") String signature) {
     int lineNumber = Thread.currentThread().getStackTrace()[2].getLineNumber();
 
-    StackItem item = new StackItem(type, method, signature, lineNumber);
-    LOG.debug("Enter constructor: {}", item);
+    StackItem item = new StackItem(type, method, signature, lineNumber, false);
+    CallRecorder.beforeMethod(item);
     return item;
   }
 
   @Advice.OnMethodExit(inline = false)
   public static void exit(@Advice.Enter StackItem item) {
-    LOG.debug("Exit constructor: {}", item);
+    CallRecorder.afterMethod(item);
   }
 }

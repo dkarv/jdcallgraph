@@ -5,26 +5,29 @@ import org.junit.rules.TemporaryFolder;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
 import java.util.Arrays;
 
 public class ConfigUtils {
 
-  public static void replace(TemporaryFolder tmp, boolean addMissing, String... options) throws IOException {
-    reset();
-    new ConfigReader(write(tmp, addMissing, options)).read();
-  }
-
-  public static File write(TemporaryFolder tmp, boolean addMissing, String... options) throws IOException {
-    if (addMissing) {
-      options = Arrays.copyOf(options, options.length + 1);
-      // add fake outDir
-      options[options.length - 1] = "outDir: " + tmp.getRoot().getCanonicalPath();
+  public static void replace(boolean addDefaults, String... options) throws IOException {
+    if (addDefaults) {
+      new ConfigReader(
+          ConfigUtils.class.getResourceAsStream("/defaults.ini"),
+          write(options)).read();
+    } else {
+      new ConfigReader(
+          write(options)).read();
     }
-    return TestUtils.writeFile(tmp, options);
   }
 
-  public static void reset() {
-    Config.reset();
+  public static InputStream write(String... options) throws IOException {
+    StringBuilder str = new StringBuilder();
+    for (String opt : options) {
+      str.append(opt);
+      str.append('\n');
+    }
+    return TestUtils.writeInputStream(str.toString());
   }
 
   public static void inject(Config config) {

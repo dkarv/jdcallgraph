@@ -21,13 +21,12 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package com.dkarv.jdcallgraph;
+package com.dkarv.jdcallgraph.instr.bytebuddy;
 
+import com.dkarv.jdcallgraph.CallRecorder;
 import com.dkarv.jdcallgraph.util.StackItem;
 import com.dkarv.jdcallgraph.util.log.Logger;
 import net.bytebuddy.asm.Advice;
-
-import java.lang.reflect.Method;
 
 public class MethodTracer {
   public static final Logger LOG = new Logger(MethodTracer.class);
@@ -37,13 +36,13 @@ public class MethodTracer {
   public static StackItem enter(@Advice.Origin("#t") String type, @Advice.Origin("#m") String method, @Advice.Origin("#s") String signature) {
     int lineNumber = Thread.currentThread().getStackTrace()[2].getLineNumber();
 
-    StackItem item = new StackItem(type, method, signature, lineNumber);
-    LOG.debug("Enter method: {}", item);
+    StackItem item = new StackItem(type, method, signature, lineNumber, true);
+    CallRecorder.beforeMethod(item);
     return item;
   }
 
   @Advice.OnMethodExit(inline = false, onThrowable = Throwable.class)
   public static void exit(@Advice.Enter StackItem item) {
-    LOG.debug("Exit method: {}", item);
+    CallRecorder.afterMethod(item);
   }
 }

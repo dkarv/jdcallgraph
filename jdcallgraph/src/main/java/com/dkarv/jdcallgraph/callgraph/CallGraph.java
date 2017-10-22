@@ -46,12 +46,13 @@ public class CallGraph {
     for (Target target : targets) {
       if (!target.isDataDependency()) {
         // Do not handle the DATA dependence graph
-        writers.add(createWriter(target, Config.getInst().multiGraph()));
+        writers.add(createWriter(target, false));
       }
     }
   }
 
   static GraphWriter createWriter(Target t, boolean multiGraph) {
+    // TODO redo this with new remove duplicate strategies
     switch (t) {
       case DOT:
         if (multiGraph) {
@@ -103,9 +104,22 @@ public class CallGraph {
         LOG.info("Skip first node {} because start condition not fulfilled", method);
       }
     } else {
-      // There already is at least one node, so this is an edge
+      StackItem top = calls.peek();
+      if (!top.isReturnSafe()) {
+        // The parent might be a constructor where we can't track the method exit if an exception occurs
+        // check stack trace and remove element from calls if it returned unnoticed
+        StackTraceElement element = StackTraceUtil.get(2);
+        LOG.info("Check if {} (unsafe) returned: {}", top, element);
+        while (!top.isReturnSafe() && !top.equalTo(element)) {
+          // The parent constructor already returned but we did not notice
+          // TODO writer.end?
+          LOG.debug("Remove element {}, its return was not noticed", calls.pop());
+          top = calls.peek();
+        }
+      }
+
       for (GraphWriter w : writers) {
-        w.edge(calls.peek(), method);
+        w.edge(top, method);
       }
       calls.push(method);
     }
@@ -139,7 +153,12 @@ public class CallGraph {
 
   public void finish() throws IOException {
     if (!calls.isEmpty()) {
-      LOG.error("Shutdown but call graph not empty: {}", calls);
+      LOG.info("Shutdown but call graph not empty: {}", calls);
+      for (StackItem item : calls) {
+        if (item.isReturnSafe()) {
+          LOG.error("Shutdown and safe element still on stack: {}", item);
+        }
+      }
       for (GraphWriter w : writers) {
         w.end();
       }

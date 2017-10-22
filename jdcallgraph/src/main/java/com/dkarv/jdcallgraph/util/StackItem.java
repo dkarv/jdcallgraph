@@ -29,6 +29,7 @@ public class StackItem {
   private final String className;
   private final String methodName;
   private final int lineNumber;
+  private final boolean returnSafe;
 
   private final String formatted;
 
@@ -37,16 +38,27 @@ public class StackItem {
     this.methodName = methodName;
     this.lineNumber = lineNumber;
 
+    this.returnSafe = true;
+
     this.formatted = Formatter.format(this);
   }
 
   public StackItem(String type, String method, String signature, int lineNumber) {
+    this(type, method, signature, lineNumber, true);
+  }
+
+  public StackItem(String type, String method, String signature, int lineNumber, boolean returnSafe) {
     this.className = type;
     // TODO store them separated
     this.methodName = method + signature;
     this.lineNumber = lineNumber;
+    this.returnSafe = returnSafe;
 
     this.formatted = Formatter.format(this);
+  }
+
+  public StackItem(StackTraceElement element) {
+    this(element.getClassName(), element.getMethodName(), element.getLineNumber());
   }
 
   public String getClassName() {
@@ -106,5 +118,16 @@ public class StackItem {
     int openBracket = methodName.indexOf('(');
     int closingBracket = methodName.indexOf(')');
     return methodName.substring(openBracket + 1, closingBracket);
+  }
+
+  public boolean isReturnSafe() {
+    return returnSafe;
+  }
+
+  public boolean equalTo(StackTraceElement element) {
+    return element != null
+        && this.className.equals(element.getClassName())
+        && this.getShortMethodName().equals(element.getMethodName())
+        && this.lineNumber == element.getLineNumber();
   }
 }

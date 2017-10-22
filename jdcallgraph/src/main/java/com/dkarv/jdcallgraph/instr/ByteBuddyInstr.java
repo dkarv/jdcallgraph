@@ -21,28 +21,35 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package com.dkarv.jdcallgraph;
+package com.dkarv.jdcallgraph.instr;
 
-import com.dkarv.jdcallgraph.instr.ByteBuddyInstr;
-import com.dkarv.jdcallgraph.instr.JavassistInstr;
 import com.dkarv.jdcallgraph.instr.bytebuddy.ConstructorTracer;
+import com.dkarv.jdcallgraph.instr.bytebuddy.FieldAdvice;
 import com.dkarv.jdcallgraph.instr.bytebuddy.MethodTracer;
+import com.dkarv.jdcallgraph.ShutdownHook;
 import com.dkarv.jdcallgraph.instr.bytebuddy.TracerListener;
-import com.dkarv.jdcallgraph.util.log.Logger;
 import com.dkarv.jdcallgraph.util.config.ConfigReader;
+import com.dkarv.jdcallgraph.util.log.Logger;
 import net.bytebuddy.agent.builder.AgentBuilder;
 import net.bytebuddy.agent.builder.ResettableClassFileTransformer;
 import net.bytebuddy.asm.Advice;
 import net.bytebuddy.asm.AsmVisitorWrapper;
+import net.bytebuddy.asm.MemberSubstitution;
+import net.bytebuddy.description.field.FieldDescription;
+import net.bytebuddy.description.method.MethodDescription;
 import net.bytebuddy.description.type.TypeDescription;
 import net.bytebuddy.dynamic.DynamicType;
+import net.bytebuddy.implementation.Implementation;
+import net.bytebuddy.jar.asm.FieldVisitor;
+import net.bytebuddy.jar.asm.MethodVisitor;
 import net.bytebuddy.matcher.ElementMatchers;
+import net.bytebuddy.pool.TypePool;
 import net.bytebuddy.utility.JavaModule;
 
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.IOException;
 import java.lang.instrument.Instrumentation;
+import java.lang.reflect.Member;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.regex.Pattern;
@@ -50,50 +57,36 @@ import java.util.regex.Pattern;
 /**
  * Instrument the target classes.
  */
-public class Tracer {
-  private final static Logger LOG = new Logger(Tracer.class);
+public class ByteBuddyInstr extends Instr {
+  private final static Logger LOG = new Logger(ByteBuddyInstr.class);
 
-  /**
-   * Program entry point. Loads the config and starts itself as instrumentation.
-   *
-   * @param argument        command line argument. Should specify a config file
-   * @param instrumentation instrumentation
-   * @throws IOException            io error
-   * @throws IllegalAccessException problem loading the config options
-   */
-  public static void premain(String argument, Instrumentation instrumentation) throws IOException, IllegalAccessException {
-    ShutdownHook.init();
-    if (argument != null) {
-      new ConfigReader(
-          Tracer.class.getResourceAsStream("/defaults.ini"),
-          new FileInputStream(new File(argument))).read();
-    } else {
-      System.err.println("You did not specify a config file. Will use the default config options instead.");
-      new ConfigReader(
-          Tracer.class.getResourceAsStream("/defaults.ini")).read();
-    }
+  public ByteBuddyInstr(List<Pattern> excludes) {
+    super(excludes);
+  }
 
-    Logger.init();
+  @Override
+  public void instrument(Instrumentation instrumentation) {
+    final Advice methodAdvice = Advice.to(MethodTracer.class);
+    final Advice constructorAdvice = Advice.to(ConstructorTracer.class);
 
-    // TODO move this to config
-    String[] excls = new String[]{
-        "java.*", "sun.*", "com.sun.*", "jdk.internal.*",
-        "com.dkarv.jdcallgraph.*", "org.xml.sax.*",
-        "org.apache.maven.surefire.*", "org.apache.tools.*", /*"org.mockito.*",*/
-        "org.easymock.internal.*",
-        "org.junit.*", "junit.framework.*", "org.hamcrest.*", /*"org.objenesis.*"*/
-        "edu.washington.cs.mut.testrunner.Formatter"
+    final FieldAdvice fieldAdvice = new FieldAdvice();
+
+    AgentBuilder.Transformer transformer1 = new AgentBuilder.Transformer() {
+      @Override
+      public DynamicType.Builder<?> transform(DynamicType.Builder<?> builder, TypeDescription typeDescription, ClassLoader classLoader, JavaModule module) {
+        return builder
+            .visit(new AsmVisitorWrapper.ForDeclaredMethods().method(ElementMatchers.isMethod(), methodAdvice))
+            .visit(new AsmVisitorWrapper.ForDeclaredMethods().method(ElementMatchers.isConstructor(), constructorAdvice))
+            .visit(new AsmVisitorWrapper.ForDeclaredMethods().method(ElementMatchers.isMethod(), fieldAdvice))
+            ;
+      }
     };
-    List<Pattern> excludes = new ArrayList<>();
-    for (String exclude : excls) {
-      excludes.add(Pattern.compile(exclude + "$"));
-    }
 
-    boolean useByteBuddy = true;
-    if (useByteBuddy) {
-      new ByteBuddyInstr(excludes).instrument(instrumentation);
-    } else {
-      new JavassistInstr(excludes).instrument(instrumentation);
-    }
+    ResettableClassFileTransformer agent = new AgentBuilder.Default()
+        .with(new TracerListener())
+        .type(ElementMatchers.not(ElementMatchers.nameStartsWith("com.dkarv.jdcallgraph.")))
+        .transform(transformer1)
+        //.transform(transformer2)
+        .installOn(instrumentation);
   }
 }

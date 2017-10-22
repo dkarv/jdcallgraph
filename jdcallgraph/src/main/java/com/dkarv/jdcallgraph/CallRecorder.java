@@ -40,30 +40,38 @@ public class CallRecorder {
   static final Map<Long, CallGraph> GRAPHS = new HashMap<>();
 
   public static void beforeMethod(String className, String methodName, int lineNumber) {
+    beforeMethod(new StackItem(className, methodName, lineNumber));
+  }
+
+  public static void beforeMethod(StackItem item) {
     try {
-      LOG.trace("beforeMethod: {}:{}#{}", className, methodName, lineNumber);
+      LOG.trace(">> {}{}", item, item.isReturnSafe() ? "": " (return unsafe)");
       long threadId = Thread.currentThread().getId();
       CallGraph graph = GRAPHS.get(threadId);
       if (graph == null) {
         graph = new CallGraph(threadId);
         GRAPHS.put(threadId, graph);
       }
-      graph.called(new StackItem(className, methodName, lineNumber));
+      graph.called(item);
     } catch (Throwable e) {
       LOG.error("Error in beforeMethod", e);
     }
   }
 
   public static void afterMethod(String className, String methodName, int lineNumber) {
+    afterMethod(new StackItem(className, methodName, lineNumber));
+  }
+
+  public static void afterMethod(StackItem item) {
     try {
-      LOG.trace("afterMethod: {}:{}#{}", className, methodName, lineNumber);
+      LOG.trace("<< {}", item);
       long threadId = Thread.currentThread().getId();
       CallGraph graph = GRAPHS.get(threadId);
       if (graph == null) {
         // not interesting
         return;
       }
-      graph.returned(new StackItem(className, methodName, lineNumber));
+      graph.returned(item);
     } catch (Throwable e) {
       LOG.error("Error in afterMethod", e);
     }

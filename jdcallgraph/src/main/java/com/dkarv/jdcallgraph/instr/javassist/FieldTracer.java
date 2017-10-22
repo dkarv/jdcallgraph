@@ -21,8 +21,9 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package com.dkarv.jdcallgraph;
+package com.dkarv.jdcallgraph.instr.javassist;
 
+import com.dkarv.jdcallgraph.instr.JavassistInstr;
 import com.dkarv.jdcallgraph.util.log.Logger;
 import javassist.CannotCompileException;
 import javassist.CtBehavior;
@@ -35,8 +36,8 @@ import java.util.regex.Pattern;
 /**
  * Go through all field accesses to build a dynamic data dependence graph.
  */
-public class FieldTracerJavassist extends ExprEditor {
-  private static final Logger LOG = new Logger(FieldTracerJavassist.class);
+public class FieldTracer extends ExprEditor {
+  private static final Logger LOG = new Logger(FieldTracer.class);
 
   /**
    * Ignore specific write accesses. This happens in anonymous classes
@@ -86,10 +87,10 @@ public class FieldTracerJavassist extends ExprEditor {
   public final void edit(FieldAccess f) throws CannotCompileException {
     CtBehavior method = f.where();
     String className = f.getEnclosingClass().getName();
-    int lineNumber = TracerJavassist.getLineNumber(method);
+    int lineNumber = JavassistInstr.getLineNumber(method);
     String methodName;
     try {
-      methodName = TracerJavassist.getMethodName(method);
+      methodName = JavassistInstr.getMethodName(method);
     } catch (NotFoundException e) {
       methodName = "<error>";
     }
