@@ -38,6 +38,13 @@ import net.bytebuddy.pool.TypePool;
 public class FieldAdvice implements AsmVisitorWrapper.ForDeclaredMethods.MethodVisitorWrapper {
   private static final Logger LOG = new Logger(FieldAdvice.class);
 
+  private static final String TARGET_CLASS = FieldAccessRecorder.class.getName().replace('.', '/');
+  private static final String TARGET_READ = "afterRead";
+  private static final String TARGET_WRITE = "afterWrite";
+  private static final String TARGET_READ_DESC =
+      "(Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;)V";
+  private static final String TARGET_WRITE_DESC = TARGET_READ_DESC;
+
   @Override
   public MethodVisitor wrap(TypeDescription instrumentedType, MethodDescription instrumentedMethod, MethodVisitor methodVisitor, Implementation.Context implementationContext, TypePool typePool, int writerFlags, int readerFlags) {
     return instrumentedMethod.isAbstract() || instrumentedMethod.isNative()
@@ -45,9 +52,11 @@ public class FieldAdvice implements AsmVisitorWrapper.ForDeclaredMethods.MethodV
         : doWrap(instrumentedType, instrumentedMethod, methodVisitor, implementationContext, writerFlags, readerFlags);
   }
 
-  private MethodVisitor doWrap(TypeDescription instrumentedType, final MethodDescription instrumentedMethod, MethodVisitor methodVisitor, Implementation.Context implementationContext, int writerFlags, int readerFlags) {
-    // LOG.debug("prepare visitor for {}:{}", instrumentedType, instrumentedMethod);
+  private MethodVisitor doWrap(final TypeDescription instrumentedType, final MethodDescription instrumentedMethod, MethodVisitor methodVisitor, Implementation.Context implementationContext, int writerFlags, int readerFlags) {
+    final String fromClass = instrumentedType.getName();
+    final String fromMethod = instrumentedMethod.getName();
     return new MethodVisitor(Opcodes.ASM6, methodVisitor) {
+      // TODO maybe visitCode + wait for next line number = method line number?
       /*@Override
       public void visitCode() {
         LOG.debug("visitCode of {}", instrumentedMethod.getDescriptor());
@@ -55,14 +64,62 @@ public class FieldAdvice implements AsmVisitorWrapper.ForDeclaredMethods.MethodV
       }*/
 
       @Override
+      public void visitMaxs(int maxStack, int maxLocals) {
+        super.visitMaxs(maxStack + 4, maxLocals);
+      }
+
+      @Override
       public void visitFieldInsn(int opcode, String owner, String name,
                                  String desc) {
-        // LOG.debug("visitFieldInsn: {}, {}, {}, {}", opcode, owner, name, desc);
         super.visitFieldInsn(opcode, owner, name, desc);
-        // FIXME push data to stack
-        // FIXME call proper method
-        super.visitMethodInsn(Opcodes.INVOKESTATIC, FieldAccessRecorder.class.getName().replace('.', '/'),
-            "log", "()V", false);
+
+        // FIXME Filter write/reads to classes we ignore
+
+        boolean isStatic = (opcode == Opcodes.GETSTATIC || opcode == Opcodes.PUTSTATIC);
+        boolean isWrite = (opcode == Opcodes.PUTSTATIC || opcode == Opcodes.PUTFIELD);
+
+        // push information about the target field
+        if (isStatic) {
+          super.visitLdcInsn(owner);
+          super.visitLdcInsn(name);
+        } else {
+          // []
+          super.visitTypeInsn(Opcodes.NEW, "java/lang/StringBuilder");
+          // [StringBuilder]
+          super.visitInsn(Opcodes.DUP);
+          // [StringBuilder, StringBuilder]
+          super.visitMethodInsn(Opcodes.INVOKESPECIAL, "java/lang/StringBuilder", "<init>", "()V", false);
+          // [StringBuilder]
+          super.visitLdcInsn(owner);
+          // [StringBuilder, example.Test]
+          super.visitMethodInsn(Opcodes.INVOKEVIRTUAL, "java/lang/StringBuilder", "append", "(Ljava/lang/String;)Ljava/lang/StringBuilder;", false);
+          // [StringBuilder]
+          super.visitLdcInsn('@');
+          // [StringBuilder, @]
+          super.visitMethodInsn(Opcodes.INVOKEVIRTUAL, "java/lang/StringBuilder", "append", "(C)Ljava/lang/StringBuilder;", false);
+          // [StringBuilder]
+          super.visitVarInsn(Opcodes.ALOAD, 0);
+          // [StringBuilder, this]
+          super.visitMethodInsn(Opcodes.INVOKESTATIC, "java/lang/System", "identityHashCode", "(Ljava/lang/Object;)I", false);
+          // [StringBuilder, 123456]
+          super.visitMethodInsn(Opcodes.INVOKESTATIC, "java/lang/Integer", "toHexString", "(I)Ljava/lang/String;", false);
+          // [StringBuilder, 123abc]
+          super.visitMethodInsn(Opcodes.INVOKEVIRTUAL, "java/lang/StringBuilder", "append", "(Ljava/lang/String;)Ljava/lang/StringBuilder;", false);
+          // [StringBuilder]
+          super.visitMethodInsn(Opcodes.INVOKEVIRTUAL, "java/lang/StringBuilder", "toString", "()Ljava/lang/String;", false);
+          // [example.Test@123abc]
+          super.visitLdcInsn(fromMethod);
+        }
+
+        // push information where this operation is executed
+        super.visitLdcInsn(fromClass);
+        super.visitLdcInsn(fromMethod);
+
+        if (isWrite) {
+          super.visitMethodInsn(Opcodes.INVOKESTATIC, TARGET_CLASS, TARGET_WRITE, TARGET_WRITE_DESC, false);
+        } else {
+          super.visitMethodInsn(Opcodes.INVOKESTATIC, TARGET_CLASS, TARGET_READ, TARGET_READ_DESC, false);
+        }
       }
 
       /*@Override

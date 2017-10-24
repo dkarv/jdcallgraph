@@ -101,15 +101,20 @@ public class CallGraph {
           w.node(method);
         }
       } else {
-        LOG.info("Skip first node {} because start condition not fulfilled", method);
+        LOG.info("Skip node {} because start condition not fulfilled", method);
       }
     } else {
       StackItem top = calls.peek();
       if (!top.isReturnSafe()) {
         // The parent might be a constructor where we can't track the method exit if an exception occurs
         // check stack trace and remove element from calls if it returned unnoticed
-        StackTraceElement element = StackTraceUtil.get(2);
-        LOG.info("Check if {} (unsafe) returned: {}", top, element);
+        // n == 0: Thread.currentThread().getStackTrace()
+        // n == 1: <method>
+        // n == 2: caller of <method>
+        StackTraceElement element = StackTraceUtils.getNthParent(method, 1);
+        // FIXME the line numbers are wrong for some reason
+        LOG.info("Check if {} returned silently?", top);
+        LOG.info("According to stack trace: {} -> {}", element, method);
         while (!top.isReturnSafe() && !top.equalTo(element)) {
           // The parent constructor already returned but we did not notice
           // TODO writer.end?

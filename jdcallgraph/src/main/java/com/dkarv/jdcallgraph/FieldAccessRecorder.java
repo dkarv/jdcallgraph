@@ -69,7 +69,15 @@ public class FieldAccessRecorder {
     }
   }
 
-  public static void log(){
+  public static void afterRead(String fieldClass, String fieldName, String fromClass, String fromMethod) {
+    LOG.info("Read to {}::{} from {}::{}", fieldClass, fieldName, fromClass, fromMethod);
+  }
+
+  public static void afterWrite(String fieldClass, String fieldName, String fromClass, String fromMethod) {
+    LOG.info("Write to {}::{} from {}::{}", fieldClass, fieldName, fromClass, fromMethod);
+  }
+
+  public static void log() {
     LOG.info("log");
   }
 

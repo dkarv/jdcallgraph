@@ -1,0 +1,12 @@
+[2017-10-22 13:05:35:237] [DEBUG] [LoggerTest] test
+[2017-10-22 13:05:35:248] [ERROR] [LoggerTest] test
+[2017-10-22 13:05:35:256] [FATAL] [LoggerTest] test
+[2017-10-22 13:05:35:263] [TRACE] [LoggerTest] test
+[2017-10-22 13:05:35:272] [INFO] [LoggerTest] test
+[2017-10-22 13:05:35:292] [WARN] [LoggerTest] test
+[2017-10-22 13:08:52:185] [DEBUG] [LoggerTest] test
+[2017-10-22 13:08:52:199] [ERROR] [LoggerTest] test
+[2017-10-22 13:08:52:208] [FATAL] [LoggerTest] test
+[2017-10-22 13:08:52:216] [TRACE] [LoggerTest] test
+[2017-10-22 13:08:52:223] [INFO] [LoggerTest] test
+[2017-10-22 13:08:52:242] [WARN] [LoggerTest] test

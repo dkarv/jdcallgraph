@@ -23,12 +23,17 @@
  */
 package com.dkarv.jdcallgraph.util;
 
+import com.dkarv.jdcallgraph.util.log.Logger;
+
 import java.util.Arrays;
 
-public class StackTraceUtil {
+public class StackTraceUtils {
+  private static final Logger LOG = new Logger(StackTraceUtils.class);
 
   /**
    * Return the nth stack trace item from the stack trace that is not in the com.dkarv.jdcallgraph package.
+   * <p>
+   * n == 0: Thread.currentThread().getStackTrace()
    */
   public static StackTraceElement get(int n) {
     for (StackTraceElement element : Thread.currentThread().getStackTrace()) {
@@ -40,5 +45,26 @@ public class StackTraceUtil {
       }
     }
     throw new IllegalArgumentException("Could not find " + n + "th element on the stack trace: " + Arrays.toString(Thread.currentThread().getStackTrace()));
+  }
+
+  public static StackTraceElement getNthParent(StackItem method, int n) {
+    StackTraceElement[] trace = Thread.currentThread().getStackTrace();
+    LOG.debug("Trace: {}", (Object) trace);
+    boolean found = false;
+    for (StackTraceElement element : trace) {
+      // TODO sync this with all the other packages to ignore
+      if (!element.getClassName().startsWith("com.dkarv.jdcallgraph")) {
+        if (found) {
+          n--;
+        } else if (method.equalTo(element)) {
+          found = true;
+          n--;
+        }
+        if (n < 0) {
+          return element;
+        }
+      }
+    }
+    throw new IllegalArgumentException("Could not find " + n + "th parent of " + method + " on the stack trace: " + Arrays.toString(Thread.currentThread().getStackTrace()));
   }
 }

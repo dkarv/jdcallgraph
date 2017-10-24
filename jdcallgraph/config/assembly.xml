@@ -25,5 +25,12 @@
             <directory>target/classes</directory>
             <outputDirectory/>
         </fileSet>
+        <fileSet>
+            <includes>
+                <include>com/dkarv/jdcallgraph/**</include>
+            </includes>
+            <directory>target/classes</directory>
+            <outputDirectory/>
+        </fileSet>
     </fileSets>
 </assembly>

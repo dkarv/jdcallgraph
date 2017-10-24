@@ -25,19 +25,8 @@ package com.dkarv.jdcallgraph;
 
 import com.dkarv.jdcallgraph.instr.ByteBuddyInstr;
 import com.dkarv.jdcallgraph.instr.JavassistInstr;
-import com.dkarv.jdcallgraph.instr.bytebuddy.ConstructorTracer;
-import com.dkarv.jdcallgraph.instr.bytebuddy.MethodTracer;
-import com.dkarv.jdcallgraph.instr.bytebuddy.TracerListener;
 import com.dkarv.jdcallgraph.util.log.Logger;
 import com.dkarv.jdcallgraph.util.config.ConfigReader;
-import net.bytebuddy.agent.builder.AgentBuilder;
-import net.bytebuddy.agent.builder.ResettableClassFileTransformer;
-import net.bytebuddy.asm.Advice;
-import net.bytebuddy.asm.AsmVisitorWrapper;
-import net.bytebuddy.description.type.TypeDescription;
-import net.bytebuddy.dynamic.DynamicType;
-import net.bytebuddy.matcher.ElementMatchers;
-import net.bytebuddy.utility.JavaModule;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -62,18 +51,19 @@ public class Tracer {
    * @throws IllegalAccessException problem loading the config options
    */
   public static void premain(String argument, Instrumentation instrumentation) throws IOException, IllegalAccessException {
-    ShutdownHook.init();
     if (argument != null) {
       new ConfigReader(
-          Tracer.class.getResourceAsStream("/defaults.ini"),
+          Tracer.class.getResourceAsStream("/com/dkarv/jdcallgraph/defaults.ini"),
           new FileInputStream(new File(argument))).read();
     } else {
       System.err.println("You did not specify a config file. Will use the default config options instead.");
       new ConfigReader(
-          Tracer.class.getResourceAsStream("/defaults.ini")).read();
+          Tracer.class.getResourceAsStream("/com/dkarv/jdcallgraph/defaults.ini")).read();
     }
 
     Logger.init();
+
+    ShutdownHook.init();
 
     // TODO move this to config
     String[] excls = new String[]{

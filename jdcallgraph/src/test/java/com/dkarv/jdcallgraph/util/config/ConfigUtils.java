@@ -1,19 +1,16 @@
 package com.dkarv.jdcallgraph.util.config;
 
 import com.dkarv.jdcallgraph.helper.TestUtils;
-import org.junit.rules.TemporaryFolder;
 
-import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.Arrays;
 
 public class ConfigUtils {
 
   public static void replace(boolean addDefaults, String... options) throws IOException {
     if (addDefaults) {
       new ConfigReader(
-          ConfigUtils.class.getResourceAsStream("/defaults.ini"),
+          ConfigUtils.class.getResourceAsStream("/com/dkarv/jdcallgraph/defaults.ini"),
           write(options)).read();
     } else {
       new ConfigReader(

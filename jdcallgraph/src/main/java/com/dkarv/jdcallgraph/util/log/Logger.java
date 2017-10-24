@@ -27,6 +27,7 @@ import com.dkarv.jdcallgraph.callgraph.CallGraph;
 import com.dkarv.jdcallgraph.util.config.Config;
 
 import java.io.IOException;
+import java.lang.reflect.Array;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -60,6 +61,7 @@ public class Logger {
 
     Runtime.getRuntime().addShutdownHook(new Thread() {
       public void run() {
+        // TODO do together with other shutdown hooks
         // flush all logs before shutting down
         for (LogTarget t : TARGETS) {
           try {
@@ -84,10 +86,32 @@ public class Logger {
         '\n';
   }
 
+  static String toString(Object o) {
+    if (o == null) {
+      return "null";
+    } else if (o.getClass().isArray()) {
+      StringBuilder str = new StringBuilder();
+      int len = Array.getLength(o);
+      for (int i = 0; i < len && i < 20; i++) {
+        str.append(toString(Array.get(o, i)));
+        if (i < len - 1) {
+          str.append(", ");
+        }
+      }
+      if (len > 20) {
+        str.append("... (");
+        str.append(len - 20);
+        str.append(" more elements)");
+      }
+      return str.toString();
+    } else {
+      return o.toString();
+    }
+  }
+
   void log(int level, String msg, Object... args) {
     for (Object o : args) {
-      String replacement = o == null ? "null" : o.toString();
-      replacement = Matcher.quoteReplacement(replacement);
+      String replacement = Matcher.quoteReplacement(toString(o));
 
       Matcher m = Pattern.compile("\\{}").matcher(msg);
       if (!m.find()) {
