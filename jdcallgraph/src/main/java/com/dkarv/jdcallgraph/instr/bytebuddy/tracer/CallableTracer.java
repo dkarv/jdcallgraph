@@ -21,27 +21,26 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package com.dkarv.jdcallgraph.instr.bytebuddy;
+package com.dkarv.jdcallgraph.instr.bytebuddy.tracer;
 
 import com.dkarv.jdcallgraph.CallRecorder;
+import com.dkarv.jdcallgraph.util.LineNumbers;
 import com.dkarv.jdcallgraph.util.StackItem;
-import com.dkarv.jdcallgraph.util.log.Logger;
-import net.bytebuddy.asm.Advice;
+import com.dkarv.jdcallgraph.util.config.ComputedConfig;
 
-public class ConstructorTracer {
-  public static final Logger LOG = new Logger(ConstructorTracer.class);
+public abstract class CallableTracer {
+  private static final boolean needsLine = ComputedConfig.lineNeeded();
 
-  @Advice.OnMethodEnter(inline = false)
-  public static StackItem enter(@Advice.Origin("#t") String type, @Advice.Origin("#m") String method, @Advice.Origin("#s") String signature) {
-    int lineNumber = Thread.currentThread().getStackTrace()[2].getLineNumber();
+  public static StackItem enter(String type, String method, String signature, boolean returnSafe) {
+    int lineNumber;
+    if (needsLine) {
+      lineNumber = LineNumbers.get(type, method + signature);
+    } else {
+      lineNumber = -1;
+    }
 
-    StackItem item = new StackItem(type, method, signature, lineNumber, false);
+    StackItem item = new StackItem(type, method, signature, lineNumber, returnSafe);
     CallRecorder.beforeMethod(item);
     return item;
-  }
-
-  @Advice.OnMethodExit(inline = false)
-  public static void exit(@Advice.Enter StackItem item) {
-    CallRecorder.afterMethod(item);
   }
 }

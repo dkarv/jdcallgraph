@@ -23,34 +23,24 @@
  */
 package com.dkarv.jdcallgraph.instr;
 
-import com.dkarv.jdcallgraph.instr.bytebuddy.ConstructorTracer;
-import com.dkarv.jdcallgraph.instr.bytebuddy.FieldAdvice;
-import com.dkarv.jdcallgraph.instr.bytebuddy.MethodTracer;
-import com.dkarv.jdcallgraph.ShutdownHook;
-import com.dkarv.jdcallgraph.instr.bytebuddy.TracerListener;
-import com.dkarv.jdcallgraph.util.config.ConfigReader;
+import com.dkarv.jdcallgraph.instr.bytebuddy.*;
+import com.dkarv.jdcallgraph.instr.bytebuddy.tracer.ConstructorTracer;
+import com.dkarv.jdcallgraph.instr.bytebuddy.LineVisitor;
+import com.dkarv.jdcallgraph.instr.bytebuddy.tracer.MethodTracer;
+import com.dkarv.jdcallgraph.instr.bytebuddy.util.NoAnonymousConstructorsMatcher;
+import com.dkarv.jdcallgraph.util.config.ComputedConfig;
 import com.dkarv.jdcallgraph.util.log.Logger;
 import net.bytebuddy.agent.builder.AgentBuilder;
 import net.bytebuddy.agent.builder.ResettableClassFileTransformer;
 import net.bytebuddy.asm.Advice;
 import net.bytebuddy.asm.AsmVisitorWrapper;
-import net.bytebuddy.asm.MemberSubstitution;
-import net.bytebuddy.description.field.FieldDescription;
 import net.bytebuddy.description.method.MethodDescription;
 import net.bytebuddy.description.type.TypeDescription;
 import net.bytebuddy.dynamic.DynamicType;
-import net.bytebuddy.implementation.Implementation;
-import net.bytebuddy.jar.asm.FieldVisitor;
-import net.bytebuddy.jar.asm.MethodVisitor;
 import net.bytebuddy.matcher.ElementMatchers;
-import net.bytebuddy.pool.TypePool;
 import net.bytebuddy.utility.JavaModule;
 
-import java.io.File;
-import java.io.IOException;
 import java.lang.instrument.Instrumentation;
-import java.lang.reflect.Member;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.regex.Pattern;
 
@@ -70,23 +60,23 @@ public class ByteBuddyInstr extends Instr {
     final Advice constructorAdvice = Advice.to(ConstructorTracer.class);
 
     final FieldAdvice fieldAdvice = new FieldAdvice();
-
-    AgentBuilder.Transformer transformer1 = new AgentBuilder.Transformer() {
-      @Override
-      public DynamicType.Builder<?> transform(DynamicType.Builder<?> builder, TypeDescription typeDescription, ClassLoader classLoader, JavaModule module) {
-        return builder
-            .visit(new AsmVisitorWrapper.ForDeclaredMethods().method(ElementMatchers.isMethod(), methodAdvice))
-            .visit(new AsmVisitorWrapper.ForDeclaredMethods().method(ElementMatchers.isConstructor(), constructorAdvice))
-            .visit(new AsmVisitorWrapper.ForDeclaredMethods().method(ElementMatchers.isMethod(), fieldAdvice))
-            ;
-      }
-    };
+    final LineVisitor lineVisitor = new LineVisitor();
 
     ResettableClassFileTransformer agent = new AgentBuilder.Default()
-        .with(new TracerListener())
+        .with(new TracerLogger())
         .type(ElementMatchers.not(ElementMatchers.nameStartsWith("com.dkarv.jdcallgraph.")))
-        .transform(transformer1)
-        //.transform(transformer2)
+        .transform(new AgentBuilder.Transformer() {
+          @Override
+          public DynamicType.Builder<?> transform(DynamicType.Builder<?> builder, TypeDescription typeDescription, ClassLoader classLoader, JavaModule module) {
+            builder = builder.visit(new AsmVisitorWrapper.ForDeclaredMethods().method(ElementMatchers.isMethod(), methodAdvice));
+            builder = builder.visit(new AsmVisitorWrapper.ForDeclaredMethods().method(ElementMatchers.isConstructor(), constructorAdvice));
+            builder = builder.visit(new AsmVisitorWrapper.ForDeclaredMethods().method(new NoAnonymousConstructorsMatcher(), fieldAdvice));
+            if (ComputedConfig.lineNeeded()) {
+              builder = builder.visit(new AsmVisitorWrapper.ForDeclaredMethods().method(ElementMatchers.<MethodDescription>any(), lineVisitor));
+            }
+            return builder;
+          }
+        })
         .installOn(instrumentation);
   }
 }

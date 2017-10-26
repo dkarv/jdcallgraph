@@ -25,8 +25,7 @@ package com.dkarv.jdcallgraph.instr;
 
 import com.dkarv.jdcallgraph.instr.javassist.FieldTracer;
 import com.dkarv.jdcallgraph.ShutdownHook;
-import com.dkarv.jdcallgraph.util.config.Config;
-import com.dkarv.jdcallgraph.util.config.ConfigReader;
+import com.dkarv.jdcallgraph.util.config.*;
 import com.dkarv.jdcallgraph.util.log.Logger;
 import javassist.*;
 
@@ -53,12 +52,12 @@ public class JavassistInstr extends Instr implements ClassFileTransformer {
 
   public JavassistInstr(List<Pattern> excludes) {
     super(excludes);
-    if (Config.getInst().dataDependence()) {
+    if (ComputedConfig.dataDependence()) {
       fieldTracer = new FieldTracer();
     } else {
       fieldTracer = null;
     }
-    this.callDependence = Config.getInst().callDependence();
+    this.callDependence = ComputedConfig.callDependence();
   }
 
   /**
@@ -141,7 +140,6 @@ public class JavassistInstr extends Instr implements ClassFileTransformer {
     LOG.trace("Enhancing {}", mName);
 
     if (fieldTracer != null) {
-      // TODO might be faster to do CtClass.instrument()
       method.instrument(fieldTracer);
     }
 

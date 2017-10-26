@@ -44,6 +44,8 @@ public class CallRecorder {
   }
 
   public static void beforeMethod(StackItem item) {
+    LOG.debug("current trace: {}", (Object) Thread.currentThread().getStackTrace());
+    LOG.debug("next trace: {}", (Object) Thread.currentThread().getStackTrace());
     try {
       LOG.trace(">> {}{}", item, item.isReturnSafe() ? "": " (return unsafe)");
       long threadId = Thread.currentThread().getId();

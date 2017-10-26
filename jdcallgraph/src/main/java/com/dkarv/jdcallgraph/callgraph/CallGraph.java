@@ -131,6 +131,7 @@ public class CallGraph {
   }
 
   public void returned(StackItem method) throws IOException {
+    // TODO optimize for the case removed == 1
     Stack<StackItem> trace = new Stack<>();
     int removed = 0;
     boolean found = false;

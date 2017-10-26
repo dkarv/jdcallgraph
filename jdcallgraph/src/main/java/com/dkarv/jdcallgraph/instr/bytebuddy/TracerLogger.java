@@ -29,8 +29,8 @@ import net.bytebuddy.description.type.TypeDescription;
 import net.bytebuddy.dynamic.DynamicType;
 import net.bytebuddy.utility.JavaModule;
 
-public class TracerListener implements AgentBuilder.Listener {
-  private static final Logger LOG = new Logger(TracerListener.class);
+public class TracerLogger implements AgentBuilder.Listener {
+  private static final Logger LOG = new Logger(TracerLogger.class);
 
   @Override
   public void onDiscovery(String typeName, ClassLoader classLoader, JavaModule module, boolean loaded) {

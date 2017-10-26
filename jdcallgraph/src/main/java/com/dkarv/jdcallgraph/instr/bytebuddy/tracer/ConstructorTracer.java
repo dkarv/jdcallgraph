@@ -21,54 +21,23 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package com.dkarv.jdcallgraph.util.config;
+package com.dkarv.jdcallgraph.instr.bytebuddy.tracer;
 
-import com.dkarv.jdcallgraph.util.options.DuplicateDetection;
-import com.dkarv.jdcallgraph.util.options.GroupBy;
-import com.dkarv.jdcallgraph.util.options.Target;
+import com.dkarv.jdcallgraph.CallRecorder;
+import com.dkarv.jdcallgraph.util.StackItem;
+import com.dkarv.jdcallgraph.util.log.Logger;
+import net.bytebuddy.asm.Advice;
 
-import java.io.File;
+public class ConstructorTracer {
+  public static final Logger LOG = new Logger(ConstructorTracer.class);
 
-public abstract class Config {
-
-  static Config instance;
-
-  public static Config getInst() {
-    return instance;
+  @Advice.OnMethodEnter(inline = false)
+  public static StackItem enter(@Advice.Origin("#t") String type, @Advice.Origin("#m") String method, @Advice.Origin("#s") String signature) {
+    return CallableTracer.enter(type, method, signature, false);
   }
 
-  @Option
-  public abstract String outDir();
-
-  @Option
-  public abstract int logLevel();
-
-  @Option
-  public abstract boolean logConsole();
-
-  @Option
-  public abstract GroupBy groupBy();
-
-  @Option
-  public abstract Target[] writeTo();
-
-  @Option
-  public abstract DuplicateDetection duplicateDetection();
-
-  @Option
-  public abstract String format();
-
-  /**
-   * Check whether everything is set and fix options if necessary.
-   */
-  void check() {
-    if (!outDir().endsWith(File.separator)) {
-      // TODO get rid of this by checking each location it is used
-      throw new IllegalArgumentException("outDir " + outDir() + " does not end with a file separator");
-    }
-
-    if (logLevel() < 0 || logLevel() > 6) {
-      throw new IllegalArgumentException("Invalid log level: " + logLevel());
-    }
+  @Advice.OnMethodExit(inline = false)
+  public static void exit(@Advice.Enter StackItem item) {
+    CallRecorder.afterMethod(item);
   }
 }

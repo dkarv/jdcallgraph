@@ -21,28 +21,28 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package com.dkarv.jdcallgraph.instr.bytebuddy;
+package com.dkarv.jdcallgraph.instr.bytebuddy.util;
 
-import com.dkarv.jdcallgraph.CallRecorder;
-import com.dkarv.jdcallgraph.util.StackItem;
 import com.dkarv.jdcallgraph.util.log.Logger;
-import net.bytebuddy.asm.Advice;
+import net.bytebuddy.description.method.MethodDescription;
+import net.bytebuddy.matcher.ElementMatcher;
 
-public class MethodTracer {
-  public static final Logger LOG = new Logger(MethodTracer.class);
+import java.util.regex.Pattern;
 
+public class NoAnonymousConstructorsMatcher implements ElementMatcher<MethodDescription> {
+  private static final Logger LOG = new Logger(NoAnonymousConstructorsMatcher.class);
+  private static final Pattern PATTERN = Pattern.compile("^.*\\$[0-9]+$");
 
-  @Advice.OnMethodEnter(inline = false)
-  public static StackItem enter(@Advice.Origin("#t") String type, @Advice.Origin("#m") String method, @Advice.Origin("#s") String signature) {
-    int lineNumber = Thread.currentThread().getStackTrace()[2].getLineNumber();
-
-    StackItem item = new StackItem(type, method, signature, lineNumber, true);
-    CallRecorder.beforeMethod(item);
-    return item;
+  @Override
+  public boolean matches(MethodDescription target) {
+    if (target.isConstructor() && isAnonymous(target.getName())){
+      LOG.info("Ignore {} because anonymous constructor", target);
+      return false;
+    }
+    return true;
   }
 
-  @Advice.OnMethodExit(inline = false, onThrowable = Throwable.class)
-  public static void exit(@Advice.Enter StackItem item) {
-    CallRecorder.afterMethod(item);
+  private boolean isAnonymous(String methodName) {
+    return PATTERN.matcher(methodName).matches();
   }
 }

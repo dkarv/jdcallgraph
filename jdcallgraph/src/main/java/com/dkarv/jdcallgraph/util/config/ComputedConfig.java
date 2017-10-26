@@ -23,52 +23,31 @@
  */
 package com.dkarv.jdcallgraph.util.config;
 
-import com.dkarv.jdcallgraph.util.options.DuplicateDetection;
-import com.dkarv.jdcallgraph.util.options.GroupBy;
 import com.dkarv.jdcallgraph.util.options.Target;
 
-import java.io.File;
-
-public abstract class Config {
-
-  static Config instance;
-
-  public static Config getInst() {
-    return instance;
+/**
+ * Some config options that are computed with others.
+ */
+public class ComputedConfig {
+  public static boolean dataDependence() {
+    for (Target t : Config.getInst().writeTo()) {
+      if (t.isDataDependency()) {
+        return true;
+      }
+    }
+    return false;
   }
 
-  @Option
-  public abstract String outDir();
-
-  @Option
-  public abstract int logLevel();
-
-  @Option
-  public abstract boolean logConsole();
-
-  @Option
-  public abstract GroupBy groupBy();
-
-  @Option
-  public abstract Target[] writeTo();
-
-  @Option
-  public abstract DuplicateDetection duplicateDetection();
-
-  @Option
-  public abstract String format();
-
-  /**
-   * Check whether everything is set and fix options if necessary.
-   */
-  void check() {
-    if (!outDir().endsWith(File.separator)) {
-      // TODO get rid of this by checking each location it is used
-      throw new IllegalArgumentException("outDir " + outDir() + " does not end with a file separator");
+  public static boolean callDependence() {
+    for (Target t : Config.getInst().writeTo()) {
+      if (!t.isDataDependency()) {
+        return true;
+      }
     }
+    return false;
+  }
 
-    if (logLevel() < 0 || logLevel() > 6) {
-      throw new IllegalArgumentException("Invalid log level: " + logLevel());
-    }
+  public static boolean lineNeeded() {
+    return Config.getInst().format().contains("{line}");
   }
 }

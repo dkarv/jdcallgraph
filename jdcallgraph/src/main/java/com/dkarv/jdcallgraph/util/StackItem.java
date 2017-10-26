@@ -128,6 +128,9 @@ public class StackItem {
     return element != null
         && this.className.equals(element.getClassName())
         && this.getShortMethodName().equals(element.getMethodName())
-        && this.lineNumber == element.getLineNumber();
+        // line number comparison does not work because the stack trace number
+        // is the real line of the call and not beginning of the method
+        //&& this.lineNumber == element.getLineNumber()
+        ;
   }
 }
