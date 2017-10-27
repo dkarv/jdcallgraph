@@ -27,6 +27,7 @@ import com.dkarv.jdcallgraph.util.config.Config;
 import com.dkarv.jdcallgraph.util.log.Logger;
 import com.dkarv.jdcallgraph.util.config.ConfigReader;
 import javassist.*;
+import javassist.bytecode.*;
 
 import java.io.ByteArrayInputStream;
 import java.io.File;
@@ -201,7 +202,7 @@ public class Tracer implements ClassFileTransformer {
   }
 
   public static String getMethodName(CtBehavior method) throws NotFoundException {
-    return method.getLongName();
+    return method.getName() + Descriptor.toString(method.getSignature());
 
     /*
     StringBuilder methodName = new StringBuilder();
