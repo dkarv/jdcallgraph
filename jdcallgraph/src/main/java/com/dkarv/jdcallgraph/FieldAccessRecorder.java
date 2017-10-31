@@ -26,7 +26,9 @@ package com.dkarv.jdcallgraph;
 import com.dkarv.jdcallgraph.callgraph.CallGraph;
 import com.dkarv.jdcallgraph.data.DataDependenceGraph;
 import com.dkarv.jdcallgraph.util.StackItem;
+import com.dkarv.jdcallgraph.util.config.*;
 import com.dkarv.jdcallgraph.util.log.Logger;
+import com.dkarv.jdcallgraph.util.options.*;
 
 import java.io.IOException;
 import java.util.HashMap;
@@ -40,6 +42,17 @@ public class FieldAccessRecorder {
    * Collect the call graph per thread.
    */
   static final Map<Long, DataDependenceGraph> GRAPHS = new HashMap<>();
+  private static final boolean needCombined;
+
+  static {
+    boolean combined = false;
+    for (Target t : Config.getInst().writeTo()) {
+      if (t == Target.COMBINED_DOT) {
+        combined = true;
+      }
+    }
+    needCombined = combined;
+  }
 
   public static void write(String fromClass, String fromMethod, int lineNumber, String fieldClass, String fieldName) {
     try {
@@ -65,7 +78,14 @@ public class FieldAccessRecorder {
         LOG.trace("Read not interesting because there was no write before");
         return;
       }
-      graph.addRead(new StackItem(fromClass, fromMethod, lineNumber), fieldClass + "::" + fieldName);
+      if (needCombined) {
+        CallGraph callGraph = CallRecorder.GRAPHS.get(threadId);
+        graph.addRead(new StackItem(fromClass, fromMethod, lineNumber), fieldClass + "::" +
+            fieldName, callGraph);
+      } else {
+        graph.addRead(new StackItem(fromClass, fromMethod, lineNumber), fieldClass + "::" +
+            fieldName, null);
+      }
     } catch (Exception e) {
       LOG.error("Error in read", e);
     }

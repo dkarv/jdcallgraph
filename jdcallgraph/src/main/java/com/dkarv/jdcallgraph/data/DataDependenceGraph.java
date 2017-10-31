@@ -23,6 +23,7 @@
  */
 package com.dkarv.jdcallgraph.data;
 
+import com.dkarv.jdcallgraph.callgraph.*;
 import com.dkarv.jdcallgraph.util.StackItem;
 import com.dkarv.jdcallgraph.util.options.Target;
 import com.dkarv.jdcallgraph.util.config.Config;
@@ -48,7 +49,7 @@ public class DataDependenceGraph {
   public DataDependenceGraph(long threadId) throws IOException {
     Target[] targets = Config.getInst().writeTo();
     for (Target target : targets) {
-      if (target.isDataDependency()) {
+      if (target.isDataDependency() && target != Target.COMBINED_DOT) {
         GraphWriter writer = createWriter(target);
         writer.start(FOLDER + "data_" + threadId);
         writers.add(writer);
@@ -75,7 +76,7 @@ public class DataDependenceGraph {
     // }
   }
 
-  public void addRead(StackItem location, String field) throws IOException {
+  public void addRead(StackItem location, String field, CallGraph callGraph) throws IOException {
     LOG.trace("Read to {} from {}", field, location);
     StackItem lastWrite = lastWrites.get(field);
     if (lastWrite != null) {
@@ -84,6 +85,9 @@ public class DataDependenceGraph {
         // LOG.debug("Location {} depends on {}", location, lastWrite);
         for (GraphWriter writer : writers) {
           writer.edge(lastWrite, location, field);
+        }
+        if (callGraph != null) {
+          callGraph.dataEdge(lastWrite, location);
         }
       }
     }

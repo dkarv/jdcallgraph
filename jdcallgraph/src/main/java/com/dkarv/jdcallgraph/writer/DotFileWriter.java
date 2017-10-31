@@ -54,8 +54,19 @@ public class DotFileWriter implements GraphWriter {
   }
 
   @Override
-  public void edge(StackItem from, StackItem to, String label) throws IOException {
-    writer.append("\t\"" + from.toString() + "\" -> \"" + to.toString() + "\" [label=\"" + label + "\"];\n");
+  public void edge(StackItem from, StackItem to, String attributes) throws IOException {
+    writer.append('\t');
+    writer.append('"');
+    writer.append(from.toString());
+    writer.append('"');
+    writer.append(" -> ");
+    writer.append('"');
+    writer.append(to.toString());
+    writer.append('"');
+    writer.append(' ');
+    writer.append(attributes);
+    writer.append(';');
+    writer.append('\n');
   }
 
   @Override

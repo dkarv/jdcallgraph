@@ -203,24 +203,6 @@ public class Tracer implements ClassFileTransformer {
 
   public static String getMethodName(CtBehavior method) throws NotFoundException {
     return method.getName() + Descriptor.toString(method.getSignature());
-
-    /*
-    StringBuilder methodName = new StringBuilder();
-    // boolean isConstructor = method.getMethodInfo().isConstructor();
-
-    // TODO replace with method.getLongName()
-    methodName.append(method.getName());
-    methodName.append('(');
-    CtClass[] params = method.getParameterTypes();
-    for (int i = 0; i < params.length; i++) {
-      if (i != 0) {
-        methodName.append(',');
-      }
-      methodName.append(getShortName(params[i]));
-    }
-    methodName.append(')');
-    return methodName.toString();
-    */
   }
 
   static String getShortName(final CtClass clazz) {

@@ -137,6 +137,18 @@ public class CallGraph {
     }
   }
 
+  public void dataEdge(StackItem from, StackItem to) throws IOException {
+    if (calls.isEmpty()) {
+      LOG.info("Ignore dd egde {} -> {}", from, to);
+    } else {
+      for (GraphWriter w : writers) {
+        if (w instanceof DotFileWriter || w instanceof RemoveDuplicatesWriter) {
+          w.edge(from, to, "[style=dotted]");
+        }
+      }
+    }
+  }
+
   public void finish() throws IOException {
     if (!calls.isEmpty()) {
       LOG.error("Shutdown but call graph not empty: {}", calls);

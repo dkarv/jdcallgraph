@@ -54,9 +54,14 @@ public enum Target {
   /**
    * Data dependence graph as csv.
    */
-  DD_TRACE;
+  DD_TRACE,
+  /**
+   * Combined call and dd graph in dot file format.
+   */
+  COMBINED_DOT;
 
   public boolean isDataDependency() {
-    return this == Target.DD_DOT || this == Target.DD_TRACE;
+    return this == Target.DD_DOT || this == Target.DD_TRACE ||
+        this == Target.COMBINED_DOT;
   }
 }

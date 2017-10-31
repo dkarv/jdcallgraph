@@ -52,9 +52,10 @@ public interface GraphWriter extends Closeable {
   void edge(StackItem from, StackItem to) throws IOException;
 
   /**
-   * Write an edge with a label. If the writer does not support labels it will write the edge without.
+   * Write an edge with additional attributes. If the writer does not support labels it will write
+   * the edge without. For dot files the attributes should look like [style=dotted, label="asdf"]
    */
-  void edge(StackItem from, StackItem to, String label) throws IOException;
+  void edge(StackItem from, StackItem to, String attributes) throws IOException;
 
   /**
    * Finish the graph.

@@ -4,6 +4,7 @@ import javassist.CannotCompileException;
 import javassist.CtBehavior;
 import javassist.CtClass;
 import javassist.NotFoundException;
+import javassist.bytecode.*;
 import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
@@ -41,7 +42,8 @@ public class EnhanceMethodTest {
 
   @Test
   public void testConstructor() throws NotFoundException, CannotCompileException {
-    Mockito.when(behavior.getLongName()).thenReturn("Example()");
+    Mockito.when(behavior.getName()).thenReturn("Example");
+    Mockito.when(behavior.getSignature()).thenReturn("()");
 
     p.enhanceMethod(behavior, className);
 
@@ -52,19 +54,24 @@ public class EnhanceMethodTest {
 
   @Test
   public void testParameters() throws NotFoundException, CannotCompileException {
-    Mockito.when(behavior.getLongName()).thenReturn("method(String,int,byte)");
+    Mockito.when(behavior.getName()).thenReturn("method");
+    Mockito.when(behavior.getSignature()).thenReturn(
+        Descriptor.ofMethod(null,
+            new CtClass[]{CtClass.booleanType, CtClass.intType, CtClass.byteType}));
 
     p.enhanceMethod(behavior, className);
 
     ArgumentCaptor<String> captor = ArgumentCaptor.forClass(String.class);
     Mockito.verify(behavior).insertBefore(captor.capture());
-    Assert.assertEquals(expected(className, "method(String,int,byte)"), captor.getValue());
+    Assert.assertEquals(expected(className, "method(boolean,int,byte)"), captor.getValue());
   }
 
   @Test
   @SuppressWarnings("unchecked")
   public void testIsTest() throws NotFoundException, CannotCompileException, ClassNotFoundException {
-    Mockito.when(behavior.getLongName()).thenReturn("method()");
+    Mockito.when(behavior.getName()).thenReturn("method");
+    Mockito.when(behavior.getSignature()).thenReturn(
+        Descriptor.ofMethod(null, new CtClass[0]));
 
     Annotation[] annotations = new Annotation[]{
         Mockito.mock(Annotation.class, Mockito.RETURNS_DEEP_STUBS),
