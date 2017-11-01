@@ -3,7 +3,7 @@ package com.dkarv.verifier;
 import java.util.function.*;
 import java.util.regex.*;
 
-public class ClassMethodMatcher implements Predicate<String> {
+public class ClassMethodMatcher implements NodeMatcher {
   private final Pattern p;
 
   public ClassMethodMatcher(String clazz, String method) {
@@ -11,7 +11,7 @@ public class ClassMethodMatcher implements Predicate<String> {
   }
 
   @Override
-  public boolean test(String s) {
+  public boolean matches(String s) {
     return p.matcher(s).matches();
   }
 

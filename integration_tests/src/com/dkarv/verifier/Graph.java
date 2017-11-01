@@ -1,9 +1,9 @@
 package com.dkarv.verifier;
 
 import java.io.*;
+import java.nio.charset.*;
 import java.nio.file.*;
 import java.util.*;
-import java.util.function.*;
 import java.util.regex.*;
 
 public class Graph {
@@ -12,29 +12,33 @@ public class Graph {
 
   public void read(File directory) throws IOException {
     for (File file : directory.listFiles()) {
-      for (String line : Files.readAllLines(file.toPath())) {
+      for (String line : Files.readAllLines(file.toPath(), StandardCharsets.UTF_8)) {
         Matcher m = P.matcher(line);
         if (m.matches()) {
-          Set<String> end = edges.computeIfAbsent(m.group(1), s -> new HashSet<>());
+          Set<String> end = edges.get(m.group(1));
+          if (end == null) {
+            end = new HashSet<>();
+            edges.put(m.group(1), end);
+          }
           end.add(m.group(2));
         }
       }
     }
   }
 
-  public Set<String> getTargets(Predicate<String> f) {
+  public Set<String> getTargets(NodeMatcher m) {
     Set<String> targets = null;
     for (Map.Entry<String, Set<String>> entry : edges.entrySet()) {
-      if (f.test(entry.getKey())) {
+      if (m.matches(entry.getKey())) {
         if (targets == null) {
           targets = entry.getValue();
         } else {
-          throw new IllegalStateException("Found second matching node for: " + f);
+          throw new IllegalStateException("Found second matching node for: " + m);
         }
       }
     }
     if (targets == null) {
-      throw new IllegalStateException("Found no matching node: " + f);
+      throw new IllegalStateException("Found no matching node: " + m);
     }
     return targets;
   }

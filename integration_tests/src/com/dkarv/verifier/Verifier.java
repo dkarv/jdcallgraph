@@ -5,8 +5,8 @@ import java.util.*;
 
 public class Verifier {
   private static File directory = new File("./result/");
-  private static File cgDirectory = new File(directory,"cg/");
-  private static File ddgDirectory = new File(directory,"ddg/");
+  private static File cgDirectory = new File(directory, "cg/");
+  private static File ddgDirectory = new File(directory, "ddg/");
   private Graph cGraph;
 
   public Graph readCG() throws IOException {
@@ -16,8 +16,23 @@ public class Verifier {
   }
 
   public void verifyCG(String fromClazz, String fromMethod, String toClazz, String toMethod) {
+    NodeMatcher matcher = new ClassMethodMatcher(toClazz, toMethod);
+
     Set<String> targets = cGraph.getTargets(new ClassMethodMatcher(fromClazz, fromMethod));
-    if (!targets.removeIf(new ClassMethodMatcher(toClazz, toMethod))) {
+    Iterator<String> iterator = targets.iterator();
+    boolean found = false;
+    while (iterator.hasNext()) {
+      String s = iterator.next();
+      if (matcher.matches(s)) {
+        if (found) {
+          throw new IllegalStateException("Found two edges matching " + matcher);
+        }
+        found = true;
+        iterator.remove();
+      }
+    }
+
+    if (!found) {
       throw new IllegalStateException("Can't find edge from " + fromClazz + "::" + fromMethod + "" +
           " -> " + toClazz + "::" + toMethod);
     }
@@ -35,8 +50,8 @@ public class Verifier {
   }
 
   public void verifyErrorLogEmpty() throws IOException {
-    File errorLog = new File(directory,"error.log");
-    if(errorLog.exists()) {
+    File errorLog = new File(directory, "error.log");
+    if (errorLog.exists()) {
       BufferedReader br = new BufferedReader(new FileReader(errorLog));
       if (br.readLine() != null) {
         throw new IllegalStateException("Error log is not empty.");
