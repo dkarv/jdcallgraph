@@ -4,7 +4,7 @@ dist: trusty
 jdk:
 - openjdk7
 - openjdk8
-- openjdk9
+# - openjdk9 Not yet supported on travis
 - oraclejdk7
 - oraclejdk8
 - oraclejdk9
