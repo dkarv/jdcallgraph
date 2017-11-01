@@ -13,7 +13,10 @@ xargs javac -cp target -d target || exit 255
 
 
 java -cp target \
--javaagent:../jdcallgraph/target/jdcallgraph-0.2-agent.jar=./config.ini \
+-javaagent:../jdcallgraph/target/jdcallgraph-0.2-agent.jar=./bytebuddy.ini \
+com/dkarv/testcases/$1/Main
+java -cp target \
+-javaagent:../jdcallgraph/target/jdcallgraph-0.2-agent.jar=./javassist.ini \
 com/dkarv/testcases/$1/Main
 
 

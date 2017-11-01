@@ -58,6 +58,9 @@ public abstract class Config {
   @Option
   public abstract String format();
 
+  @Option
+  public abstract boolean javassist();
+
   /**
    * Check whether everything is set and fix options if necessary.
    */

@@ -25,8 +25,8 @@ package com.dkarv.jdcallgraph;
 
 import com.dkarv.jdcallgraph.instr.ByteBuddyInstr;
 import com.dkarv.jdcallgraph.instr.JavassistInstr;
+import com.dkarv.jdcallgraph.util.config.*;
 import com.dkarv.jdcallgraph.util.log.Logger;
-import com.dkarv.jdcallgraph.util.config.ConfigReader;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -79,11 +79,10 @@ public class Tracer {
       excludes.add(Pattern.compile(exclude + "$"));
     }
 
-    boolean useByteBuddy = true;
-    if (useByteBuddy) {
-      new ByteBuddyInstr(excludes).instrument(instrumentation);
-    } else {
+    if (Config.getInst().javassist()) {
       new JavassistInstr(excludes).instrument(instrumentation);
+    } else {
+      new ByteBuddyInstr(excludes).instrument(instrumentation);
     }
   }
 }
