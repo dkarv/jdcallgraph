@@ -27,7 +27,7 @@ matrix:
     sudo: false
     jdk: oraclejdk9
 # Test on one osx, should be Java 8
-  - os: osx
+#  - os: osx (Times out)
 
 
 
