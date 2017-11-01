@@ -38,8 +38,8 @@ cache:
 script:
 - echo $TRAVIS_JDK_VERSION
 - cd jdcallgraph
-- [[ $TRAVIS_JDK_VERSION == "oraclejdk9" ]] && mvn clean verify -Dcobertura.skip
-- [[ $TRAVIS_JDK_VERSION != "oraclejdk9" ]] && mvn clean verify coveralls:report
+- if [ $TRAVIS_JDK_VERSION == "oraclejdk9" ]]; then mvn clean verify -Dcobertura.skip; fi
+- if [ $TRAVIS_JDK_VERSION != "oraclejdk9" ]]; then mvn clean verify coveralls:report; fi
 - cd ../integration_tests
 - ./all.sh
 # after_success: cd ../jdcallgraph && mvn cobertura:cobertura coveralls:report -Dcheckstyle
