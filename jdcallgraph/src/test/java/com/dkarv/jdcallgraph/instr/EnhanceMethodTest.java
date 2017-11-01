@@ -1,22 +1,14 @@
 package com.dkarv.jdcallgraph.instr;
 
-import com.dkarv.jdcallgraph.instr.JavassistInstr;
-import com.dkarv.jdcallgraph.util.config.ConfigUtils;
-import javassist.CannotCompileException;
-import javassist.CtBehavior;
-import javassist.CtClass;
-import javassist.NotFoundException;
-import org.junit.After;
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.Test;
-import org.mockito.ArgumentCaptor;
-import org.mockito.Mockito;
+import com.dkarv.jdcallgraph.util.config.*;
+import javassist.*;
+import org.junit.*;
+import org.mockito.*;
 
-import java.io.IOException;
-import java.lang.annotation.Annotation;
-import java.util.ArrayList;
-import java.util.regex.Pattern;
+import java.io.*;
+import java.lang.annotation.*;
+import java.util.*;
+import java.util.regex.*;
 
 public class EnhanceMethodTest {
   private CtBehavior behavior;
@@ -44,7 +36,8 @@ public class EnhanceMethodTest {
 
   @Test
   public void testConstructor() throws NotFoundException, CannotCompileException {
-    Mockito.when(behavior.getLongName()).thenReturn("Example()");
+    Mockito.when(behavior.getName()).thenReturn("Example");
+    Mockito.when(behavior.getSignature()).thenReturn("()");
 
     p.enhanceMethod(behavior, className);
 
@@ -55,7 +48,8 @@ public class EnhanceMethodTest {
 
   @Test
   public void testParameters() throws NotFoundException, CannotCompileException {
-    Mockito.when(behavior.getLongName()).thenReturn("method(String,int,byte)");
+    Mockito.when(behavior.getName()).thenReturn("method");
+    Mockito.when(behavior.getSignature()).thenReturn("(LString;IB)");
 
     p.enhanceMethod(behavior, className);
 
@@ -67,7 +61,8 @@ public class EnhanceMethodTest {
   @Test
   @SuppressWarnings("unchecked")
   public void testIsTest() throws NotFoundException, CannotCompileException, ClassNotFoundException {
-    Mockito.when(behavior.getLongName()).thenReturn("method()");
+    Mockito.when(behavior.getName()).thenReturn("method");
+    Mockito.when(behavior.getSignature()).thenReturn("()");
 
     Annotation[] annotations = new Annotation[]{
         Mockito.mock(Annotation.class, Mockito.RETURNS_DEEP_STUBS),
