@@ -3,7 +3,7 @@ package com.dkarv.testcases.anonymous;
 public class Main {
   Number n;
 
-  public Main(int offset) {
+  public Main(final int offset) {
     // test
     if (offset != 0) {
       n = new Number() {
