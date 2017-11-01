@@ -1,5 +1,8 @@
 #!/bin/bash
 
+version=$(java -version 2>&1 | awk -F '"' '/version/ {print $2}')
+echo "Running on java $version" >&2
+
 rm -r result
 rm -r result2
 mkdir -p target
@@ -26,10 +29,13 @@ function run {
 }
 
 run $1 "bytebuddy.ini"
-mv result result2
-mkdir result
 
-run $1 "javassist.ini"
+if [[ "$version" < "1.9" ]]; then
+    mv result result2
+    mkdir result
 
-diff -r result/cg result2/cg >&2
-# diff -r result/ddg result2/ddg
+    run $1 "javassist.ini"
+
+    diff -r result/cg result2/cg >&2
+    # diff -r result/ddg result2/ddg
+fi
