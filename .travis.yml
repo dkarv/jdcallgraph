@@ -14,7 +14,7 @@ matrix:
     sudo: required
     jdk: openjdk9
   - os: linux
-    dist: trusty
+    dist: precise
     sudo: false
     jdk: oraclejdk7
   - os: linux
