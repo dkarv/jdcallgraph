@@ -37,17 +37,12 @@ public class MethodTracer {
   @Advice.OnMethodEnter(inline = false)
   public static StackItem enter(@Advice.Origin("#t") String type,
                                 @Advice.Origin("#m") String method,
-                                // #s #d
                                 @Advice.Origin("#s") String signature) {
-    // TODO ByteBuddy does not allow to get the MethodDescription.getParameters()
-    // Either we hack it to do that somehow
-    // Or we transform #s to the correct format...
-    LOG.debug("desc: {}", Format.simplify(signature));
     return CallableTracer.enter(type, method, signature, true);
   }
 
   @Advice.OnMethodExit(inline = false, onThrowable = Throwable.class)
   public static void exit(@Advice.Enter StackItem item) {
-    CallRecorder.afterMethod(item);
+    CallableTracer.exit(item);
   }
 }

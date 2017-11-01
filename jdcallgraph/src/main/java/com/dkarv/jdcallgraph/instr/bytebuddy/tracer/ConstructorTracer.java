@@ -38,6 +38,6 @@ public class ConstructorTracer {
 
   @Advice.OnMethodExit(inline = false)
   public static void exit(@Advice.Enter StackItem item) {
-    CallRecorder.afterMethod(item);
+    CallableTracer.exit(item);
   }
 }

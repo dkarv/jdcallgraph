@@ -24,14 +24,19 @@
 package com.dkarv.jdcallgraph.instr.bytebuddy.tracer;
 
 import com.dkarv.jdcallgraph.CallRecorder;
+import com.dkarv.jdcallgraph.instr.bytebuddy.util.*;
 import com.dkarv.jdcallgraph.util.LineNumbers;
 import com.dkarv.jdcallgraph.util.StackItem;
 import com.dkarv.jdcallgraph.util.config.ComputedConfig;
+import com.dkarv.jdcallgraph.util.log.*;
 
 public abstract class CallableTracer {
+  private static final Logger LOG = new Logger(CallableTracer.class);
   private static final boolean needsLine = ComputedConfig.lineNeeded();
 
   public static StackItem enter(String type, String method, String signature, boolean returnSafe) {
+    signature = Format.simplifySignatureArrays(signature);
+
     int lineNumber;
     if (needsLine) {
       lineNumber = LineNumbers.get(type, method + signature);
@@ -42,5 +47,9 @@ public abstract class CallableTracer {
     StackItem item = new StackItem(type, method, signature, lineNumber, returnSafe);
     CallRecorder.beforeMethod(item);
     return item;
+  }
+
+  public static void exit(StackItem item) {
+    CallRecorder.afterMethod(item);
   }
 }
