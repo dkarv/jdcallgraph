@@ -35,7 +35,8 @@ cache:
   - $HOME/.m2
 
 
-script: 
+script:
+- echo $TRAVIS_JDK_VERSION
 - cd jdcallgraph
 - mvn clean verify coveralls:report
 - cd ../integration_tests
