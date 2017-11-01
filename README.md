@@ -1,5 +1,7 @@
 # jdcallgraph
-JDCallgraph - Dynamic call graph generation for Java. Uses [Javassist](http://jboss-javassist.github.io/javassist/) to instrument the target application.
+JDCallgraph - Dynamic call graph generation for Java. Uses 
+[ByteBuddy](http://bytebuddy.net/) or 
+[Javassist](http://jboss-javassist.github.io/javassist/) to instrument the target application.
 Can also create a data dependency graph to show field access between methods. Support various output formats like csv, dot or a matrix.
 
 [![Build Status](https://travis-ci.org/dkarv/jdcallgraph.svg?branch=master)](https://travis-ci.org/dkarv/jdcallgraph)
