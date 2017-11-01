@@ -106,9 +106,7 @@ public class JavassistInstr extends Instr implements ClassFileTransformer {
         LOG.trace("Enhancing class: {}", clazz.getName());
         CtBehavior[] methods = clazz.getDeclaredBehaviors();
         for (CtBehavior method : methods) {
-          if (!method.isEmpty()) {
-            enhanceMethod(method, clazz.getName());
-          }
+          enhanceMethod(method, clazz.getName());
         }
         return clazz.toBytecode();
       } else {
@@ -143,9 +141,11 @@ public class JavassistInstr extends Instr implements ClassFileTransformer {
 
       String args = '"' + className + '"' + ',' + '"' + mName + '"' + ',' + lineNumber;
 
-      // TODO detect constructors where the afterMethod detection might not work
-      String srcBefore = "com.dkarv.jdcallgraph.CallRecorder.beforeMethod(" + args + ");";
-      String srcAfter = "com.dkarv.jdcallgraph.CallRecorder.afterMethod(" + args + ");";
+      boolean returnSafe = !(method instanceof CtConstructor);
+      String srcBefore = "com.dkarv.jdcallgraph.CallRecorder.beforeMethod(" + args + "," +
+          returnSafe + ");";
+      String srcAfter = "com.dkarv.jdcallgraph.CallRecorder.afterMethod(" + args + "," +
+          returnSafe + ");";
 
       method.insertBefore(srcBefore);
       method.insertAfter(srcAfter, true);
@@ -157,7 +157,14 @@ public class JavassistInstr extends Instr implements ClassFileTransformer {
   }
 
   public static String getMethodName(CtBehavior method) throws NotFoundException {
-    return method.getName() + Descriptor.toString(method.getSignature());
+    StringBuilder sb = new StringBuilder();
+    if (method instanceof CtConstructor) {
+      sb.append("<init>");
+    } else {
+      sb.append(method.getName());
+    }
+    sb.append(Descriptor.toString(method.getSignature()));
+    return sb.toString();
   }
 
   static String getShortName(final CtClass clazz) {

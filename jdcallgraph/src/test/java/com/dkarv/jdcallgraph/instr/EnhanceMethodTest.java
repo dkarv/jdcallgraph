@@ -30,7 +30,7 @@ public class EnhanceMethodTest {
   }
 
   private String expected(String cName, String mName) {
-    String args = '"' + cName + '"' + ',' + '"' + mName + '"' + ',' + lineNumber;
+    String args = '"' + cName + '"' + ',' + '"' + mName + '"' + ',' + lineNumber + ",true";
     return "com.dkarv.jdcallgraph.CallRecorder.beforeMethod(" + args + ");";
   }
 

@@ -112,7 +112,8 @@ public class CallGraph {
         // n == 1: <method>
         // n == 2: caller of <method>
         StackTraceElement element = StackTraceUtils.getNthParent(method, 1);
-        // FIXME the line numbers are wrong for some reason
+        // TODO this does not work for two methods called the same
+        // It might work to check line # method 1 < line # stack trace < line # method 2
         LOG.info("Check if {} returned silently?", top);
         LOG.info("According to stack trace: {} -> {}", element, method);
         while (!top.isReturnSafe() && !top.equalTo(element)) {

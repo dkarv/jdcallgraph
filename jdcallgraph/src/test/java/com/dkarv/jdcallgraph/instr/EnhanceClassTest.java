@@ -60,21 +60,9 @@ public class EnhanceClassTest {
   }
 
   @Test
-  public void testEmptyMethod() throws IOException, NotFoundException, CannotCompileException {
-    // Ignore empty method
-    CtBehavior m = Mockito.mock(CtBehavior.class);
-    Mockito.when(m.isEmpty()).thenReturn(true);
-    Mockito.when(ct.getDeclaredBehaviors()).thenReturn(new CtBehavior[]{m});
-    byte[] result = p.enhanceClass(input);
-    Assert.assertArrayEquals(output, result);
-    Mockito.verify(p, Mockito.never()).enhanceMethod(Mockito.<CtBehavior>any(), Mockito.<String>any());
-  }
-
-  @Test
   public void testSuccess() throws IOException, NotFoundException, CannotCompileException {
     // Ignore empty method
     CtBehavior m = Mockito.mock(CtBehavior.class);
-    Mockito.when(m.isEmpty()).thenReturn(false);
     Mockito.when(ct.getDeclaredBehaviors()).thenReturn(new CtBehavior[]{m});
     byte[] result = p.enhanceClass(input);
     Assert.assertArrayEquals(output, result);

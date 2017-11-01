@@ -14,14 +14,13 @@ xargs javac -cp target -d target || exit 255
 
 
 function run {
-    echo "## Run tests with $2" >&2
     java -cp target \
     -javaagent:../jdcallgraph/target/jdcallgraph-0.2-agent.jar=./$2 \
     com/dkarv/testcases/$1/Main
     if java -cp target com/dkarv/testcases/$1/Verification ; then
-        echo "Verification of >>  $1  << succeeded" >&2
+        echo "Verification of >>  $1 with $2  << succeeded" >&2
     else
-        echo "Verification of >>  $1  << failed" >&2
+        echo "Verification of >>  $1 with $2  << failed" >&2
         exit 1
     fi
 }

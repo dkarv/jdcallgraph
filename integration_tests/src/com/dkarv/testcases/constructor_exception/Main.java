@@ -17,11 +17,11 @@ public class Main {
     try {
       new Main();
     } catch(IllegalArgumentException e) {
+      System.out.println("error");
       error();
     }
   }
 
   public static void error(){
-
   }
 }

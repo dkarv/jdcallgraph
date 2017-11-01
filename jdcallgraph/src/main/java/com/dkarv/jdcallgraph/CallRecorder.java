@@ -39,15 +39,14 @@ public class CallRecorder {
    */
   static final Map<Long, CallGraph> GRAPHS = new HashMap<>();
 
-  public static void beforeMethod(String className, String methodName, int lineNumber) {
-    beforeMethod(new StackItem(className, methodName, lineNumber));
+  public static void beforeMethod(String className, String methodName, int lineNumber, boolean
+      returnSafe) {
+    beforeMethod(new StackItem(className, methodName, lineNumber, returnSafe));
   }
 
   public static void beforeMethod(StackItem item) {
-    LOG.debug("current trace: {}", (Object) Thread.currentThread().getStackTrace());
-    LOG.debug("next trace: {}", (Object) Thread.currentThread().getStackTrace());
     try {
-      LOG.trace(">> {}{}", item, item.isReturnSafe() ? "": " (return unsafe)");
+      LOG.trace(">> {}{}", item, item.isReturnSafe() ? "" : " (return unsafe)");
       long threadId = Thread.currentThread().getId();
       CallGraph graph = GRAPHS.get(threadId);
       if (graph == null) {
@@ -60,8 +59,9 @@ public class CallRecorder {
     }
   }
 
-  public static void afterMethod(String className, String methodName, int lineNumber) {
-    afterMethod(new StackItem(className, methodName, lineNumber));
+  public static void afterMethod(String className, String methodName, int lineNumber, boolean
+      returnSafe) {
+    afterMethod(new StackItem(className, methodName, lineNumber, returnSafe));
   }
 
   public static void afterMethod(StackItem item) {

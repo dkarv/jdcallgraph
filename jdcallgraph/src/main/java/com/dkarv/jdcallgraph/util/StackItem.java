@@ -33,12 +33,12 @@ public class StackItem {
 
   private final String formatted;
 
-  public StackItem(String className, String methodName, int lineNumber) {
+  public StackItem(String className, String methodName, int lineNumber, boolean returnSafe) {
     this.className = className;
     this.methodName = methodName;
     this.lineNumber = lineNumber;
 
-    this.returnSafe = true;
+    this.returnSafe = returnSafe;
 
     this.formatted = Formatter.format(this);
   }
@@ -55,10 +55,6 @@ public class StackItem {
     this.returnSafe = returnSafe;
 
     this.formatted = Formatter.format(this);
-  }
-
-  public StackItem(StackTraceElement element) {
-    this(element.getClassName(), element.getMethodName(), element.getLineNumber());
   }
 
   public String getClassName() {

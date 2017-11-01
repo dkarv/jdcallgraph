@@ -48,7 +48,8 @@ public class FieldAccessRecorder {
         graph = new DataDependenceGraph(threadId);
         GRAPHS.put(threadId, graph);
       }
-      graph.addWrite(new StackItem(fromClass, fromMethod, lineNumber), fieldClass + "::" + fieldName);
+      graph.addWrite(new StackItem(fromClass, fromMethod, lineNumber, true), fieldClass + "::" +
+          fieldName);
     } catch (Exception e) {
       LOG.error("Error in write", e);
     }
@@ -63,7 +64,8 @@ public class FieldAccessRecorder {
         LOG.trace("Read not interesting because there was no write before");
         return;
       }
-      graph.addRead(new StackItem(fromClass, fromMethod, lineNumber), fieldClass + "::" + fieldName);
+      graph.addRead(new StackItem(fromClass, fromMethod, lineNumber, true), fieldClass + "::" +
+          fieldName);
     } catch (Exception e) {
       LOG.error("Error in read", e);
     }
