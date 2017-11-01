@@ -1,6 +1,5 @@
 package com.dkarv.verifier;
 
-import java.util.function.*;
 import java.util.regex.*;
 
 public class ClassMethodMatcher implements NodeMatcher {
