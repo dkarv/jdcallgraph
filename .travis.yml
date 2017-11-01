@@ -37,9 +37,7 @@ cache:
 
 script: 
 - cd jdcallgraph
-- mvn clean
-- mvn install -DskipTests
-- mvn test
+- mvn clean install coveralls:report
 - cd ../integration_tests
 - ./all.sh
 # after_success: cd ../jdcallgraph && mvn cobertura:cobertura coveralls:report -Dcheckstyle
