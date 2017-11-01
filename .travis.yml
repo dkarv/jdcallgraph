@@ -36,10 +36,13 @@ cache:
 
 
 script: 
-- cd jdcallgraph && mvn clean install
-- cd ../integration_tests && ./all.sh
-after_success:
-- cd ../jdcallgraph && mvn cobertura:cobertura coveralls:report -Dcheckstyle.skip=true
+- cd jdcallgraph
+- mvn clean
+- mvn install -DskipTests
+- mvn cobertura:cobertura coveralls:report -Dcheckstyle.skip=true
+- cd ../integration_tests
+- ./all.sh
+
 deploy:
   provider: releases
   api_key:
