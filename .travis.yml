@@ -30,6 +30,10 @@ matrix:
 #  - os: osx (Times out)
 
 
+cache:
+  directories:
+  - $HOME/.m2
+
 
 script: 
 - cd jdcallgraph && mvn clean install
