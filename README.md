@@ -84,3 +84,8 @@ Specify one or multiple output formats. Multiple formats are separated by comma:
 - TRACE: Write a file called `trace.csv`. It contains one row per entry method and a list of methods that come after behind (Typically a list of methods covered per test).
 - COVERAGE: Write a `coverage.csv` file. The opposite of TRACE. For each method it lists the tests this method was covered in.
 - DATA: Also compute data dependency graphs. This will output them as .dot graph.
+
+#### Backend `javassist` (boolean)
+Decide which backend to use for the instrumentation. Since v0.2 ByteBuddy is the default 
+(`javassist: false`). You can change this by setting this option to true.
+Note that Javassist is not compatible with Java 9, also the ByteBuddy backend is more tested.
