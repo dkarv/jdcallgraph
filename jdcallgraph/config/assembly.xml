@@ -13,6 +13,7 @@
             <unpack>true</unpack>
             <includes>
                 <include>net.bytebuddy:</include>
+                <include>org.javassist:javassist</include>
             </includes>
             <scope>provided</scope>
         </dependencySet>
