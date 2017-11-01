@@ -1,28 +1,23 @@
 package com.dkarv.jdcallgraph.instr;
 
-import com.dkarv.jdcallgraph.instr.JavassistInstr;
-import com.dkarv.jdcallgraph.util.config.ConfigUtils;
+import com.dkarv.jdcallgraph.util.config.*;
 import javassist.*;
-import org.junit.Assert;
-import org.junit.Rule;
-import org.junit.Test;
-import org.junit.rules.TemporaryFolder;
-import org.mockito.ArgumentCaptor;
-import org.mockito.Mockito;
+import org.junit.*;
+import org.junit.rules.*;
+import org.mockito.*;
 
-import java.io.ByteArrayInputStream;
-import java.io.File;
-import java.io.IOException;
-import java.lang.instrument.Instrumentation;
-import java.nio.file.NoSuchFileException;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
+import java.io.*;
+import java.util.*;
+import java.util.regex.*;
 
 public class JavassistInstrTest {
   @Rule
   public TemporaryFolder tmp = new TemporaryFolder();
+
+  @Before
+  public void init() throws IOException {
+    ConfigUtils.replace(true);
+  }
 
   @Test
   public void testGetShortName() {
