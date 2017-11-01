@@ -39,9 +39,11 @@ script:
 - cd jdcallgraph
 - mvn clean
 - mvn install -DskipTests
-- mvn cobertura:cobertura coveralls:report -Dcheckstyle.skip=true
 - cd ../integration_tests
 - ./all.sh
+after_success:
+- cd ../jdcallgraph
+- mvn cobertura:cobertura coveralls:report -Dcheckstyle.skip=true
 
 deploy:
   provider: releases
