@@ -11,7 +11,7 @@ matrix:
     jdk: openjdk8
   - os: linux
     dist: trusty
-    sudo: false
+    sudo: required
     jdk: openjdk9
   - os: linux
     dist: trusty
