@@ -39,7 +39,7 @@ script:
 - cd jdcallgraph && mvn clean install
 - cd ../integration_tests && ./all.sh
 after_success:
-- cd ../jdcallgraph && mvn clean cobertura:cobertura coveralls:report -Dcheckstyle.skip=true
+- cd ../jdcallgraph && mvn cobertura:cobertura coveralls:report -Dcheckstyle.skip=true
 deploy:
   provider: releases
   api_key:
