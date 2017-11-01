@@ -23,22 +23,17 @@
  */
 package com.dkarv.jdcallgraph.instr;
 
-import com.dkarv.jdcallgraph.instr.javassist.FieldTracer;
-import com.dkarv.jdcallgraph.ShutdownHook;
+import com.dkarv.jdcallgraph.instr.javassist.*;
 import com.dkarv.jdcallgraph.util.config.*;
-import com.dkarv.jdcallgraph.util.log.Logger;
+import com.dkarv.jdcallgraph.util.log.*;
 import javassist.*;
+import javassist.bytecode.*;
 
-import java.io.ByteArrayInputStream;
-import java.io.File;
-import java.io.IOException;
-import java.lang.instrument.ClassFileTransformer;
-import java.lang.instrument.Instrumentation;
-import java.security.ProtectionDomain;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
+import java.io.*;
+import java.lang.instrument.*;
+import java.security.*;
+import java.util.*;
+import java.util.regex.*;
 
 /**
  * Instrument the target classes.
@@ -162,7 +157,7 @@ public class JavassistInstr extends Instr implements ClassFileTransformer {
   }
 
   public static String getMethodName(CtBehavior method) throws NotFoundException {
-    return method.getLongName();
+    return method.getName() + Descriptor.toString(method.getSignature());
   }
 
   static String getShortName(final CtClass clazz) {
