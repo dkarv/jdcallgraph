@@ -1,23 +1,11 @@
 package com.dkarv.jdcallgraph;
 
-import com.dkarv.jdcallgraph.instr.ByteBuddyInstr;
-import com.dkarv.jdcallgraph.instr.JavassistInstr;
-import com.dkarv.jdcallgraph.util.config.ConfigUtils;
-import com.sun.org.apache.bcel.internal.util.ClassPath;
-import org.junit.Assert;
-import org.junit.Rule;
-import org.junit.Test;
-import org.junit.rules.TemporaryFolder;
-import org.mockito.AdditionalMatchers;
-import org.mockito.Mockito;
+import org.junit.*;
+import org.junit.rules.*;
+import org.mockito.*;
 
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.IOException;
-import java.io.InputStream;
-import java.lang.instrument.ClassFileTransformer;
-import java.lang.instrument.Instrumentation;
-import java.nio.file.NoSuchFileException;
+import java.io.*;
+import java.lang.instrument.*;
 
 public class TracerTest {
   @Rule

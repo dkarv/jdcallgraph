@@ -46,7 +46,21 @@ public class FormatterTest {
     Assert.assertEquals(METHOD + "#" + LINE, Formatter.format(item));
 
     Mockito.when(config.format()).thenReturn("{package}-{class}-{classname}-{method}-{methodname}-{parameters}-{line}");
-    Assert.assertEquals(String.join("-", PACKAGE, PACKAGE + "." + CLASS, CLASS,
+    Assert.assertEquals(join("-", PACKAGE, PACKAGE + "." + CLASS, CLASS,
         METHOD + "(" + PARAMETERS + ")", METHOD, PARAMETERS, Integer.toString(LINE)), Formatter.format(item));
+  }
+
+  private static String join(String delimiter, String... args) {
+    StringBuilder sbuf = new StringBuilder();
+    boolean append = false;
+    for (String s : args) {
+      if (append) {
+        sbuf.append(delimiter);
+      } else {
+        append = true;
+      }
+      sbuf.append(s);
+    }
+    return sbuf.toString();
   }
 }
