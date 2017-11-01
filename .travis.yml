@@ -9,17 +9,25 @@ matrix:
     dist: trusty
     sudo: false
     jdk: openjdk8
+  - os: linux
+    dist: trusty
+    sudo: false
+    jdk: openjdk9
+  - os: linux
+    dist: trusty
+    sudo: false
+    jdk: oraclejdk7
+  - os: linux
+    dist: trusty
+    sudo: false
+    jdk: oraclejdk8
+  - os: linux
+    dist: trusty
+    sudo: false
+    jdk: oraclejdk9
+# Test on one osx, should be Java 8
+  - os: osx
 
-#language: java
-#sudo: false
-#dist: trusty
-#jdk:
-#- openjdk7
-#- openjdk8
-# - openjdk9 Not yet supported
-#- oraclejdk7
-#- oraclejdk8
-#- oraclejdk9
 
 
 script: 
