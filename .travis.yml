@@ -9,11 +9,11 @@ matrix:
     dist: trusty
     sudo: false
     jdk: openjdk8
-  - os: linux
-    dist: trusty
-    sudo: required
-    group: edge
-    jdk: openjdk9
+# Not yet supported?
+#  - os: linux
+#    dist: trusty
+#    sudo: required
+#    jdk: openjdk9
   - os: linux
     dist: precise
     sudo: false
