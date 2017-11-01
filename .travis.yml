@@ -5,11 +5,11 @@ jdk:
 - openjdk8
 - oraclejdk8
 
-before_script:
-- cd jdcallgraph
-script: mvn clean install
+script: 
+- cd jdcallgraph && mvn clean install
+- cd integration_tests && ./all.sh
 after_success:
-- mvn clean cobertura:cobertura coveralls:report
+- cd jdcallgraph && mvn clean cobertura:cobertura coveralls:report
 deploy:
   provider: releases
   api_key:
