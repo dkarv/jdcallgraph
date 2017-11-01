@@ -7,9 +7,9 @@ jdk:
 
 script: 
 - cd jdcallgraph && mvn clean install
-- cd integration_tests && ./all.sh
+- cd ../integration_tests && ./all.sh
 after_success:
-- cd jdcallgraph && mvn clean cobertura:cobertura coveralls:report
+- cd ../jdcallgraph && mvn clean cobertura:cobertura coveralls:report
 deploy:
   provider: releases
   api_key:
