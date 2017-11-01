@@ -31,4 +31,4 @@ mkdir result
 
 run $1 "javassist.ini"
 diff -r result/cg result2/cg
-diff -r result/ddg result2/ddg
+# diff -r result/ddg result2/ddg
