@@ -39,10 +39,8 @@ script:
 - cd jdcallgraph
 - if [ $TRAVIS_JDK_VERSION == "oraclejdk9" ]; then mvn clean verify; fi
 - if [ $TRAVIS_JDK_VERSION != "oraclejdk9" ]; then mvn clean verify cobertura:cobertura coveralls:report; fi
-- cd ../integration_tests
-- ./all.sh
-# after_success: cd ../jdcallgraph && mvn cobertura:cobertura coveralls:report -Dcheckstyle
-# .skip=true
+- cd ../integration_tests && ./all.sh
+
 
 deploy:
   provider: releases
