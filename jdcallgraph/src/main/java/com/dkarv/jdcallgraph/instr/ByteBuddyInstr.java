@@ -37,7 +37,7 @@ import net.bytebuddy.asm.AsmVisitorWrapper;
 import net.bytebuddy.description.method.MethodDescription;
 import net.bytebuddy.description.type.TypeDescription;
 import net.bytebuddy.dynamic.DynamicType;
-import net.bytebuddy.matcher.ElementMatchers;
+import net.bytebuddy.matcher.*;
 import net.bytebuddy.utility.JavaModule;
 
 import java.lang.instrument.Instrumentation;
@@ -64,7 +64,17 @@ public class ByteBuddyInstr extends Instr {
 
     ResettableClassFileTransformer agent = new AgentBuilder.Default()
         .with(new TracerLogger())
-        .type(ElementMatchers.not(ElementMatchers.nameStartsWith("com.dkarv.jdcallgraph.")))
+        .type(new ElementMatcher<TypeDescription>() {
+          @Override
+          public boolean matches(TypeDescription target) {
+            for (Pattern p : ByteBuddyInstr.super.excludes) {
+              if (p.matcher(target.getName()).matches()) {
+                return false;
+              }
+            }
+            return true;
+          }
+        })
         .transform(new AgentBuilder.Transformer() {
           @Override
           public DynamicType.Builder<?> transform(DynamicType.Builder<?> builder, TypeDescription typeDescription, ClassLoader classLoader, JavaModule module) {

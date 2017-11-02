@@ -65,17 +65,8 @@ public class Tracer {
 
     ShutdownHook.init();
 
-    // TODO move this to config
-    String[] excls = new String[]{
-        "java.*", "sun.*", "com.sun.*", "jdk.internal.*",
-        "com.dkarv.jdcallgraph.*", "org.xml.sax.*",
-        "org.apache.maven.surefire.*", "org.apache.tools.*", /*"org.mockito.*",*/
-        "org.easymock.internal.*",
-        "org.junit.*", "junit.framework.*", "org.hamcrest.*", /*"org.objenesis.*"*/
-        "edu.washington.cs.mut.testrunner.Formatter"
-    };
     List<Pattern> excludes = new ArrayList<>();
-    for (String exclude : excls) {
+    for (String exclude : Config.getInst().exclude()) {
       excludes.add(Pattern.compile(exclude + "$"));
     }
 

@@ -40,11 +40,24 @@ public class TypeUtils {
       String[] elems = value.split(",");
       Object[] array = (Object[]) Array.newInstance(inner, elems.length);
       for (int i = 0; i < elems.length; i++) {
-        array[i] = cast(inner, elems[i]);
+        array[i] = cast(inner, elems[i].trim());
       }
       return array;
     } else {
       throw new IllegalArgumentException("Cannot cast to field of type " + c);
     }
+  }
+
+  public static Object[] merge(Object[] old, Object[] add) {
+    Class<?> inner1 = old.getClass().getComponentType();
+    Class<?> inner2 = add.getClass().getComponentType();
+    if (inner1 != inner2) {
+      throw new IllegalArgumentException("Both arguments must have the same type. Was: " + inner1 + " and " + inner2);
+    }
+    Object[] array = (Object[]) Array.newInstance(inner1, old.length + add.length);
+    System.arraycopy(old, 0, array, 0, old.length);
+    System.arraycopy(add, 0, array, old.length, add.length);
+
+    return array;
   }
 }

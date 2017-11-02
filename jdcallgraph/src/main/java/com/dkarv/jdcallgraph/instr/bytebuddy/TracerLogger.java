@@ -34,17 +34,17 @@ public class TracerLogger implements AgentBuilder.Listener {
 
   @Override
   public void onDiscovery(String typeName, ClassLoader classLoader, JavaModule module, boolean loaded) {
-    // LOG.debug("onDiscovery: {}, {}, {}", typeName, module, loaded);
+    LOG.trace("onDiscovery: {}, {}, {}", typeName, module, loaded);
   }
 
   @Override
   public void onTransformation(TypeDescription typeDescription, ClassLoader classLoader, JavaModule module, boolean loaded, DynamicType dynamicType) {
-    // LOG.debug("onTransformation: {}, {}, {}, {}", typeDescription, module, loaded, dynamicType);
+    LOG.trace("onTransformation: {}, {}, {}, {}", typeDescription, module, loaded, dynamicType);
   }
 
   @Override
   public void onIgnored(TypeDescription typeDescription, ClassLoader classLoader, JavaModule module, boolean loaded) {
-    // LOG.debug("onIgnored: {}, {}, {}", typeDescription, module, loaded);
+    LOG.trace("onIgnored: {}, {}, {}", typeDescription, module, loaded);
   }
 
   @Override
@@ -54,6 +54,6 @@ public class TracerLogger implements AgentBuilder.Listener {
 
   @Override
   public void onComplete(String typeName, ClassLoader classLoader, JavaModule module, boolean loaded) {
-    // LOG.debug("onComplete: {}, {}, {}", typeName, module, loaded);
+    LOG.trace("onComplete: {}, {}, {}", typeName, module, loaded);
   }
 }

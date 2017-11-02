@@ -31,4 +31,8 @@ import java.lang.annotation.Target;
 @Target(ElementType.METHOD)
 @Retention(RetentionPolicy.RUNTIME)
 @interface Option {
+  /**
+   * Merge this option with the defaults option. This is only valid for array options.
+   */
+  boolean mergeDefaults() default false;
 }

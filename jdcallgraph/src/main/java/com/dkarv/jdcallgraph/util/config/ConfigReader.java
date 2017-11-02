@@ -117,7 +117,14 @@ public class ConfigReader {
         throw new IllegalArgumentException("Invalid config option: " + key);
       }
 
-      options.put(key, TypeUtils.cast(m.getReturnType(), val));
+      Option opt = m.getAnnotation(Option.class);
+      if (opt.mergeDefaults() && m.getReturnType().isArray() && options.containsKey(key)) {
+        Object[] old = (Object[]) m.getReturnType().cast(options.get(key));
+        Object[] add = (Object[]) TypeUtils.cast(m.getReturnType(), val);
+        options.put(key, TypeUtils.merge(old, add));
+      } else {
+        options.put(key, TypeUtils.cast(m.getReturnType(), val));
+      }
     }
   }
 
