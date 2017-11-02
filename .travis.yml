@@ -1,31 +1,31 @@
 language: java
 matrix:
   include:
-#  - os: linux
-#    dist: trusty
-#    sudo: false
-#    jdk: openjdk7
   - os: linux
     dist: trusty
-    sudo: required
+    sudo: false
+    jdk: openjdk7
+  - os: linux
+    dist: trusty
+    sudo: false
     jdk: openjdk8
 # Not yet supported?
 #  - os: linux
 #    dist: trusty
 #    sudo: required
 #    jdk: openjdk9
-#  - os: linux
-#    dist: precise
-#    sudo: false
-#    jdk: oraclejdk7
-#  - os: linux
-#    dist: trusty
-#    sudo: false
-#    jdk: oraclejdk8
-#  - os: linux
-#    dist: trusty
-#    sudo: false
-#    jdk: oraclejdk9
+  - os: linux
+    dist: precise
+    sudo: false
+    jdk: oraclejdk7
+  - os: linux
+    dist: trusty
+    sudo: false
+    jdk: oraclejdk8
+  - os: linux
+    dist: trusty
+    sudo: false
+    jdk: oraclejdk9
 # Test on one osx, should be Java 8
 #  - os: osx (Times out)
 
