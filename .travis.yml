@@ -36,7 +36,6 @@ cache:
 
 
 script:
-- echo $TRAVIS_JDK_VERSION
 - cd jdcallgraph
 - if [ $TRAVIS_JDK_VERSION == "oraclejdk9" ]; then mvn clean verify; fi
 - if [ $TRAVIS_JDK_VERSION != "oraclejdk9" ]; then mvn clean verify cobertura:cobertura coveralls:report; fi
