@@ -54,7 +54,9 @@ key1: false
 # a list of values
 key2: 1, 2, 3
 ```
-You can check out the configurations in the [example folder](./examples).
+You can check out the configurations in the [example folder](./examples). Options not present in 
+your config take the value from 
+[defaults.ini](./jdcallgraph/src/main/resources/com/dkarv/jdcallgraph/defaults.ini)
 The following options are supported:
 
 #### Output directory `outDir` (String)
