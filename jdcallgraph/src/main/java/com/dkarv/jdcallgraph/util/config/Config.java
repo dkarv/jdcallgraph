@@ -61,7 +61,7 @@ public abstract class Config {
   @Option
   public abstract boolean javassist();
 
-  @Option(mergeDefaults = false)
+  @Option(mergeDefaults = true)
   public abstract String[] exclude();
 
   /**
