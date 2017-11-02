@@ -27,7 +27,7 @@ import java.io.IOException;
 
 public class ConsoleTarget implements LogTarget {
   @Override
-  public void print(String msg, int level) {
+  public synchronized void print(String msg, int level) {
     if (level > 2) {
       System.out.print(msg);
     } else {
@@ -36,7 +36,7 @@ public class ConsoleTarget implements LogTarget {
   }
 
   @Override
-  public void printTrace(Throwable e, int level) throws IOException {
+  public synchronized void printTrace(Throwable e, int level) throws IOException {
     if (level > 2) {
       e.printStackTrace(System.out);
     } else {

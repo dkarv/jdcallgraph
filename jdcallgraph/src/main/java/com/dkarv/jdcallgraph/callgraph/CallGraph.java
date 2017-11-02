@@ -105,6 +105,7 @@ public class CallGraph {
       }
     } else {
       StackItem top = calls.peek();
+      /* FIXME this is not yet stable at all. Especially take a look how it handles clinit
       if (!top.isReturnSafe()) {
         // The parent might be a constructor where we can't track the method exit if an exception occurs
         // check stack trace and remove element from calls if it returned unnoticed
@@ -112,17 +113,17 @@ public class CallGraph {
         // n == 1: <method>
         // n == 2: caller of <method>
         StackTraceElement element = StackTraceUtils.getNthParent(method, 1);
-        // TODO this does not work for two methods called the same
+        // TODO this does not work for two methods with the same name
         // It might work to check line # method 1 < line # stack trace < line # method 2
-        LOG.info("Check if {} returned silently?", top);
-        LOG.info("According to stack trace: {} -> {}", element, method);
         while (!top.isReturnSafe() && !top.equalTo(element)) {
           // The parent constructor already returned but we did not notice
           // TODO writer.end?
           LOG.debug("Remove element {}, its return was not noticed", calls.pop());
+          LOG.info("According to stack trace: {} -> {}", element, method);
+          LOG.trace("Trace: {}", (Object) Thread.currentThread().getStackTrace());
           top = calls.peek();
         }
-      }
+      } */
 
       for (GraphWriter w : writers) {
         w.edge(top, method);

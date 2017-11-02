@@ -73,7 +73,7 @@ public class JavassistInstr extends Instr implements ClassFileTransformer {
     for (Pattern p : excludes) {
       Matcher m = p.matcher(name);
       if (m.matches()) {
-        // LOG.trace("Skipping class {}", name);
+        LOG.trace("Skipping class {}", name);
         enhanceClass = false;
         break;
       }
@@ -106,14 +106,25 @@ public class JavassistInstr extends Instr implements ClassFileTransformer {
         LOG.trace("Enhancing class: {}", clazz.getName());
         CtBehavior[] methods = clazz.getDeclaredBehaviors();
         for (CtBehavior method : methods) {
-          enhanceMethod(method, clazz.getName());
+          CodeAttribute ca = method.getMethodInfo2().getCodeAttribute();
+          if (ca == null) {
+            // abstract or native
+            continue;
+          }
+          try {
+            enhanceMethod(method, clazz.getName());
+          } catch (CannotCompileException e) {
+            LOG.error("Cannot compile {}::{}", clazz, method, e);
+          }
         }
-        return clazz.toBytecode();
+        try {
+          return clazz.toBytecode();
+        } catch (CannotCompileException e) {
+          LOG.error("Cannot compile {}", clazz, e);
+        }
       } else {
         LOG.trace("Ignore class {}", clazz.getName());
       }
-    } catch (CannotCompileException e) {
-      LOG.error("Cannot compile", e);
     } catch (NotFoundException e) {
       LOG.error("Cannot find", e);
     } catch (IOException e) {
@@ -159,7 +170,11 @@ public class JavassistInstr extends Instr implements ClassFileTransformer {
   public static String getMethodName(CtBehavior method) throws NotFoundException {
     StringBuilder sb = new StringBuilder();
     if (method instanceof CtConstructor) {
-      sb.append("<init>");
+      if (((CtConstructor) method).isClassInitializer()) {
+        sb.append("<clinit>");
+      } else {
+        sb.append("<init>");
+      }
     } else {
       sb.append(method.getName());
     }

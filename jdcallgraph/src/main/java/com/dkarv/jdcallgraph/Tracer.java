@@ -71,8 +71,10 @@ public class Tracer {
     }
 
     if (Config.getInst().javassist()) {
+      LOG.info("Use Javassist backend");
       new JavassistInstr(excludes).instrument(instrumentation);
     } else {
+      LOG.info("Use ByteBuddy backend");
       new ByteBuddyInstr(excludes).instrument(instrumentation);
     }
   }

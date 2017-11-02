@@ -34,14 +34,15 @@ public class MethodTracer {
   public static final Logger LOG = new Logger(MethodTracer.class);
 
 
-  @Advice.OnMethodEnter(inline = false)
+  @Advice.OnMethodEnter(inline = false, suppress = Throwable.class)
   public static StackItem enter(@Advice.Origin("#t") String type,
                                 @Advice.Origin("#m") String method,
                                 @Advice.Origin("#s") String signature) {
-    return CallableTracer.enter(type, method, signature, true);
+    // TODO replace this crap. Breaks everything by returning very inconsistent names
+    return CallableTracer.enter(type, Format.shortName(method), signature, true);
   }
 
-  @Advice.OnMethodExit(inline = false, onThrowable = Throwable.class)
+  @Advice.OnMethodExit(inline = false, onThrowable = Throwable.class, suppress = Throwable.class)
   public static void exit(@Advice.Enter StackItem item) {
     CallableTracer.exit(item);
   }

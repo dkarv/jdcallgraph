@@ -49,7 +49,7 @@ public class StackTraceUtils {
 
   public static StackTraceElement getNthParent(StackItem method, int n) {
     StackTraceElement[] trace = Thread.currentThread().getStackTrace();
-    LOG.debug("Trace: {}", (Object) trace);
+    // LOG.debug("Trace: {}", (Object) trace);
     boolean found = false;
     for (StackTraceElement element : trace) {
       // TODO sync this with all the other packages to ignore

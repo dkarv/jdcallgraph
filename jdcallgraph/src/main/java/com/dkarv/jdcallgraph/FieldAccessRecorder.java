@@ -72,11 +72,14 @@ public class FieldAccessRecorder {
   }
 
   public static void afterRead(String fieldClass, String fieldName, String fromClass, String fromMethod) {
-    LOG.info("Read to {}::{} from {}::{}", fieldClass, fieldName, fromClass, fromMethod);
+    LOG.trace("Read to {}::{} from {}::{}", fieldClass, fieldName, fromClass, fromMethod);
+    // FIXME I forgot to implement this
+    // TODO fieldClass is wrong. Uses / instead of .
   }
 
   public static void afterWrite(String fieldClass, String fieldName, String fromClass, String fromMethod) {
-    LOG.info("Write to {}::{} from {}::{}", fieldClass, fieldName, fromClass, fromMethod);
+    LOG.trace("Write to {}::{} from {}::{}", fieldClass, fieldName, fromClass, fromMethod);
+    // FIXME I forgot to implement this
   }
 
   public static void log() {

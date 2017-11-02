@@ -2,6 +2,7 @@ package com.dkarv.jdcallgraph.instr;
 
 import com.dkarv.jdcallgraph.instr.JavassistInstr;
 import javassist.*;
+import javassist.bytecode.*;
 import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
@@ -63,7 +64,10 @@ public class EnhanceClassTest {
   public void testSuccess() throws IOException, NotFoundException, CannotCompileException {
     // Ignore empty method
     CtBehavior m = Mockito.mock(CtBehavior.class);
+    MethodInfo info = Mockito.mock(MethodInfo.class);
     Mockito.when(ct.getDeclaredBehaviors()).thenReturn(new CtBehavior[]{m});
+    Mockito.when(m.getMethodInfo2()).thenReturn(info);
+    Mockito.when(info.getCodeAttribute()).thenReturn(Mockito.mock(CodeAttribute.class));
     byte[] result = p.enhanceClass(input);
     Assert.assertArrayEquals(output, result);
     Mockito.verify(p).enhanceMethod(Mockito.eq(m), Mockito.eq("abc.def.ExampleClass"));

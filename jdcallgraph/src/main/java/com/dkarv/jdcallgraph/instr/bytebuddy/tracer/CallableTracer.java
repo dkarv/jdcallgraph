@@ -35,21 +35,33 @@ public abstract class CallableTracer {
   private static final boolean needsLine = ComputedConfig.lineNeeded();
 
   public static StackItem enter(String type, String method, String signature, boolean returnSafe) {
-    signature = Format.simplifySignatureArrays(signature);
+    try {
+      signature = Format.simplifySignatureArrays(signature);
 
-    int lineNumber;
-    if (needsLine) {
-      lineNumber = LineNumbers.get(type, method + signature);
-    } else {
-      lineNumber = -1;
+      int lineNumber;
+      if (needsLine) {
+        lineNumber = LineNumbers.get(type, method + signature);
+      } else {
+        lineNumber = -1;
+      }
+
+      StackItem item = new StackItem(type, method, signature, lineNumber, returnSafe);
+      CallRecorder.beforeMethod(item);
+      return item;
+    } catch (Throwable t) {
+      LOG.error("Error processing enter", t);
+      return null;
     }
-
-    StackItem item = new StackItem(type, method, signature, lineNumber, returnSafe);
-    CallRecorder.beforeMethod(item);
-    return item;
   }
 
   public static void exit(StackItem item) {
-    CallRecorder.afterMethod(item);
+    if (item != null) {
+      // Might be null if an error happened during enter
+      try {
+        CallRecorder.afterMethod(item);
+      } catch (Throwable t) {
+        LOG.error("Error processing exit", t);
+      }
+    }
   }
 }

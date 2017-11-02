@@ -170,4 +170,13 @@ public class Format {
     }
     return type;
   }
+
+  public static String shortName(String method) {
+    int index = method.lastIndexOf('.');
+    if (index < 0) {
+      return method;
+    } else {
+      return method.substring(index + 1);
+    }
+  }
 }

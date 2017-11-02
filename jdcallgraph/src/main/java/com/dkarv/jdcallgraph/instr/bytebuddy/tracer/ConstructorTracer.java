@@ -24,6 +24,7 @@
 package com.dkarv.jdcallgraph.instr.bytebuddy.tracer;
 
 import com.dkarv.jdcallgraph.CallRecorder;
+import com.dkarv.jdcallgraph.instr.bytebuddy.util.*;
 import com.dkarv.jdcallgraph.util.StackItem;
 import com.dkarv.jdcallgraph.util.log.Logger;
 import net.bytebuddy.asm.Advice;
@@ -31,12 +32,12 @@ import net.bytebuddy.asm.Advice;
 public class ConstructorTracer {
   public static final Logger LOG = new Logger(ConstructorTracer.class);
 
-  @Advice.OnMethodEnter(inline = false)
+  @Advice.OnMethodEnter(inline = false, suppress = Throwable.class)
   public static StackItem enter(@Advice.Origin("#t") String type, @Advice.Origin("#m") String method, @Advice.Origin("#s") String signature) {
-    return CallableTracer.enter(type, method, signature, false);
+    return CallableTracer.enter(type, Format.shortName(method), signature, false);
   }
 
-  @Advice.OnMethodExit(inline = false)
+  @Advice.OnMethodExit(inline = false, suppress = Throwable.class)
   public static void exit(@Advice.Enter StackItem item) {
     CallableTracer.exit(item);
   }
