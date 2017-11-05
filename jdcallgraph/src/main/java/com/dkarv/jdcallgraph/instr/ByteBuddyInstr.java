@@ -24,9 +24,8 @@
 package com.dkarv.jdcallgraph.instr;
 
 import com.dkarv.jdcallgraph.instr.bytebuddy.*;
-import com.dkarv.jdcallgraph.instr.bytebuddy.tracer.ConstructorTracer;
+import com.dkarv.jdcallgraph.instr.bytebuddy.tracer.*;
 import com.dkarv.jdcallgraph.instr.bytebuddy.LineVisitor;
-import com.dkarv.jdcallgraph.instr.bytebuddy.tracer.MethodTracer;
 import com.dkarv.jdcallgraph.instr.bytebuddy.util.NoAnonymousConstructorsMatcher;
 import com.dkarv.jdcallgraph.util.config.ComputedConfig;
 import com.dkarv.jdcallgraph.util.log.Logger;
@@ -56,14 +55,15 @@ public class ByteBuddyInstr extends Instr {
 
   @Override
   public void instrument(Instrumentation instrumentation) {
-    final Advice methodAdvice = Advice.to(MethodTracer.class);
-    final Advice constructorAdvice = Advice.to(ConstructorTracer.class);
+    final Advice.WithCustomMapping callableAdvice = Callable.collect();
+    final Advice methodAdvice = callableAdvice.to(MethodTracer.class);
+    final Advice constructorAdvice = callableAdvice.to(ConstructorTracer.class);
 
     final FieldAdvice fieldAdvice = new FieldAdvice();
     final LineVisitor lineVisitor = new LineVisitor();
 
     ResettableClassFileTransformer agent = new AgentBuilder.Default()
-        .with(new TracerLogger())
+        //.with(new TracerLogger())
         .type(new ElementMatcher<TypeDescription>() {
           @Override
           public boolean matches(TypeDescription target) {
@@ -78,7 +78,7 @@ public class ByteBuddyInstr extends Instr {
         .transform(new AgentBuilder.Transformer() {
           @Override
           public DynamicType.Builder<?> transform(DynamicType.Builder<?> builder, TypeDescription typeDescription, ClassLoader classLoader, JavaModule module) {
-            builder = builder.visit(new AsmVisitorWrapper.ForDeclaredMethods().method(ElementMatchers.isMethod(), methodAdvice));
+            builder = builder.visit(new AsmVisitorWrapper.ForDeclaredMethods().method(ElementMatchers.not(ElementMatchers.isConstructor()), methodAdvice));
             builder = builder.visit(new AsmVisitorWrapper.ForDeclaredMethods().method(ElementMatchers.isConstructor(), constructorAdvice));
             builder = builder.visit(new AsmVisitorWrapper.ForDeclaredMethods().method(new NoAnonymousConstructorsMatcher(), fieldAdvice));
             if (ComputedConfig.lineNeeded()) {

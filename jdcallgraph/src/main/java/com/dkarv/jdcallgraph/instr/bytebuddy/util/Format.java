@@ -73,7 +73,7 @@ public class Format {
 
   /**
    * ByteBuddy returns signatures where everything is resolved except arrays. This doesn't really
-   * make sense... But we have to translate the arrays to normal signatures.
+   * make sense... But we have to serialize the arrays to normal signatures.
    */
   public static String simplifySignatureArrays(String desc) {
     StringBuffer sbuf = new StringBuffer();

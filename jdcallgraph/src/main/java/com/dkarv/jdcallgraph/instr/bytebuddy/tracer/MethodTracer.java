@@ -23,27 +23,25 @@
  */
 package com.dkarv.jdcallgraph.instr.bytebuddy.tracer;
 
-import com.dkarv.jdcallgraph.CallRecorder;
 import com.dkarv.jdcallgraph.instr.bytebuddy.util.*;
-import com.dkarv.jdcallgraph.util.StackItem;
-import com.dkarv.jdcallgraph.util.log.Logger;
-import net.bytebuddy.asm.Advice;
-import net.bytebuddy.description.method.*;
+import com.dkarv.jdcallgraph.util.*;
+import com.dkarv.jdcallgraph.util.log.*;
+import net.bytebuddy.asm.*;
 
 public class MethodTracer {
   public static final Logger LOG = new Logger(MethodTracer.class);
 
-
   @Advice.OnMethodEnter(inline = false, suppress = Throwable.class)
-  public static StackItem enter(@Advice.Origin("#t") String type,
-                                @Advice.Origin("#m") String method,
-                                @Advice.Origin("#s") String signature) {
-    // TODO replace this crap. Breaks everything by returning very inconsistent names
+  public static StackItem enter(@Callable.Type String type,
+                                @Callable.Name String method,
+                                @Callable.Signature String signature) {
+    LOG.debug("Enter {}::{}{}", type, method, signature);
     return CallableTracer.enter(type, Format.shortName(method), signature, true);
   }
 
   @Advice.OnMethodExit(inline = false, onThrowable = Throwable.class, suppress = Throwable.class)
   public static void exit(@Advice.Enter StackItem item) {
+    LOG.debug("Exit {}", item);
     CallableTracer.exit(item);
   }
 }
