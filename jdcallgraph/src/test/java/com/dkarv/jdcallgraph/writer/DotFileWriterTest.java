@@ -28,9 +28,7 @@ public class DotFileWriterTest {
 
   @Before
   public void before() throws IOException {
-    Config c = Mockito.mock(Config.class);
-    Mockito.when(c.outDir()).thenReturn(tmp.getRoot().getCanonicalPath() + "/");
-    ConfigUtils.inject(c);
+    ConfigUtils.replace(true, "outDir: " + tmp.getRoot().getCanonicalPath());
   }
 
   @Test

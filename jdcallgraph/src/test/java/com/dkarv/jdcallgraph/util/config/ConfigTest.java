@@ -49,14 +49,8 @@ public class ConfigTest {
     ConfigUtils.replace(true, "outDir: abc/");
     Assert.assertEquals("abc/", Config.getInst().outDir());
 
-    try {
-      ConfigUtils.replace(true, "outDir: abc");
-      Assert.fail("Did not detect missing trailing slash");
-    } catch (IllegalArgumentException e) {
-    }
-
     ConfigUtils.replace(true);
-    Assert.assertEquals("./", Config.getInst().outDir());
+    Assert.assertEquals(".", Config.getInst().outDir());
   }
 
   @Test

@@ -25,6 +25,8 @@ package com.dkarv.jdcallgraph.util.config;
 
 import com.dkarv.jdcallgraph.util.options.Target;
 
+import java.io.*;
+
 /**
  * Some config options that are computed with others.
  */
@@ -49,5 +51,13 @@ public class ComputedConfig {
 
   public static boolean lineNeeded() {
     return Config.getInst().format().contains("{line}");
+  }
+
+  public static String outDir() {
+    String str = Config.getInst().outDir();
+    if (!str.endsWith(File.separator)) {
+      return str + File.separator;
+    }
+    return str;
   }
 }

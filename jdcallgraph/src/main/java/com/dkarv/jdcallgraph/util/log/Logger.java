@@ -24,7 +24,7 @@
 package com.dkarv.jdcallgraph.util.log;
 
 import com.dkarv.jdcallgraph.callgraph.CallGraph;
-import com.dkarv.jdcallgraph.util.config.Config;
+import com.dkarv.jdcallgraph.util.config.*;
 
 import java.io.IOException;
 import java.lang.reflect.Array;
@@ -53,7 +53,7 @@ public class Logger {
   public static void init() {
     TARGETS.clear();
     if (Config.getInst().logLevel() > 0) {
-      TARGETS.add(new FileTarget(Config.getInst().outDir(), Config.getInst().logLevel()));
+      TARGETS.add(new FileTarget(ComputedConfig.outDir(), Config.getInst().logLevel()));
       if (Config.getInst().logConsole()) {
         TARGETS.add(new ConsoleTarget());
       }

@@ -38,7 +38,7 @@ public abstract class Config {
   }
 
   @Option
-  public abstract String outDir();
+  abstract String outDir();
 
   @Option
   public abstract int logLevel();
@@ -71,11 +71,6 @@ public abstract class Config {
    * Check whether everything is set and fix options if necessary.
    */
   void check() {
-    if (!outDir().endsWith(File.separator)) {
-      // TODO get rid of this by checking each location it is used
-      throw new IllegalArgumentException("outDir " + outDir() + " does not end with a file separator");
-    }
-
     if (logLevel() < 0 || logLevel() > 6) {
       throw new IllegalArgumentException("Invalid log level: " + logLevel());
     }
