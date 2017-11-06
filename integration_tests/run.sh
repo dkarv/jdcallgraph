@@ -3,8 +3,8 @@
 version=$(java -version 2>&1 | awk -F '"' '/version/ {print $2}')
 echo "Running on java $version" >&2
 
+rm -r target
 rm -r result
-rm -r result2
 mkdir -p target
 mkdir -p result
 
