@@ -8,10 +8,7 @@ import org.junit.Test;
 import org.junit.rules.TemporaryFolder;
 import org.mockito.Mockito;
 
-import java.io.File;
-import java.io.IOException;
-import java.io.PrintWriter;
-import java.io.UnsupportedEncodingException;
+import java.io.*;
 import java.nio.charset.*;
 import java.nio.file.Files;
 
@@ -29,11 +26,15 @@ public class FileTargetTest {
 
       File file = new File(tmp.getRoot(), "error.log");
       if (file.exists()) {
-        file.delete();
+        if (!file.delete()) {
+          throw new FileNotFoundException("Can't delete " + file.getCanonicalPath());
+        }
       }
       file = new File(tmp.getRoot(), "debug.log");
       if (file.exists()) {
-        file.delete();
+        if (!file.delete()) {
+          throw new FileNotFoundException("Can't delete " + file.getCanonicalPath());
+        }
       }
 
       return new FileTarget(tmp.getRoot().getCanonicalPath() + "/", level);
