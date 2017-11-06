@@ -7,11 +7,11 @@ rmdir /s /q result
 mkdir target
 mkdir result
 
-for /F %%G in (src\com\dkarv\verifier\*.java) do (
+for /R src\com\dkarv\verifier\ %%G in (*.java) do (
     javac -d target %%G
 )
 
-for /F %%G in (src\com\dkarv\testcases\%1\*.java) do (
+for /R src\com\dkarv\testcases\%1\ %%G in (*.java) do (
     javac -d target %%G
 )
 
