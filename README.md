@@ -5,6 +5,7 @@ JDCallgraph - Dynamic call graph generation for Java. Uses
 Can also create a data dependency graph to show field access between methods. Support various output formats like csv, dot or a matrix.
 
 [![Build Status](https://travis-ci.org/dkarv/jdcallgraph.svg?branch=master)](https://travis-ci.org/dkarv/jdcallgraph)
+[![Build status](https://ci.appveyor.com/api/projects/status/ormg13avflgg3t3t/branch/master?svg=true)](https://ci.appveyor.com/project/dkarv/jdcallgraph/branch/master)
 [![Coverage Status](https://coveralls.io/repos/github/dkarv/jdcallgraph/badge.svg?branch=master)](https://coveralls.io/github/dkarv/jdcallgraph?branch=master)
 
 ## How-To
