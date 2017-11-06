@@ -19,7 +19,7 @@ public class LoggerTest {
 
   private Logger init(int logLevel, boolean stdOut) {
     try {
-      ConfigUtils.replace( true, "logLevel: " + logLevel, "logConsole: " + stdOut);
+      ConfigUtils.replace(true, "logLevel: " + logLevel, "logConsole: " + stdOut);
     } catch (IOException e) {
       fail("Error initializing config");
     }
@@ -195,7 +195,7 @@ public class LoggerTest {
     logger.debug("test");
     logger.error("test", new RuntimeException());
     assertEquals("", console.getOut());
-    String pattern = "Error in logger: error\njava.io.IOException: error\n.*";
+    String pattern = "Error in logger: error\r?\njava.io.IOException: error\r?\n.*";
     pattern = pattern + pattern + pattern;
     assertThat(console.getErr(), MatchesPattern.matchesPattern(Pattern.compile(pattern, Pattern.DOTALL)));
     console.reset();
