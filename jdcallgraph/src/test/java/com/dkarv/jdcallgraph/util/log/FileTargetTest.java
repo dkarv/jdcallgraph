@@ -1,16 +1,14 @@
 package com.dkarv.jdcallgraph.util.log;
 
-import com.dkarv.jdcallgraph.helper.Console;
-import junit.framework.AssertionFailedError;
+import junit.framework.*;
 import org.junit.Assert;
-import org.junit.Rule;
+import org.junit.*;
 import org.junit.Test;
-import org.junit.rules.TemporaryFolder;
-import org.mockito.Mockito;
+import org.junit.rules.*;
 
 import java.io.*;
 import java.nio.charset.*;
-import java.nio.file.Files;
+import java.nio.file.*;
 
 public class FileTargetTest {
 
@@ -26,15 +24,11 @@ public class FileTargetTest {
 
       File file = new File(tmp.getRoot(), "error.log");
       if (file.exists()) {
-        if (!file.delete()) {
-          throw new FileNotFoundException("Can't delete " + file.getCanonicalPath() + " in " + tmp.getRoot());
-        }
+        Files.delete(file.toPath());
       }
       file = new File(tmp.getRoot(), "debug.log");
       if (file.exists()) {
-        if (!file.delete()) {
-          throw new FileNotFoundException("Can't delete " + file.getCanonicalPath() + " in " + tmp.getRoot());
-        }
+        Files.delete(file.toPath());
       }
 
       return new FileTarget(tmp.getRoot().getCanonicalPath() + File.separator, level);
