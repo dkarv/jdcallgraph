@@ -7,13 +7,8 @@ rmdir /s /q result
 mkdir target
 mkdir result
 
-for /R src\com\dkarv\verifier\ %%G in (*.java) do (
-    javac -d target %%G
-)
-
-for /R src\com\dkarv\testcases\%1\ %%G in (*.java) do (
-    javac -d target %%G
-)
+dir /s /B *.java > sources.txt
+javac @sources.txt
 
 java -cp target ^
 -javaagent:..\jdcallgraph\target\jdcallgraph-0.2-agent.jar=.\bytebuddy.ini ^
