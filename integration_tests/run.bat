@@ -15,10 +15,8 @@ for /R src\com\dkarv\testcases\%1\ %%G in (*.java) do (
     javac -d target %%G
 )
 
-:run
-echo Run %1 %2
 java -cp target ^
--javaagent:..\jdcallgraph\target\jdcallgraph-0.2-agent.jar=.\%2 ^
+-javaagent:..\jdcallgraph\target\jdcallgraph-0.2-agent.jar=.\bytebuddy.ini ^
 com.dkarv.testcases.%1.Main
 
 ::    if java -cp target com/dkarv/testcases/$1/Verification ; then
