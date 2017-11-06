@@ -27,13 +27,13 @@ public class FileTargetTest {
       File file = new File(tmp.getRoot(), "error.log");
       if (file.exists()) {
         if (!file.delete()) {
-          throw new FileNotFoundException("Can't delete " + file.getCanonicalPath());
+          throw new FileNotFoundException("Can't delete " + file.getCanonicalPath() + " in " + tmp.getRoot());
         }
       }
       file = new File(tmp.getRoot(), "debug.log");
       if (file.exists()) {
         if (!file.delete()) {
-          throw new FileNotFoundException("Can't delete " + file.getCanonicalPath());
+          throw new FileNotFoundException("Can't delete " + file.getCanonicalPath() + " in " + tmp.getRoot());
         }
       }
 
