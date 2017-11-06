@@ -23,6 +23,7 @@
  */
 package com.dkarv.jdcallgraph.writer;
 
+import com.dkarv.jdcallgraph.util.*;
 import com.dkarv.jdcallgraph.util.config.*;
 import com.dkarv.jdcallgraph.util.log.Logger;
 
@@ -38,7 +39,7 @@ public class FileWriter {
   BufferedWriter writer;
 
   FileWriter(String fileName) throws FileNotFoundException, UnsupportedEncodingException {
-    File target = new File(ComputedConfig.outDir() + fileName);
+    File target = new File(OsUtils.escapeFilename(ComputedConfig.outDir() + fileName));
     target.getParentFile().mkdirs();
     writer = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(target, true), "UTF-8"), BUFFER_SIZE);
   }
