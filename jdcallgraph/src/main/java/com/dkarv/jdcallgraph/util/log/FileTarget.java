@@ -79,4 +79,14 @@ public class FileTarget implements LogTarget {
       error.flush();
     }
   }
+
+  @Override
+  public void close() throws IOException {
+    if (debug != null) {
+      debug.close();
+    }
+    if (error != null) {
+      error.close();
+    }
+  }
 }

@@ -58,20 +58,6 @@ public class Logger {
         TARGETS.add(new ConsoleTarget());
       }
     }
-
-    Runtime.getRuntime().addShutdownHook(new Thread() {
-      public void run() {
-        // TODO do together with other shutdown hooks
-        // flush all logs before shutting down
-        for (LogTarget t : TARGETS) {
-          try {
-            t.flush();
-          } catch (IOException e) {
-            System.err.println("Error flushing log before shutdown: " + e.getMessage());
-          }
-        }
-      }
-    });
   }
 
   private String build(int level, String msg) {
@@ -194,6 +180,17 @@ public class Logger {
   public void fatal(String msg, Object... args) {
     if (Config.getInst().logLevel() >= 1) {
       logE(1, msg, args);
+    }
+  }
+
+  public static void shutdown() {
+    // flush all logs before shutting down
+    for (LogTarget t : TARGETS) {
+      try {
+        t.close();
+      } catch (IOException e) {
+        System.err.println("Error flushing log before shutdown: " + e.getMessage());
+      }
     }
   }
 }

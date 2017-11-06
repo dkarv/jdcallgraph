@@ -48,4 +48,9 @@ public class ConsoleTarget implements LogTarget {
   public void flush() throws IOException {
     // Nothing to do
   }
+
+  @Override
+  public void close() throws IOException {
+    // Nothing to do
+  }
 }

@@ -19,8 +19,14 @@ public class FileTargetTest {
 
   private FileTarget reset(int level) {
     try {
-      FileTarget.debug = null;
-      FileTarget.error = null;
+      if (FileTarget.debug != null) {
+        FileTarget.debug.close();
+        FileTarget.debug = null;
+      }
+      if (FileTarget.error != null) {
+        FileTarget.error.close();
+        FileTarget.error = null;
+      }
 
       File file = new File(tmp.getRoot(), "error.log");
       if (file.exists()) {

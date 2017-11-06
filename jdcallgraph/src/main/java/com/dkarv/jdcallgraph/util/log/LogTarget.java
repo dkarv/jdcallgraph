@@ -31,4 +31,6 @@ public interface LogTarget {
   void printTrace(Throwable e, int level) throws IOException;
 
   void flush() throws IOException;
+
+  void close() throws IOException;
 }
