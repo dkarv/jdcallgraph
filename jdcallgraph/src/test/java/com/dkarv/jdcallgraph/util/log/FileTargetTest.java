@@ -12,7 +12,7 @@ import java.io.File;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.UnsupportedEncodingException;
-import java.nio.charset.Charset;
+import java.nio.charset.*;
 import java.nio.file.Files;
 
 public class FileTargetTest {
@@ -48,7 +48,7 @@ public class FileTargetTest {
       return null;
     }
     byte[] encoded = Files.readAllBytes(file.toPath());
-    return new String(encoded, Charset.defaultCharset());
+    return new String(encoded, StandardCharsets.UTF_8);
   }
 
   private String readOut() throws IOException {
@@ -57,7 +57,7 @@ public class FileTargetTest {
       return null;
     }
     byte[] encoded = Files.readAllBytes(file.toPath());
-    return new String(encoded, Charset.defaultCharset());
+    return new String(encoded, StandardCharsets.UTF_8);
   }
 
   @Test
