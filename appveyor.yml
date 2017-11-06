@@ -18,4 +18,4 @@ build_script:
   - all.bat
 cache:
   - C:\maven\ -> appveyor.yml
-  - C:\Users\appveyor\.m2\ -> jdcallgraph\pom.xml
+  - C:\Users\appveyor\.m2\ -> pom.xml
