@@ -24,6 +24,7 @@
 package com.dkarv.jdcallgraph.util.log;
 
 import java.io.*;
+import java.nio.charset.*;
 
 public class FileTarget implements LogTarget {
   static Writer error;
@@ -33,8 +34,8 @@ public class FileTarget implements LogTarget {
     if (level > 0 && error == null) {
       try {
         FileTarget.error = new BufferedWriter(new OutputStreamWriter(
-            new FileOutputStream(folder + "error.log", true), "UTF-8"), 128);
-      } catch (UnsupportedEncodingException | FileNotFoundException e) {
+            new FileOutputStream(folder + "error.log", true), StandardCharsets.UTF_8), 128);
+      } catch (FileNotFoundException e) {
         System.err.println("Can't setup logfile: " + e.getMessage());
       }
     }
@@ -42,8 +43,8 @@ public class FileTarget implements LogTarget {
     if (level > 2 && debug == null) {
       try {
         FileTarget.debug = new BufferedWriter(new OutputStreamWriter(
-            new FileOutputStream(folder + "debug.log", true), "UTF-8"), 128);
-      } catch (UnsupportedEncodingException | FileNotFoundException e) {
+            new FileOutputStream(folder + "debug.log", true), StandardCharsets.UTF_8), 128);
+      } catch (FileNotFoundException e) {
         System.err.println("Can't setup logfile: " + e.getMessage());
       }
     }
