@@ -58,6 +58,10 @@ public class LineNumbers {
     }
     Integer i = lines.get(method);
     if (i == null) {
+      if ("<clinit>()".equals(method)) {
+        // Happens for static imports
+        return -1;
+      }
       throw new IllegalArgumentException("Line number for method " + clazz + "::" + method +
           " unknown.");
     }

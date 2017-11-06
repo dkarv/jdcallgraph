@@ -1,4 +1,4 @@
-package com.dkarv.testcases.clinit;
+package com.dkarv.testcases.recursive;
 
 import com.dkarv.verifier.*;
 
@@ -10,8 +10,10 @@ public class Verification {
     v.readCG();
 
     String main = Main.class.getCanonicalName();
-    v.mustCG(main, "<clinit>()", "<init>()");
-    
+
+    v.mustCG(main,"main(","call(int)");
+    v.mustCG(main,"call(int)","call(int)");
+
     v.verifyCGEmpty();
     v.verifyErrorLogEmpty();
   }

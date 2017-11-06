@@ -80,14 +80,12 @@ public class CallRecorder {
   }
 
   public static void shutdown() {
-    /*
-    TODO ignore for now
     for (CallGraph g : GRAPHS.values()) {
       try {
         g.finish();
       } catch (IOException e) {
         LOG.error("Error finishing call graph {}", g, e);
       }
-    }*/
+    }
   }
 }

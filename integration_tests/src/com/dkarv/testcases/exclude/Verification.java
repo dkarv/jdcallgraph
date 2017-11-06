@@ -10,7 +10,7 @@ public class Verification {
     v.readCG();
 
     String main = Main.class.getCanonicalName();
-    v.verifyCG(main, "main(java.lang.String[])", "<init>()");
+    v.mustCG(main, "main(java.lang.String[])", "<init>()");
 
     v.verifyCGEmpty();
     v.verifyErrorLogEmpty();

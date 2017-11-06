@@ -1,4 +1,4 @@
-package com.dkarv.testcases.clinit;
+package com.dkarv.testcases.staticimport;
 
 import com.dkarv.verifier.*;
 
@@ -10,7 +10,6 @@ public class Verification {
     v.readCG();
 
     String main = Main.class.getCanonicalName();
-    v.mustCG(main, "<clinit>()", "<init>()");
     
     v.verifyCGEmpty();
     v.verifyErrorLogEmpty();

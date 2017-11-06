@@ -80,8 +80,7 @@ public class Callable {
       return new Advice.OffsetMapping() {
         @Override
         public Target resolve(TypeDescription instrumentedType, MethodDescription instrumentedMethod, Assigner assigner, Context context) {
-          LOG.debug("Resolve {}::{}, {} {}", instrumentedType, instrumentedMethod, assigner, context);
-          return new Target.ForStackManipulation(new TextConstant(serialize(instrumentedType,instrumentedMethod)));
+          return new Target.ForStackManipulation(new TextConstant(serialize(instrumentedType, instrumentedMethod)));
         }
       };
     }
@@ -93,7 +92,6 @@ public class Callable {
 
       @Override
       protected String serialize(TypeDescription type, MethodDescription method) {
-        LOG.debug("serialize: {}::{}", type, method);
         return Format.method(method);
       }
     }
@@ -105,7 +103,6 @@ public class Callable {
 
       @Override
       protected String serialize(TypeDescription type, MethodDescription method) {
-        LOG.debug("serialize: {}::{}", type, method);
         return Format.type(type);
       }
     }
@@ -117,7 +114,6 @@ public class Callable {
 
       @Override
       protected String serialize(TypeDescription type, MethodDescription method) {
-        LOG.debug("serialize: {}::{}", type, method);
         return Format.signature(method);
       }
     }

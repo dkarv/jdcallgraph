@@ -36,6 +36,10 @@ if [[ "$version" < "1.9" ]]; then
 
     run $1 "javassist.ini"
 
-    diff -r result/cg result2/cg >&2
+    if [[ -f "src/com/dkarv/testcases/$1/.nodiff" ]]; then
+        diff -r -X src/com/dkarv/testcases/$1/.nodiff result/cg result2/cg >&2
+    else
+        diff -r result/cg result2/cg >&2
+    fi
     # diff -r result/ddg result2/ddg
 fi

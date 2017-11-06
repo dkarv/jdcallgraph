@@ -15,10 +15,17 @@ public class Verifier {
     return cGraph;
   }
 
-  public void verifyCG(String fromClazz, String fromMethod, String toClazz, String toMethod) {
+  public void verifyCG(String fromClazz, String fromMethod, String toClazz, String toMethod, boolean optional) {
     NodeMatcher matcher = new ClassMethodMatcher(toClazz, toMethod);
 
     Set<String> targets = cGraph.getTargets(new ClassMethodMatcher(fromClazz, fromMethod));
+    if (targets == null) {
+      if (optional) {
+        return;
+      } else {
+        throw new IllegalStateException("Start node " + fromClazz + "::" + fromMethod + " not found");
+      }
+    }
     Iterator<String> iterator = targets.iterator();
     boolean found = false;
     while (iterator.hasNext()) {
@@ -32,15 +39,26 @@ public class Verifier {
       }
     }
 
-    if (!found) {
+    if (!found && !optional) {
       throw new IllegalStateException("Can't find edge from " + fromClazz + "::" + fromMethod + "" +
           " -> " + toClazz + "::" + toMethod);
     }
-
   }
 
-  public void verifyCG(String clazz, String fromMethod, String toMethod) {
-    verifyCG(clazz, fromMethod, clazz, toMethod);
+  public void mustCG(String fromClazz, String fromMethod, String toClazz, String toMethod) {
+    verifyCG(fromClazz, fromMethod, toClazz, toMethod, false);
+  }
+
+  public void optionalCG(String fromClazz, String fromMethod, String toClazz, String toMethod) {
+    verifyCG(fromClazz, fromMethod, toClazz, toMethod, true);
+  }
+
+  public void mustCG(String clazz, String fromMethod, String toMethod) {
+    verifyCG(clazz, fromMethod, clazz, toMethod, false);
+  }
+
+  public void optionalCG(String clazz, String fromMethod, String toMethod) {
+    verifyCG(clazz, fromMethod, clazz, toMethod, true);
   }
 
   public void verifyCGEmpty() {

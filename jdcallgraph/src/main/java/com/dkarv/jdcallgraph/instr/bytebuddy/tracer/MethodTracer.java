@@ -35,13 +35,11 @@ public class MethodTracer {
   public static StackItem enter(@Callable.Type String type,
                                 @Callable.Name String method,
                                 @Callable.Signature String signature) {
-    LOG.debug("Enter {}::{}{}", type, method, signature);
     return CallableTracer.enter(type, Format.shortName(method), signature, true);
   }
 
   @Advice.OnMethodExit(inline = false, onThrowable = Throwable.class, suppress = Throwable.class)
   public static void exit(@Advice.Enter StackItem item) {
-    LOG.debug("Exit {}", item);
     CallableTracer.exit(item);
   }
 }

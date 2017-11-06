@@ -56,13 +56,6 @@ public class FieldAdvice implements AsmVisitorWrapper.ForDeclaredMethods.MethodV
     final String fromClass = instrumentedType.getName();
     final String fromMethod = instrumentedMethod.getName();
     return new MethodVisitor(Opcodes.ASM6, methodVisitor) {
-      // TODO maybe visitCode + wait for next line number = method line number?
-      /*@Override
-      public void visitCode() {
-        LOG.debug("visitCode of {}", instrumentedMethod.getDescriptor());
-        super.visitCode();
-      }*/
-
       @Override
       public void visitMaxs(int maxStack, int maxLocals) {
         super.visitMaxs(maxStack + 4, maxLocals);
@@ -73,8 +66,6 @@ public class FieldAdvice implements AsmVisitorWrapper.ForDeclaredMethods.MethodV
                                  String desc) {
         super.visitFieldInsn(opcode, owner, name, desc);
 
-        // FIXME Filter write/reads to classes we ignore
-
         boolean isStatic = (opcode == Opcodes.GETSTATIC || opcode == Opcodes.PUTSTATIC);
         boolean isWrite = (opcode == Opcodes.PUTSTATIC || opcode == Opcodes.PUTFIELD);
 
@@ -83,6 +74,7 @@ public class FieldAdvice implements AsmVisitorWrapper.ForDeclaredMethods.MethodV
           super.visitLdcInsn(owner);
           super.visitLdcInsn(name);
         } else {
+          // FIXME this is wrong?? Using this as target is too easy?
           // []
           super.visitTypeInsn(Opcodes.NEW, "java/lang/StringBuilder");
           // [StringBuilder]
@@ -121,16 +113,6 @@ public class FieldAdvice implements AsmVisitorWrapper.ForDeclaredMethods.MethodV
           super.visitMethodInsn(Opcodes.INVOKESTATIC, TARGET_CLASS, TARGET_READ, TARGET_READ_DESC, false);
         }
       }
-
-      /*@Override
-      public void visitLineNumber(int line, Label start) {
-        LOG.debug("visitLineNumber: {}, {}", line, start);
-      }*/
-
-      /*@Override
-      public void visitEnd() {
-        LOG.debug("visitEnd");
-      }*/
     };
   }
 

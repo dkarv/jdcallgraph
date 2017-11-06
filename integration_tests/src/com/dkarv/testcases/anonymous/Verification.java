@@ -11,11 +11,14 @@ public class Verification {
 
     String main = Main.class.getCanonicalName();
     String number = Number.class.getCanonicalName();
-    v.verifyCG(main, "main(java.lang.String[])", "<init>(int)");
-    v.verifyCG(main, "<init>(int)", main + "$1", "<init>");
-    v.verifyCG(main + "$1", "<init>", number, "<init>()");
-    v.verifyCG(number, "<init>()", "<init>(int)");
-    v.verifyCG(main, "main(java.lang.String[])", main + "$1", "add(int)");
+    v.mustCG(main, "main(java.lang.String[])", "<init>(int)");
+    v.mustCG(main, "<init>(int)", main + "$1", "<init>");
+    v.mustCG(main + "$1", "<init>", number, "<init>()");
+    v.mustCG(number, "<init>()", "<init>(int)");
+    v.mustCG(main, "main(java.lang.String[])", main + "$1", "add(int)");
+
+    v.optionalCG(main, "<init>", number, "<clinit>");
+    v.optionalCG(main, "<init>", main + "$1", "<clinit>");
 
     v.verifyCGEmpty();
     v.verifyErrorLogEmpty();

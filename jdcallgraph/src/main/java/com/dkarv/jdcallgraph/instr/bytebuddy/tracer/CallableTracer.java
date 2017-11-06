@@ -27,12 +27,13 @@ import com.dkarv.jdcallgraph.CallRecorder;
 import com.dkarv.jdcallgraph.instr.bytebuddy.util.*;
 import com.dkarv.jdcallgraph.util.LineNumbers;
 import com.dkarv.jdcallgraph.util.StackItem;
-import com.dkarv.jdcallgraph.util.config.ComputedConfig;
+import com.dkarv.jdcallgraph.util.config.*;
 import com.dkarv.jdcallgraph.util.log.*;
 
 public abstract class CallableTracer {
   private static final Logger LOG = new Logger(CallableTracer.class);
   private static final boolean needsLine = ComputedConfig.lineNeeded();
+  private static final boolean ignoreEmptyClinit = Config.getInst().ignoreEmptyClinit();
 
   public static StackItem enter(String type, String method, String signature, boolean returnSafe) {
     try {
@@ -41,6 +42,10 @@ public abstract class CallableTracer {
       int lineNumber;
       if (needsLine) {
         lineNumber = LineNumbers.get(type, method + signature);
+        if(ignoreEmptyClinit && lineNumber == -1 && "<clinit>".equals(method)) {
+          // ignore
+          return null;
+        }
       } else {
         lineNumber = -1;
       }

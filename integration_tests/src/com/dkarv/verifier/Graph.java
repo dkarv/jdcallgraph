@@ -37,9 +37,6 @@ public class Graph {
         }
       }
     }
-    if (targets == null) {
-      throw new IllegalStateException("Found no matching node: " + m);
-    }
     return targets;
   }
 
@@ -59,8 +56,6 @@ public class Graph {
         sb.append(entry.getKey());
         sb.append(" -> ");
         sb.append(to);
-      }
-      if (!entry.getValue().isEmpty()) {
         sb.append('\n');
       }
     }

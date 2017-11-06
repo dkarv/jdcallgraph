@@ -64,6 +64,9 @@ public abstract class Config {
   @Option(mergeDefaults = true)
   public abstract String[] exclude();
 
+  @Option
+  public abstract boolean ignoreEmptyClinit();
+
   /**
    * Check whether everything is set and fix options if necessary.
    */

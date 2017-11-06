@@ -21,8 +21,9 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package com.dkarv.jdcallgraph;
+package com.dkarv.jdcallgraph.util;
 
+import com.dkarv.jdcallgraph.*;
 import com.dkarv.jdcallgraph.util.log.Logger;
 
 public class ShutdownHook {

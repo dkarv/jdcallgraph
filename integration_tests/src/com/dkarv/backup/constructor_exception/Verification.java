@@ -11,9 +11,9 @@ public class Verification {
 
     String clazz = Main.class.getCanonicalName();
 
-    v.verifyCG(clazz, "main(java.lang.String[])", "<init>()");
-    v.verifyCG(clazz, "<init>()", "exception()");
-    v.verifyCG(clazz, "main(java.lang.String[])", "error()");
+    v.mustCG(clazz, "main(java.lang.String[])", "<init>()");
+    v.mustCG(clazz, "<init>()", "exception()");
+    v.mustCG(clazz, "main(java.lang.String[])", "error()");
 
     v.verifyCGEmpty();
     v.verifyErrorLogEmpty();
