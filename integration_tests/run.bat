@@ -1,14 +1,10 @@
-echo Run %1
-
-javac -version
-
 rmdir /s /q target
 rmdir /s /q result
 mkdir target
 mkdir result
 
 dir /s /B *.java > sources.txt
-javac @sources.txt
+javac -d target @sources.txt
 
 java -cp target ^
 -javaagent:..\jdcallgraph\target\jdcallgraph-0.2-agent.jar=.\bytebuddy.ini ^
