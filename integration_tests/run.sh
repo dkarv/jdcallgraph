@@ -31,8 +31,9 @@ function run {
 run $1 "bytebuddy.ini"
 
 if [[ "$version" < "1.9" ]]; then
+    rm -r result2
     mv result result2
-    mkdir result
+    mkdir -p result
 
     run $1 "javassist.ini"
 
