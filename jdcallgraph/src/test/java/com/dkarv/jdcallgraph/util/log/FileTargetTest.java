@@ -37,7 +37,7 @@ public class FileTargetTest {
         }
       }
 
-      return new FileTarget(tmp.getRoot().getCanonicalPath() + "/", level);
+      return new FileTarget(tmp.getRoot().getCanonicalPath() + File.separator, level);
     } catch (IOException e) {
       throw new AssertionFailedError("Error creating new FileTarget: " + e.getMessage());
     }
