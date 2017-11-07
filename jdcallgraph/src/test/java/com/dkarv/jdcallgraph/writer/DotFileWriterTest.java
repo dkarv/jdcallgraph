@@ -38,7 +38,7 @@ public class DotFileWriterTest {
   public void testStart() throws IOException {
     DotFileWriter writer = new DotFileWriter();
     writer.start("start");
-    writer.writer.writer.flush();
+    writer.writer.writer.close();
     Assert.assertEquals("digraph \"start\"\n{\n", read("start.dot"));
   }
 
@@ -51,7 +51,7 @@ public class DotFileWriterTest {
     writer.writer.writer.flush();
     clear("node.dot");
     writer.node(item);
-    writer.writer.writer.flush();
+    writer.writer.writer.close();
     Assert.assertEquals("\t\"method()\" [style=filled,fillcolor=red];\n", read("node.dot"));
 
   }
@@ -67,7 +67,7 @@ public class DotFileWriterTest {
     writer.writer.writer.flush();
     clear("edge.dot");
     writer.edge(item, item2);
-    writer.writer.writer.flush();
+    writer.writer.writer.close();
     Assert.assertEquals("\t\"from()\" -> \"to()\";\n", read("edge.dot"));
   }
 
@@ -78,7 +78,7 @@ public class DotFileWriterTest {
     writer.writer.writer.flush();
     clear("end.dot");
     writer.end();
-    writer.writer.writer.flush();
+    writer.writer.writer.close();
     Assert.assertEquals("}\n", read("end.dot"));
   }
 }
