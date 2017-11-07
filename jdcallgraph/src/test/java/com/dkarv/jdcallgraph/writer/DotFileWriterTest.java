@@ -13,12 +13,15 @@ import org.mockito.Mockito;
 
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.nio.file.*;
+import java.util.*;
 
 public class DotFileWriterTest {
   @Rule
   public TemporaryFolder tmp = new TemporaryFolder();
 
   private String read(String fileName) throws IOException {
+    System.out.println(Arrays.toString(tmp.getRoot().list()));
     return TestUtils.readFile(tmp, fileName);
   }
 
