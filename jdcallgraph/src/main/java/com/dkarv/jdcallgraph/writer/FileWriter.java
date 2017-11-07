@@ -38,13 +38,9 @@ public class FileWriter {
    */
   BufferedWriter writer;
 
-  FileWriter(String fileName) throws FileNotFoundException, UnsupportedEncodingException {
-    LOG.info("Create {}", fileName);
+  FileWriter(String fileName) throws IOException {
     fileName = OsUtils.escapeFilename(ComputedConfig.outDir() + fileName);
-    LOG.info("Escaped {}", fileName);
-    File target = new File(fileName);
-    LOG.info("File {}", target);
-    LOG.info("Parent {}", target.getParentFile());
+    File target = new File(fileName).getCanonicalFile();
     target.getParentFile().mkdirs();
     writer = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(target, true), "UTF-8"), BUFFER_SIZE);
   }
