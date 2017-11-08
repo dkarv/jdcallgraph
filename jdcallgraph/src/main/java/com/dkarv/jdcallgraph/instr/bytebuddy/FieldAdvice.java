@@ -24,13 +24,12 @@
 package com.dkarv.jdcallgraph.instr.bytebuddy;
 
 import com.dkarv.jdcallgraph.FieldAccessRecorder;
+import com.dkarv.jdcallgraph.instr.bytebuddy.util.*;
 import com.dkarv.jdcallgraph.util.log.Logger;
 import net.bytebuddy.asm.AsmVisitorWrapper;
 import net.bytebuddy.description.method.MethodDescription;
 import net.bytebuddy.description.type.TypeDescription;
 import net.bytebuddy.implementation.Implementation;
-import net.bytebuddy.jar.asm.AnnotationVisitor;
-import net.bytebuddy.jar.asm.Label;
 import net.bytebuddy.jar.asm.MethodVisitor;
 import net.bytebuddy.jar.asm.Opcodes;
 import net.bytebuddy.pool.TypePool;
@@ -39,8 +38,8 @@ public class FieldAdvice implements AsmVisitorWrapper.ForDeclaredMethods.MethodV
   private static final Logger LOG = new Logger(FieldAdvice.class);
 
   private static final String TARGET_CLASS = FieldAccessRecorder.class.getName().replace('.', '/');
-  private static final String TARGET_READ = "afterRead";
-  private static final String TARGET_WRITE = "afterWrite";
+  private static final String TARGET_READ = "beforeRead";
+  private static final String TARGET_WRITE = "beforeWrite";
   private static final String TARGET_READ_DESC =
       "(Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;)V";
   private static final String TARGET_WRITE_DESC = TARGET_READ_DESC;
@@ -53,55 +52,83 @@ public class FieldAdvice implements AsmVisitorWrapper.ForDeclaredMethods.MethodV
   }
 
   private MethodVisitor doWrap(final TypeDescription instrumentedType, final MethodDescription instrumentedMethod, MethodVisitor methodVisitor, Implementation.Context implementationContext, int writerFlags, int readerFlags) {
-    final String fromClass = instrumentedType.getName();
-    final String fromMethod = instrumentedMethod.getName();
+    final String fromClass = Format.type(instrumentedType);
+    final String fromMethod = Format.method(instrumentedMethod) + Format.signature(instrumentedMethod);
     return new MethodVisitor(Opcodes.ASM6, methodVisitor) {
       @Override
       public void visitMaxs(int maxStack, int maxLocals) {
         super.visitMaxs(maxStack + 4, maxLocals);
       }
 
+      /**
+       * Call toString on the element on top of the stack. Replaces the object with owner@123abc
+       */
+      private void hashObject(String owner, String name) {
+        // [Other]
+        super.visitMethodInsn(Opcodes.INVOKESTATIC, "java/lang/System", "identityHashCode", "(Ljava/lang/Object;)I", false);
+        // [123456]
+        super.visitMethodInsn(Opcodes.INVOKESTATIC, "java/lang/Integer", "toHexString", "(I)Ljava/lang/String;", false);
+        // [abc123]
+
+        super.visitTypeInsn(Opcodes.NEW, "java/lang/StringBuilder");
+        // [abc123, StringBuilder]
+        super.visitInsn(Opcodes.DUP);
+        // [abc123, StringBuilder, StringBuilder]
+        super.visitMethodInsn(Opcodes.INVOKESPECIAL, "java/lang/StringBuilder", "<init>", "()V", false);
+        // [abc123, StringBuilder]
+        super.visitLdcInsn(owner);
+        // [abc123, StringBuilder, example.Other]
+        super.visitMethodInsn(Opcodes.INVOKEVIRTUAL, "java/lang/StringBuilder", "append", "(Ljava/lang/String;)Ljava/lang/StringBuilder;", false);
+        // [abc123, StringBuilder]
+        super.visitLdcInsn('@');
+        // [abc123, StringBuilder, @]
+        super.visitMethodInsn(Opcodes.INVOKEVIRTUAL, "java/lang/StringBuilder", "append", "(C)Ljava/lang/StringBuilder;", false);
+        // [abc123, StringBuilder]
+        super.visitInsn(Opcodes.SWAP);
+        // [StringBuilder, abc123]
+        super.visitMethodInsn(Opcodes.INVOKEVIRTUAL, "java/lang/StringBuilder", "append", "(Ljava/lang/String;)Ljava/lang/StringBuilder;", false);
+        // [StringBuilder]
+        super.visitMethodInsn(Opcodes.INVOKEVIRTUAL, "java/lang/StringBuilder", "toString", "()Ljava/lang/String;", false);
+        // [example.Test@123abc]
+        super.visitLdcInsn(name);
+      }
+
       @Override
       public void visitFieldInsn(int opcode, String owner, String name,
                                  String desc) {
-        super.visitFieldInsn(opcode, owner, name, desc);
-
-        boolean isStatic = (opcode == Opcodes.GETSTATIC || opcode == Opcodes.PUTSTATIC);
-        boolean isWrite = (opcode == Opcodes.PUTSTATIC || opcode == Opcodes.PUTFIELD);
-
-        // push information about the target field
-        if (isStatic) {
-          super.visitLdcInsn(owner);
-          super.visitLdcInsn(name);
-        } else {
-          // FIXME this is wrong?? Using this as target is too easy?
-          // []
-          super.visitTypeInsn(Opcodes.NEW, "java/lang/StringBuilder");
-          // [StringBuilder]
-          super.visitInsn(Opcodes.DUP);
-          // [StringBuilder, StringBuilder]
-          super.visitMethodInsn(Opcodes.INVOKESPECIAL, "java/lang/StringBuilder", "<init>", "()V", false);
-          // [StringBuilder]
-          super.visitLdcInsn(owner);
-          // [StringBuilder, example.Test]
-          super.visitMethodInsn(Opcodes.INVOKEVIRTUAL, "java/lang/StringBuilder", "append", "(Ljava/lang/String;)Ljava/lang/StringBuilder;", false);
-          // [StringBuilder]
-          super.visitLdcInsn('@');
-          // [StringBuilder, @]
-          super.visitMethodInsn(Opcodes.INVOKEVIRTUAL, "java/lang/StringBuilder", "append", "(C)Ljava/lang/StringBuilder;", false);
-          // [StringBuilder]
-          super.visitVarInsn(Opcodes.ALOAD, 0);
-          // [StringBuilder, this]
-          super.visitMethodInsn(Opcodes.INVOKESTATIC, "java/lang/System", "identityHashCode", "(Ljava/lang/Object;)I", false);
-          // [StringBuilder, 123456]
-          super.visitMethodInsn(Opcodes.INVOKESTATIC, "java/lang/Integer", "toHexString", "(I)Ljava/lang/String;", false);
-          // [StringBuilder, 123abc]
-          super.visitMethodInsn(Opcodes.INVOKEVIRTUAL, "java/lang/StringBuilder", "append", "(Ljava/lang/String;)Ljava/lang/StringBuilder;", false);
-          // [StringBuilder]
-          super.visitMethodInsn(Opcodes.INVOKEVIRTUAL, "java/lang/StringBuilder", "toString", "()Ljava/lang/String;", false);
-          // [example.Test@123abc]
-          super.visitLdcInsn(fromMethod);
+        String readableOwner = owner.replace('/', '.');
+        switch (opcode) {
+          case Opcodes.GETSTATIC:
+          case Opcodes.PUTSTATIC:
+            super.visitLdcInsn(readableOwner);
+            super.visitLdcInsn(name);
+            break;
+          case Opcodes.GETFIELD:
+            // [Other]
+            super.visitInsn(Opcodes.DUP);
+            // [Other, Other]
+            hashObject(readableOwner, name);
+            break;
+          case Opcodes.PUTFIELD:
+            if ("L".equals(desc) || "D".equals(desc)) {
+              // Category2 element
+              // [Other, +123+]
+              super.visitInsn(Opcodes.DUP2_X1);
+              // [+123+, Other, 123]
+              super.visitInsn(Opcodes.POP2);
+              // [+123+, Other]
+              super.visitInsn(Opcodes.DUP_X2);
+              // [Other, +123+, Other]
+            } else {
+              // [Other, 123]
+              super.visitInsn(Opcodes.DUP2);
+              super.visitInsn(Opcodes.POP);
+              // [Other, 123, Other]
+            }
+            hashObject(readableOwner, name);
+            break;
         }
+        boolean isWrite = (opcode == Opcodes.PUTSTATIC || opcode == Opcodes.PUTFIELD);
 
         // push information where this operation is executed
         super.visitLdcInsn(fromClass);
@@ -112,6 +139,7 @@ public class FieldAdvice implements AsmVisitorWrapper.ForDeclaredMethods.MethodV
         } else {
           super.visitMethodInsn(Opcodes.INVOKESTATIC, TARGET_CLASS, TARGET_READ, TARGET_READ_DESC, false);
         }
+        super.visitFieldInsn(opcode, owner, name, desc);
       }
     };
   }

@@ -8,17 +8,23 @@ public class Verifier {
   private static File cgDirectory = new File(directory, "cg/");
   private static File ddgDirectory = new File(directory, "ddg/");
   private Graph cGraph;
+  private Graph ddGraph;
 
-  public Graph readCG() throws IOException {
+  public void readCG() throws IOException {
     cGraph = new Graph();
-    cGraph.read(cgDirectory);
-    return cGraph;
+    if (cgDirectory.exists()) {
+      cGraph.read(cgDirectory);
+    }
+    ddGraph = new Graph();
+    if (ddgDirectory.exists()) {
+      ddGraph.read(ddgDirectory);
+    }
   }
 
-  public void verifyCG(String fromClazz, String fromMethod, String toClazz, String toMethod, boolean optional) {
+  private void verify(Graph g, String fromClazz, String fromMethod, String toClazz, String toMethod, boolean optional) {
     NodeMatcher matcher = new ClassMethodMatcher(toClazz, toMethod);
 
-    Set<String> targets = cGraph.getTargets(new ClassMethodMatcher(fromClazz, fromMethod));
+    Set<String> targets = g.getTargets(new ClassMethodMatcher(fromClazz, fromMethod));
     if (targets == null) {
       if (optional) {
         return;
@@ -45,6 +51,10 @@ public class Verifier {
     }
   }
 
+  public void verifyCG(String fromClazz, String fromMethod, String toClazz, String toMethod, boolean optional) {
+    verify(cGraph, fromClazz, fromMethod, toClazz, toMethod, optional);
+  }
+
   public void mustCG(String fromClazz, String fromMethod, String toClazz, String toMethod) {
     verifyCG(fromClazz, fromMethod, toClazz, toMethod, false);
   }
@@ -61,9 +71,35 @@ public class Verifier {
     verifyCG(clazz, fromMethod, clazz, toMethod, true);
   }
 
+  public void verifyDDG(String fromClazz, String fromMethod, String toClazz, String toMethod, boolean optional) {
+    verify(ddGraph, fromClazz, fromMethod, toClazz, toMethod, optional);
+  }
+
+  public void mustDDG(String fromClazz, String fromMethod, String toClazz, String toMethod) {
+    verifyDDG(fromClazz, fromMethod, toClazz, toMethod, false);
+  }
+
+  public void optionalDDG(String fromClazz, String fromMethod, String toClazz, String toMethod) {
+    verifyDDG(fromClazz, fromMethod, toClazz, toMethod, true);
+  }
+
+  public void mustDDG(String clazz, String fromMethod, String toMethod) {
+    verifyDDG(clazz, fromMethod, clazz, toMethod, false);
+  }
+
+  public void optionalDDG(String clazz, String fromMethod, String toMethod) {
+    verifyDDG(clazz, fromMethod, clazz, toMethod, true);
+  }
+
   public void verifyCGEmpty() {
     if (!cGraph.isEmpty()) {
       throw new IllegalStateException("Graph is not empty:\n" + cGraph);
+    }
+  }
+
+  public void verifyDDGEmpty() {
+    if (!ddGraph.isEmpty()) {
+      throw new IllegalStateException("Graph is not empty:\n" + ddGraph);
     }
   }
 

@@ -24,9 +24,10 @@
 package com.dkarv.jdcallgraph;
 
 import com.dkarv.jdcallgraph.data.DataDependenceGraph;
-import com.dkarv.jdcallgraph.util.StackItem;
+import com.dkarv.jdcallgraph.util.*;
 import com.dkarv.jdcallgraph.util.log.Logger;
 
+import javax.sound.sampled.*;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
@@ -71,15 +72,14 @@ public class FieldAccessRecorder {
     }
   }
 
-  public static void afterRead(String fieldClass, String fieldName, String fromClass, String fromMethod) {
-    LOG.trace("Read to {}::{} from {}::{}", fieldClass, fieldName, fromClass, fromMethod);
-    // FIXME I forgot to implement this
-    // TODO fieldClass is wrong. Uses / instead of .
+  public static void beforeRead(String fieldClass, String fieldName, String fromClass, String fromMethod) {
+    int lineNumber = LineNumbers.get(fromClass, fromMethod);
+    read(fromClass, fromMethod, lineNumber, fieldClass, fieldName);
   }
 
-  public static void afterWrite(String fieldClass, String fieldName, String fromClass, String fromMethod) {
-    LOG.trace("Write to {}::{} from {}::{}", fieldClass, fieldName, fromClass, fromMethod);
-    // FIXME I forgot to implement this
+  public static void beforeWrite(String fieldClass, String fieldName, String fromClass, String fromMethod) {
+    int lineNumber = LineNumbers.get(fromClass, fromMethod);
+    write(fromClass, fromMethod, lineNumber, fieldClass, fieldName);
   }
 
   public static void log() {

@@ -78,9 +78,13 @@ public class ByteBuddyInstr extends Instr {
         .transform(new AgentBuilder.Transformer() {
           @Override
           public DynamicType.Builder<?> transform(DynamicType.Builder<?> builder, TypeDescription typeDescription, ClassLoader classLoader, JavaModule module) {
-            builder = builder.visit(new AsmVisitorWrapper.ForDeclaredMethods().method(ElementMatchers.not(ElementMatchers.isConstructor()), methodAdvice));
-            builder = builder.visit(new AsmVisitorWrapper.ForDeclaredMethods().method(ElementMatchers.isConstructor(), constructorAdvice));
-            builder = builder.visit(new AsmVisitorWrapper.ForDeclaredMethods().method(new NoAnonymousConstructorsMatcher(), fieldAdvice));
+            if (ComputedConfig.callDependence()) {
+              builder = builder.visit(new AsmVisitorWrapper.ForDeclaredMethods().method(ElementMatchers.not(ElementMatchers.isConstructor()), methodAdvice));
+              builder = builder.visit(new AsmVisitorWrapper.ForDeclaredMethods().method(ElementMatchers.isConstructor(), constructorAdvice));
+            }
+            if (ComputedConfig.dataDependence()) {
+              builder = builder.visit(new AsmVisitorWrapper.ForDeclaredMethods().method(new NoAnonymousConstructorsMatcher(), fieldAdvice));
+            }
             if (ComputedConfig.lineNeeded()) {
               builder = builder.visit(new AsmVisitorWrapper.ForDeclaredMethods().method(ElementMatchers.<MethodDescription>any(), lineVisitor));
             }
