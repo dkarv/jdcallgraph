@@ -60,7 +60,7 @@ public class DataDependenceGraph {
   private GraphWriter createWriter(Target target) {
     switch (target) {
       case DD_DOT:
-        return new RemoveDuplicatesWriter(new DotFileWriter());
+        return new RemoveDuplicatesWriter(new DotFileWriter(), false);
       case DD_TRACE:
         return new CsvTraceFileWriter();
       default:
