@@ -84,7 +84,7 @@ public class DataDependenceGraph {
         // ignore dependency on itself
         // LOG.debug("Location {} depends on {}", location, lastWrite);
         for (GraphWriter writer : writers) {
-          writer.edge(lastWrite, location, field);
+          writer.edge(lastWrite, location, "[label=\"" + field + "\"]");
         }
         if (callGraph != null) {
           callGraph.dataEdge(lastWrite, location);

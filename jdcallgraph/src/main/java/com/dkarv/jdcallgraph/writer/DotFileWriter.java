@@ -45,7 +45,7 @@ public class DotFileWriter implements GraphWriter {
 
   @Override
   public void node(StackItem method) throws IOException {
-    writer.append("\t\"" + method.toString() + "\" [style=filled,fillcolor=red];\n");
+    writer.append("\t\"" + method.toString() + "\" [style=filled,fillcolor=green];\n");
   }
 
   @Override

@@ -51,7 +51,7 @@ public class DotFileWriterTest {
     clear("node.dot");
     writer.node(item);
     writer.writer.writer.flush();
-    Assert.assertEquals("\t\"method()\" [style=filled,fillcolor=red];\n", read("node.dot"));
+    Assert.assertEquals("\t\"method()\" [style=filled,fillcolor=green];\n", read("node.dot"));
 
   }
 
