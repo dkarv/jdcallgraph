@@ -42,6 +42,10 @@ public class RemoveDuplicatesWriter implements GraphWriter {
   private final HashMap<StackItem, HashMap<StackItem, HashSet<String>>> labels = new HashMap<>();
   private final boolean checkLabel;
 
+  public RemoveDuplicatesWriter(GraphWriter parentWriter) {
+    this(parentWriter, true);
+  }
+
   public RemoveDuplicatesWriter(GraphWriter parentWriter, boolean checkLabel) {
     this.parentWriter = parentWriter;
     this.checkLabel = checkLabel;
