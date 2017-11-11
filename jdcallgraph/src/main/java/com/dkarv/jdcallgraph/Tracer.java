@@ -131,7 +131,9 @@ public class Tracer implements ClassFileTransformer {
         LOG.trace("Enhancing class: {}", clazz.getName());
         CtBehavior[] methods = clazz.getDeclaredBehaviors();
         for (CtBehavior method : methods) {
-          if (!method.isEmpty()) {
+          CodeAttribute ca = method.getMethodInfo2().getCodeAttribute();
+          if (ca != null) {
+            // not abstract or native
             enhanceMethod(method, clazz.getName());
           }
         }

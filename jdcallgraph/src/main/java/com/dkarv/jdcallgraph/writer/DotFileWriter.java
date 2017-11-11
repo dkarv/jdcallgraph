@@ -50,6 +50,7 @@ public class DotFileWriter implements GraphWriter {
 
   @Override
   public void edge(StackItem from, StackItem to) throws IOException {
+    // LOG.debug("{} => {}", from, to);
     writer.append("\t\"" + from.toString() + "\" -> \"" + to.toString() + "\";\n");
   }
 
