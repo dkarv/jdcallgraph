@@ -40,33 +40,10 @@ import java.util.*;
 public class DataDependenceGraph {
   private static final Logger LOG = new Logger(DataDependenceGraph.class);
 
-  // final List<GraphWriter> writers = new ArrayList<>();
-  final List<Target> writers = new ArrayList<>();
-  private final long threadId;
-
+  private final List<Target> writers = new ArrayList<>();
   private Map<String, StackItem> lastWrites = new HashMap<>();
 
-  /**
-   * Clinit methods are only called once. This is an issue because we don't add transitive data dependence nodes. Assume this scenario:
-   * static1 {
-   * x = 1;
-   * }
-   * static2 {
-   * y = x * 2;
-   * }
-   * <p>
-   * Only static2 is listed as dependency. The target is to also have static1 in there. That means:
-   * - For all reads in static1 add an edge to clinitDD.
-   * - For all reads to a variable that was written in static1, check if static1 depends on other staticX
-   * <p>
-   * TODO make configurable
-   */
-  //private static final boolean transitiveDDClinit = true;
-
-  //private static final Map<StackItem, Set<StackItem>> clinitDD = new HashMap<>();
-
-  public DataDependenceGraph(long threadId) throws IOException {
-    this.threadId = threadId;
+  public DataDependenceGraph() {
     for (Target t : Config.getInst().targets()) {
       if (t.needs(Property.NEEDS_DATA)) {
         writers.add(t);
@@ -84,30 +61,8 @@ public class DataDependenceGraph {
       if (!lastWrite.equals(location)) {
         // ignore dependency on itself
         for (Target t : writers) {
-          t.edge(threadId, lastWrite, location, field);
+          t.edge(lastWrite, location, field);
         }
-
-        /*
-        // TODO move this to a processor
-        if (transitiveDDClinit && lastWrite.isClinit()) {
-          if (location.isClinit()) {
-            Set<StackItem> set = clinitDD.get(location);
-            if (set == null) {
-              set = new HashSet<>();
-              clinitDD.put(location, set);
-            }
-            set.add(lastWrite);
-          }
-
-          Set<StackItem> dependencies = clinitDD.get(lastWrite);
-          if (dependencies != null) {
-            for (StackItem dependency : dependencies) {
-              for (GraphWriter writer : writers) {
-                writer.edge(dependency, lastWrite, "clinit dependency");
-              }
-            }
-          }
-        }*/
       }
     }
   }

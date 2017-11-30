@@ -1,12 +1,11 @@
 package com.dkarv.jdcallgraph.callgraph;
 
+import com.dkarv.jdcallgraph.util.options.*;
 import com.dkarv.jdcallgraph.writer.DotFileWriter;
 import com.dkarv.jdcallgraph.writer.GraphWriter;
 import com.dkarv.jdcallgraph.writer.CsvMatrixFileWriter;
 import com.dkarv.jdcallgraph.writer.RemoveDuplicatesWriter;
-import com.dkarv.jdcallgraph.util.options.GroupBy;
 import com.dkarv.jdcallgraph.util.StackItem;
-import com.dkarv.jdcallgraph.util.options.OldTarget;
 import com.dkarv.jdcallgraph.util.config.Config;
 import com.dkarv.jdcallgraph.util.config.ConfigUtils;
 import org.hamcrest.CoreMatchers;
@@ -17,28 +16,12 @@ import org.mockito.Mockito;
 import java.io.IOException;
 
 public class CallGraphTest {
-
-  @Test
-  public void testCreateWriter() {
-    GraphWriter w = CallGraph.createWriter(OldTarget.DOT, true);
-    Assert.assertThat(w, CoreMatchers.instanceOf(DotFileWriter.class));
-
-    w = CallGraph.createWriter(OldTarget.DOT, false);
-    Assert.assertThat(w, CoreMatchers.instanceOf(RemoveDuplicatesWriter.class));
-
-    w = CallGraph.createWriter(OldTarget.MATRIX, false);
-    Assert.assertThat(w, CoreMatchers.instanceOf(CsvMatrixFileWriter.class));
-
-    w = CallGraph.createWriter(OldTarget.MATRIX, true);
-    Assert.assertThat(w, CoreMatchers.instanceOf(CsvMatrixFileWriter.class));
-  }
-
   @Test
   public void testFinish() throws IOException {
     CallGraph graph = new CallGraph(1);
-    GraphWriter writer = Mockito.mock(GraphWriter.class);
+    Target writer = Mockito.mock(Target.class);
     StackItem item = Mockito.mock(StackItem.class);
-    graph.writers.set(0, writer);
+    graph.writers.add(0, writer);
 
     graph.finish();
     Mockito.verify(writer, Mockito.never()).end();
@@ -50,11 +33,12 @@ public class CallGraphTest {
   @Test
   public void testReturned() throws IOException {
     Config c = Mockito.mock(Config.class);
-    Mockito.when(c.writeTo()).thenReturn(new OldTarget[]{OldTarget.DOT});
+    Target t = Mockito.mock(Target.class);
+    Mockito.when(c.targets()).thenReturn(new Target[]{t});
     ConfigUtils.inject(c);
 
     CallGraph graph = new CallGraph(1);
-    GraphWriter writer = Mockito.mock(GraphWriter.class);
+    Target writer = Mockito.mock(Target.class);
     StackItem[] items = new StackItem[]{
         Mockito.mock(StackItem.class),
         Mockito.mock(StackItem.class),
@@ -63,7 +47,7 @@ public class CallGraphTest {
     };
 
     // Calling with unknown item should clear the whole stack
-    graph.writers.set(0, writer);
+    graph.writers.add(0, writer);
     for (StackItem item : items) {
       graph.calls.push(item);
     }
@@ -89,23 +73,5 @@ public class CallGraphTest {
     graph.returned(items[0]);
     Assert.assertTrue(graph.calls.isEmpty());
     Mockito.verify(writer, Mockito.times(2)).end();
-  }
-
-  @Test
-  public void testCheckStartCondition() {
-    Config c = Mockito.mock(Config.class);
-    Mockito.when(c.writeTo()).thenReturn(new OldTarget[]{});
-    ConfigUtils.inject(c);
-    StackItem item = Mockito.mock(StackItem.class);
-    Mockito.when(item.toString()).thenReturn("method()");
-    CallGraph graph = new CallGraph(1);
-
-    Mockito.when(c.groupBy()).thenReturn(GroupBy.THREAD);
-    String result = graph.checkStartCondition(item);
-    Assert.assertEquals("cg/1", result);
-
-    Mockito.when(c.groupBy()).thenReturn(GroupBy.ENTRY);
-    result = graph.checkStartCondition(item);
-    Assert.assertEquals("cg/method()", result);
   }
 }

@@ -40,17 +40,22 @@ public interface Processor {
   /**
    * Start a new graph.
    */
-  void start(long threadId) throws IOException;
+  void start(String id) throws IOException;
+
+  /**
+   * Single node: No edge.
+   */
+  void node(StackItem method) throws IOException;
 
   /**
    * Add an edge.
    */
-  void edge(long threadId, StackItem from, StackItem to) throws IOException;
+  void edge(StackItem from, StackItem to) throws IOException;
 
   /**
    * Add an edge with some additional information.
    */
-  void edge(long threadId, StackItem from, StackItem to, String info) throws IOException;
+  void edge(StackItem from, StackItem to, String info) throws IOException;
 
   /**
    * End of current stream reached. This is a good point to close the file written to if you write

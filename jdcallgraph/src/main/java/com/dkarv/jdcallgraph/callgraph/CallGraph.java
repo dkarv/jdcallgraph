@@ -23,7 +23,8 @@
  */
 package com.dkarv.jdcallgraph.callgraph;
 
-import com.dkarv.jdcallgraph.util.options.OldTarget;
+import com.dkarv.jdcallgraph.util.options.*;
+import com.dkarv.jdcallgraph.util.target.*;
 import com.dkarv.jdcallgraph.writer.*;
 import com.dkarv.jdcallgraph.util.*;
 import com.dkarv.jdcallgraph.util.config.Config;
@@ -34,74 +35,26 @@ import java.util.*;
 
 public class CallGraph {
   private static final Logger LOG = new Logger(CallGraph.class);
-  private static final String FOLDER = "cg/";
   private final long threadId;
   final Stack<StackItem> calls = new Stack<>();
 
-  final List<GraphWriter> writers = new ArrayList<>();
+  final List<Target> writers = new ArrayList<>();
 
   public CallGraph(long threadId) {
     this.threadId = threadId;
-    OldTarget[] targets = Config.getInst().writeTo();
-    for (OldTarget target : targets) {
-      if (!target.isDataDependency()) {
-        // Do not handle the DATA dependence graph
-        writers.add(createWriter(target, false));
+    for (Target t : Config.getInst().targets()) {
+      if (t.needs(Property.NEEDS_DATA)) {
+        writers.add(t);
       }
-    }
-  }
-
-  static GraphWriter createWriter(OldTarget t, boolean multiGraph) {
-    // TODO redo this with new remove duplicate strategies
-    switch (t) {
-      case DOT:
-        if (multiGraph) {
-          return new DotFileWriter();
-        } else {
-          return new RemoveDuplicatesWriter(new DotFileWriter());
-        }
-      case MATRIX:
-        return new CsvMatrixFileWriter();
-      case COVERAGE:
-        return new CsvCoverageFileWriter();
-      case TRACE:
-        return new CsvTraceFileWriter();
-      case LINES:
-        return new LineNumberFileWriter();
-      default:
-        throw new IllegalArgumentException("Unknown writeTo: " + t);
-    }
-  }
-
-  /**
-   * Check whether the method is a valid start condition.
-   *
-   * @param method called method
-   * @return identifier if method is a valid start condition, null otherwise
-   */
-  String checkStartCondition(StackItem method) {
-    switch (Config.getInst().groupBy()) {
-      case THREAD:
-        return FOLDER + String.valueOf(threadId);
-      case ENTRY:
-        return FOLDER + method.toString();
-      default:
-        throw new IllegalArgumentException("Unknown groupBy: " + Config.getInst().groupBy());
     }
   }
 
   public void called(StackItem method) throws IOException {
     if (calls.isEmpty()) {
-      // First node
-      String identifier = checkStartCondition(method);
-      if (identifier != null) {
-        calls.push(method);
-        for (GraphWriter w : writers) {
-          w.start(identifier);
-          w.node(method);
-        }
-      } else {
-        LOG.info("Skip node {} because start condition not fulfilled", method);
+      calls.push(method);
+      for (Target t : writers) {
+        t.start("cg");
+        t.node(method);
       }
     } else {
       StackItem top = calls.peek();
@@ -125,7 +78,7 @@ public class CallGraph {
         }
       } */
 
-      for (GraphWriter w : writers) {
+      for (Target w : writers) {
         w.edge(top, method);
       }
       calls.push(method);
@@ -153,7 +106,7 @@ public class CallGraph {
       LOG.error("Couldn't find the returned method call on stack");
     }
     if (calls.isEmpty()) {
-      for (GraphWriter w : writers) {
+      for (Target w : writers) {
         w.end();
       }
     }
@@ -167,12 +120,12 @@ public class CallGraph {
           LOG.error("Shutdown and safe element still on stack: {}", item);
         }
       }
-      for (GraphWriter w : writers) {
+      for (Target w : writers) {
         w.end();
       }
     }
 
-    for (GraphWriter w : writers) {
+    for (Target w : writers) {
       w.close();
     }
   }

@@ -1,7 +1,6 @@
 package com.dkarv.jdcallgraph.util.config;
 
-import com.dkarv.jdcallgraph.util.options.GroupBy;
-import com.dkarv.jdcallgraph.util.options.OldTarget;
+import com.dkarv.jdcallgraph.util.options.*;
 import org.junit.Assert;
 import org.junit.Rule;
 import org.junit.Test;
@@ -81,14 +80,15 @@ public class ConfigTest {
   }
 
   @Test
-  public void testWriteTo() throws IOException {
-    for (OldTarget t : OldTarget.values()) {
-      ConfigUtils.replace(true, "writeTo: " + t.name());
-      Assert.assertEquals(t, Config.getInst().writeTo()[0]);
-    }
+  public void testTargets() throws IOException {
+    ConfigUtils.replace(true, "targets: cg | dot");
+    Assert.assertEquals(1, Config.getInst().targets().length);
+    Assert.assertNotNull(Config.getInst().targets()[0]);
 
-    ConfigUtils.replace(true, "writeTo: " + OldTarget.DOT +
-        "," + OldTarget.MATRIX);
+    ConfigUtils.replace(true, "targets: cg | dot, ddg | csv");
+    Assert.assertEquals(2, Config.getInst().targets().length);
+    Assert.assertNotNull(Config.getInst().targets()[0]);
+    Assert.assertNotNull(Config.getInst().targets()[1]);
   }
 
   @Test

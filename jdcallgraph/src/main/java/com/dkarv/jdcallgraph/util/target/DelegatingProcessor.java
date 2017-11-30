@@ -39,18 +39,23 @@ public abstract class DelegatingProcessor implements Processor {
   }
 
   @Override
-  public void start(long threadId) throws IOException {
-    next.start(threadId);
+  public void start(String id) throws IOException {
+    next.start(id);
   }
 
   @Override
-  public void edge(long threadId, StackItem from, StackItem to) throws IOException {
-    next.edge(threadId, from, to);
+  public void node(StackItem node) throws IOException {
+    next.node(node);
   }
 
   @Override
-  public void edge(long threadId, StackItem from, StackItem to, String info) throws IOException {
-    next.edge(threadId, from, to, info);
+  public void edge(StackItem from, StackItem to) throws IOException {
+    next.edge(from, to);
+  }
+
+  @Override
+  public void edge(StackItem from, StackItem to, String info) throws IOException {
+    next.edge(from, to, info);
   }
 
   @Override

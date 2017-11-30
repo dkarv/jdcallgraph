@@ -62,24 +62,24 @@ public class DotFileWriter extends Writer {
   }
 
   @Override
-  public void start(long threadId) throws IOException {
+  public void start(String id) throws IOException {
     if (writer != null) {
       // close an old writer to make sure everything is flushed to disk
       close();
     }
-    writer = new FileWriter(threadId + ".dot");
-    writer.append("digraph \"" + threadId + "\"\n{\n");
+    writer = new FileWriter(id + ".dot");
+    writer.append("digraph \"" + id + "\"\n{\n");
   }
 
   @Override
-  public void edge(long threadId, StackItem from, StackItem to) throws IOException {
+  public void edge(StackItem from, StackItem to) throws IOException {
     LOG.trace("{} -> {}", from, to);
     writer.append("\t\"" + from.toString() + "\" -> \"" + to.toString() + "\";\n");
 
   }
 
   @Override
-  public void edge(long threadId, StackItem from, StackItem to, String info) throws IOException {
+  public void edge(StackItem from, StackItem to, String info) throws IOException {
     writer.append("\t\"" + from.toString() + "\" -> \"" + to.toString() + "\" [label=\"" + info + "\"];\n");
   }
 

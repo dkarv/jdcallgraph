@@ -23,7 +23,8 @@
  */
 package com.dkarv.jdcallgraph.util.config;
 
-import com.dkarv.jdcallgraph.util.options.OldTarget;
+import com.dkarv.jdcallgraph.util.options.*;
+import com.dkarv.jdcallgraph.util.target.*;
 
 import java.io.*;
 
@@ -32,8 +33,8 @@ import java.io.*;
  */
 public class ComputedConfig {
   public static boolean dataDependence() {
-    for (OldTarget t : Config.getInst().writeTo()) {
-      if (t.isDataDependency()) {
+    for (Target t : Config.getInst().targets()) {
+      if (t.needs(Property.NEEDS_DATA)) {
         return true;
       }
     }
@@ -41,8 +42,8 @@ public class ComputedConfig {
   }
 
   public static boolean callDependence() {
-    for (OldTarget t : Config.getInst().writeTo()) {
-      if (!t.isDataDependency()) {
+    for (Target t : Config.getInst().targets()) {
+      if (t.needs(Property.NEEDS_CALLS)) {
         return true;
       }
     }

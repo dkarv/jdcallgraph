@@ -1,8 +1,8 @@
 package com.dkarv.jdcallgraph.callgraph;
 
+import com.dkarv.jdcallgraph.util.options.*;
 import com.dkarv.jdcallgraph.writer.GraphWriter;
 import com.dkarv.jdcallgraph.util.StackItem;
-import com.dkarv.jdcallgraph.util.options.OldTarget;
 import com.dkarv.jdcallgraph.util.config.Config;
 import com.dkarv.jdcallgraph.util.config.ConfigUtils;
 import org.junit.Assert;
@@ -14,35 +14,27 @@ import java.io.IOException;
 
 public class CallGraph2Test {
   private StackItem item;
-  private GraphWriter writer;
+  private Target writer;
   private CallGraph graph;
 
   @Before
   public void before() {
     Config c = Mockito.mock(Config.class);
-    Mockito.when(c.writeTo()).thenReturn(new OldTarget[]{OldTarget.DOT});
+    Target t = Mockito.mock(Target.class);
+    Mockito.when(c.targets()).thenReturn(new Target[]{t});
     item = Mockito.mock(StackItem.class);
     Mockito.when(item.toString()).thenReturn("method()");
-    writer = Mockito.mock(GraphWriter.class);
+    writer = Mockito.mock(Target.class);
     ConfigUtils.inject(c);
     graph = Mockito.spy(new CallGraph(123));
-    graph.writers.set(0, writer);
+    graph.writers.add(0, writer);
   }
 
   @Test
   public void testCalledNode() throws IOException {
-    Mockito.doReturn("").when(graph).checkStartCondition(item);
     graph.called(item);
     Mockito.verify(writer).node(item);
     Assert.assertEquals(item, graph.calls.peek());
-  }
-
-  @Test
-  public void testCalledNotNode() throws IOException {
-    Mockito.doReturn(null).when(graph).checkStartCondition(item);
-    graph.called(item);
-    Mockito.verify(writer, Mockito.never()).node(item);
-    Assert.assertTrue(graph.calls.isEmpty());
   }
 
   @Test

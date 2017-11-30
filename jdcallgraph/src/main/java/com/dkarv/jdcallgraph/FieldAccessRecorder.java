@@ -34,21 +34,11 @@ import java.util.Map;
 
 public class FieldAccessRecorder {
   private static final Logger LOG = new Logger(FieldAccessRecorder.class);
-
-  /**
-   * Collect the call graph per thread.
-   */
-  static final Map<Long, DataDependenceGraph> GRAPHS = new HashMap<>();
+  private static final DataDependenceGraph graph = new DataDependenceGraph();
 
   public static void write(String fromClass, String fromMethod, int lineNumber, String fieldClass, String fieldName) {
     try {
       LOG.trace("Write to {}::{} from {}::{}", fieldClass, fieldName, fromClass, fromMethod);
-      long threadId = Thread.currentThread().getId();
-      DataDependenceGraph graph = GRAPHS.get(threadId);
-      if (graph == null) {
-        graph = new DataDependenceGraph(threadId);
-        GRAPHS.put(threadId, graph);
-      }
       graph.addWrite(new StackItem(fromClass, fromMethod, lineNumber, true), fieldClass + "::" +
           fieldName);
     } catch (Exception e) {
@@ -59,12 +49,6 @@ public class FieldAccessRecorder {
   public static void read(String fromClass, String fromMethod, int lineNumber, String fieldClass, String fieldName) {
     try {
       LOG.trace("Read to {}::{} from {}::{}", fieldClass, fieldName, fromClass, fromMethod);
-      long threadId = Thread.currentThread().getId();
-      DataDependenceGraph graph = GRAPHS.get(threadId);
-      if (graph == null) {
-        LOG.trace("Read not interesting because there was no write before");
-        return;
-      }
       graph.addRead(new StackItem(fromClass, fromMethod, lineNumber, true), fieldClass + "::" +
           fieldName);
     } catch (Exception e) {
@@ -82,21 +66,11 @@ public class FieldAccessRecorder {
     write(fromClass, fromMethod, lineNumber, fieldClass, fieldName);
   }
 
-  public static void log() {
-    LOG.info("log");
-  }
-
-  public static void log(Object o) {
-    LOG.info("log: {}", o);
-  }
-
   public static void shutdown() {
-    for (DataDependenceGraph g : GRAPHS.values()) {
-      try {
-        g.finish();
-      } catch (IOException e) {
-        LOG.error("Error finishing call graph {}", g, e);
-      }
+    try {
+      graph.finish();
+    } catch (IOException e) {
+      LOG.error("Error finishing call graph", e);
     }
   }
 }

@@ -30,30 +30,41 @@ import java.io.*;
 import java.util.*;
 
 public class ThreadsMapper extends Mapper {
-  Map<Long, Processor> threads = new HashMap<>();
+  private Map<Long, Processor> threads = new HashMap<>();
 
   public ThreadsMapper(Processor next) {
     super(next);
   }
 
-  @Override
-  public void start(long threadId) {
-    threads.put(threadId, next.copy());
+  private static long getId() {
+    return Thread.currentThread().getId();
   }
 
   @Override
-  public void edge(long threadId, StackItem from, StackItem to) throws IOException {
-    threads.get(threadId).edge(threadId, from, to);
+  public void start(String id) throws IOException {
+    Processor copy = next.copy();
+    threads.put(getId(), copy);
+    copy.start(id + "/" + getId());
   }
 
   @Override
-  public void edge(long threadId, StackItem from, StackItem to, String info) throws IOException {
-    threads.get(threadId).edge(threadId, from, to, info);
+  public void node(StackItem method) throws IOException {
+    threads.get(getId()).node(method);
   }
 
   @Override
-  public void end() {
-    // TODO add threadId to end?
+  public void edge(StackItem from, StackItem to) throws IOException {
+    threads.get(getId()).edge(from, to);
+  }
+
+  @Override
+  public void edge(StackItem from, StackItem to, String info) throws IOException {
+    threads.get(getId()).edge(from, to, info);
+  }
+
+  @Override
+  public void end() throws IOException {
+    threads.remove(getId()).end();
   }
 
   @Override

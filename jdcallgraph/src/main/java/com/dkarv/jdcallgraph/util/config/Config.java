@@ -46,9 +46,6 @@ public abstract class Config {
   public abstract GroupBy groupBy();
 
   @Option
-  public abstract OldTarget[] writeTo();
-
-  @Option
   public abstract DuplicateDetection duplicateDetection();
 
   @Option
@@ -63,6 +60,10 @@ public abstract class Config {
   @Option
   public abstract boolean ignoreEmptyClinit();
 
+  @Option
+  public abstract Target[] targets();
+
+
   /**
    * Check whether everything is set and fix options if necessary.
    */
@@ -72,5 +73,4 @@ public abstract class Config {
     }
   }
 
-  public abstract Target[] targets();
 }
