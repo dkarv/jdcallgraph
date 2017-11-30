@@ -129,4 +129,8 @@ public class StackItem {
         //&& this.lineNumber == element.getLineNumber()
         ;
   }
+
+  public boolean isClinit() {
+    return "<clinit>()".equals(methodName);
+  }
 }

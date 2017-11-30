@@ -6,7 +6,7 @@ import com.dkarv.jdcallgraph.writer.CsvMatrixFileWriter;
 import com.dkarv.jdcallgraph.writer.RemoveDuplicatesWriter;
 import com.dkarv.jdcallgraph.util.options.GroupBy;
 import com.dkarv.jdcallgraph.util.StackItem;
-import com.dkarv.jdcallgraph.util.options.Target;
+import com.dkarv.jdcallgraph.util.options.OldTarget;
 import com.dkarv.jdcallgraph.util.config.Config;
 import com.dkarv.jdcallgraph.util.config.ConfigUtils;
 import org.hamcrest.CoreMatchers;
@@ -20,16 +20,16 @@ public class CallGraphTest {
 
   @Test
   public void testCreateWriter() {
-    GraphWriter w = CallGraph.createWriter(Target.DOT, true);
+    GraphWriter w = CallGraph.createWriter(OldTarget.DOT, true);
     Assert.assertThat(w, CoreMatchers.instanceOf(DotFileWriter.class));
 
-    w = CallGraph.createWriter(Target.DOT, false);
+    w = CallGraph.createWriter(OldTarget.DOT, false);
     Assert.assertThat(w, CoreMatchers.instanceOf(RemoveDuplicatesWriter.class));
 
-    w = CallGraph.createWriter(Target.MATRIX, false);
+    w = CallGraph.createWriter(OldTarget.MATRIX, false);
     Assert.assertThat(w, CoreMatchers.instanceOf(CsvMatrixFileWriter.class));
 
-    w = CallGraph.createWriter(Target.MATRIX, true);
+    w = CallGraph.createWriter(OldTarget.MATRIX, true);
     Assert.assertThat(w, CoreMatchers.instanceOf(CsvMatrixFileWriter.class));
   }
 
@@ -50,7 +50,7 @@ public class CallGraphTest {
   @Test
   public void testReturned() throws IOException {
     Config c = Mockito.mock(Config.class);
-    Mockito.when(c.writeTo()).thenReturn(new Target[]{Target.DOT});
+    Mockito.when(c.writeTo()).thenReturn(new OldTarget[]{OldTarget.DOT});
     ConfigUtils.inject(c);
 
     CallGraph graph = new CallGraph(1);
@@ -94,7 +94,7 @@ public class CallGraphTest {
   @Test
   public void testCheckStartCondition() {
     Config c = Mockito.mock(Config.class);
-    Mockito.when(c.writeTo()).thenReturn(new Target[]{});
+    Mockito.when(c.writeTo()).thenReturn(new OldTarget[]{});
     ConfigUtils.inject(c);
     StackItem item = Mockito.mock(StackItem.class);
     Mockito.when(item.toString()).thenReturn("method()");

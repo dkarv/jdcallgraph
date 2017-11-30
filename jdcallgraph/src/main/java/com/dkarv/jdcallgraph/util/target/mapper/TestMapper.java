@@ -21,43 +21,12 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package com.dkarv.jdcallgraph.util.config;
+package com.dkarv.jdcallgraph.util.target.mapper;
 
-import com.dkarv.jdcallgraph.util.options.OldTarget;
+import com.dkarv.jdcallgraph.util.target.*;
 
-import java.io.*;
-
-/**
- * Some config options that are computed with others.
- */
-public class ComputedConfig {
-  public static boolean dataDependence() {
-    for (OldTarget t : Config.getInst().writeTo()) {
-      if (t.isDataDependency()) {
-        return true;
-      }
-    }
-    return false;
-  }
-
-  public static boolean callDependence() {
-    for (OldTarget t : Config.getInst().writeTo()) {
-      if (!t.isDataDependency()) {
-        return true;
-      }
-    }
-    return false;
-  }
-
-  public static boolean lineNeeded() {
-    return Config.getInst().format().contains("{line}");
-  }
-
-  public static String outDir() {
-    String str = Config.getInst().outDir();
-    if (!str.endsWith(File.separator)) {
-      return str + File.separator;
-    }
-    return str;
+public abstract class TestMapper extends Mapper {
+  public TestMapper(Processor next) {
+    super(next);
   }
 }

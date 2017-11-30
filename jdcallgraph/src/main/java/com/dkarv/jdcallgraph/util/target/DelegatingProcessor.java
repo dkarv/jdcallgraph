@@ -21,43 +21,45 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package com.dkarv.jdcallgraph.util.config;
+package com.dkarv.jdcallgraph.util.target;
 
-import com.dkarv.jdcallgraph.util.options.OldTarget;
+import com.dkarv.jdcallgraph.util.*;
 
 import java.io.*;
 
 /**
- * Some config options that are computed with others.
+ * Processor that automatically delegates everything to another processor if not overwritten.
  */
-public class ComputedConfig {
-  public static boolean dataDependence() {
-    for (OldTarget t : Config.getInst().writeTo()) {
-      if (t.isDataDependency()) {
-        return true;
-      }
-    }
-    return false;
+public abstract class DelegatingProcessor implements Processor {
+  protected Processor next;
+
+  @Override
+  public boolean needs(Property p) {
+    return next.needs(p);
   }
 
-  public static boolean callDependence() {
-    for (OldTarget t : Config.getInst().writeTo()) {
-      if (!t.isDataDependency()) {
-        return true;
-      }
-    }
-    return false;
+  @Override
+  public void start(long threadId) throws IOException {
+    next.start(threadId);
   }
 
-  public static boolean lineNeeded() {
-    return Config.getInst().format().contains("{line}");
+  @Override
+  public void edge(long threadId, StackItem from, StackItem to) throws IOException {
+    next.edge(threadId, from, to);
   }
 
-  public static String outDir() {
-    String str = Config.getInst().outDir();
-    if (!str.endsWith(File.separator)) {
-      return str + File.separator;
-    }
-    return str;
+  @Override
+  public void edge(long threadId, StackItem from, StackItem to, String info) throws IOException {
+    next.edge(threadId, from, to, info);
+  }
+
+  @Override
+  public void end() throws IOException {
+    next.end();
+  }
+
+  @Override
+  public void close() throws IOException {
+    next.close();
   }
 }

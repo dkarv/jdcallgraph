@@ -2,7 +2,7 @@ package com.dkarv.jdcallgraph.callgraph;
 
 import com.dkarv.jdcallgraph.writer.GraphWriter;
 import com.dkarv.jdcallgraph.util.StackItem;
-import com.dkarv.jdcallgraph.util.options.Target;
+import com.dkarv.jdcallgraph.util.options.OldTarget;
 import com.dkarv.jdcallgraph.util.config.Config;
 import com.dkarv.jdcallgraph.util.config.ConfigUtils;
 import org.junit.Assert;
@@ -20,7 +20,7 @@ public class CallGraph2Test {
   @Before
   public void before() {
     Config c = Mockito.mock(Config.class);
-    Mockito.when(c.writeTo()).thenReturn(new Target[]{Target.DOT});
+    Mockito.when(c.writeTo()).thenReturn(new OldTarget[]{OldTarget.DOT});
     item = Mockito.mock(StackItem.class);
     Mockito.when(item.toString()).thenReturn("method()");
     writer = Mockito.mock(GraphWriter.class);

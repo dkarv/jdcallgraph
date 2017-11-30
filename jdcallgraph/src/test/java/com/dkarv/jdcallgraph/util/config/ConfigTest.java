@@ -1,7 +1,7 @@
 package com.dkarv.jdcallgraph.util.config;
 
 import com.dkarv.jdcallgraph.util.options.GroupBy;
-import com.dkarv.jdcallgraph.util.options.Target;
+import com.dkarv.jdcallgraph.util.options.OldTarget;
 import org.junit.Assert;
 import org.junit.Rule;
 import org.junit.Test;
@@ -82,13 +82,13 @@ public class ConfigTest {
 
   @Test
   public void testWriteTo() throws IOException {
-    for (Target t : Target.values()) {
+    for (OldTarget t : OldTarget.values()) {
       ConfigUtils.replace(true, "writeTo: " + t.name());
       Assert.assertEquals(t, Config.getInst().writeTo()[0]);
     }
 
-    ConfigUtils.replace(true, "writeTo: " + Target.DOT +
-        "," + Target.MATRIX);
+    ConfigUtils.replace(true, "writeTo: " + OldTarget.DOT +
+        "," + OldTarget.MATRIX);
   }
 
   @Test

@@ -23,40 +23,53 @@
  */
 package com.dkarv.jdcallgraph.util.options;
 
-/**
- * Group the call graphs by the given strategy.
- */
-public enum Target {
-  /**
-   * Output a test coverage matrix.
-   */
-  MATRIX,
-  /**
-   * Output the call graph in dot format.
-   */
-  DOT,
-  /**
-   * Coverage csv.
-   */
-  COVERAGE,
-  /**
-   * All methods used per entry.
-   */
-  TRACE,
-  /**
-   * The line number of each entry (method/test).
-   */
-  LINES,
-  /**
-   * Data Dependence graph as dot file.
-   */
-  DD_DOT,
-  /**
-   * Data dependence graph as csv.
-   */
-  DD_TRACE;
+import com.dkarv.jdcallgraph.util.log.*;
+import com.dkarv.jdcallgraph.util.target.*;
 
-  public boolean isDataDependency() {
-    return this == Target.DD_DOT || this == Target.DD_TRACE;
+public class Target extends DelegatingProcessor {
+  private static final Logger LOG = new Logger(Target.class);
+  private final String[] src;
+
+  private Target(String[] src, Processor next) {
+    this.src = src;
+    super.next = next;
   }
+
+  public Target(String specification) {
+    String[] targets = specification.split("\\|");
+    if (targets.length < 2) {
+      throw new IllegalArgumentException("Target specification too short: " + specification);
+    }
+    Processor p = Writer.getFor(targets[targets.length - 1]);
+    for (int i = 1; i < targets.length - 1; i++) {
+      p = Mapper.getFor(targets[i], p);
+    }
+    next = p;
+    src = targets[0].split(" ");
+  }
+
+  @Override
+  public boolean needs(Property p) {
+    String need = null;
+    switch (p) {
+      case NEEDS_CALLS:
+        need = "cg";
+        break;
+      case NEEDS_DATA:
+        need = "ddg";
+        break;
+    }
+    for (String s : src) {
+      if (s.equals(need)) {
+        return true;
+      }
+    }
+    return next.needs(p);
+  }
+
+  @Override
+  public Target copy() {
+    return new Target(src, next.copy());
+  }
+
 }

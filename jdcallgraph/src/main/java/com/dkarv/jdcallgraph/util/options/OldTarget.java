@@ -21,43 +21,42 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package com.dkarv.jdcallgraph.util.config;
-
-import com.dkarv.jdcallgraph.util.options.OldTarget;
-
-import java.io.*;
+package com.dkarv.jdcallgraph.util.options;
 
 /**
- * Some config options that are computed with others.
+ * Group the call graphs by the given strategy.
  */
-public class ComputedConfig {
-  public static boolean dataDependence() {
-    for (OldTarget t : Config.getInst().writeTo()) {
-      if (t.isDataDependency()) {
-        return true;
-      }
-    }
-    return false;
-  }
+public enum OldTarget {
+  /**
+   * Output a test coverage matrix.
+   */
+  MATRIX,
+  /**
+   * Output the call graph in dot format.
+   */
+  DOT,
+  /**
+   * Coverage csv.
+   */
+  COVERAGE,
+  /**
+   * All methods used per entry.
+   */
+  TRACE,
+  /**
+   * The line number of each entry (method/test).
+   */
+  LINES,
+  /**
+   * Data Dependence graph as dot file.
+   */
+  DD_DOT,
+  /**
+   * Data dependence graph as csv.
+   */
+  DD_TRACE;
 
-  public static boolean callDependence() {
-    for (OldTarget t : Config.getInst().writeTo()) {
-      if (!t.isDataDependency()) {
-        return true;
-      }
-    }
-    return false;
-  }
-
-  public static boolean lineNeeded() {
-    return Config.getInst().format().contains("{line}");
-  }
-
-  public static String outDir() {
-    String str = Config.getInst().outDir();
-    if (!str.endsWith(File.separator)) {
-      return str + File.separator;
-    }
-    return str;
+  public boolean isDataDependency() {
+    return this == OldTarget.DD_DOT || this == OldTarget.DD_TRACE;
   }
 }

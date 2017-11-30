@@ -21,43 +21,50 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package com.dkarv.jdcallgraph.util.config;
+package com.dkarv.jdcallgraph.util.target.mapper;
 
-import com.dkarv.jdcallgraph.util.options.OldTarget;
+import com.dkarv.jdcallgraph.util.*;
+import com.dkarv.jdcallgraph.util.target.*;
 
 import java.io.*;
+import java.util.*;
 
-/**
- * Some config options that are computed with others.
- */
-public class ComputedConfig {
-  public static boolean dataDependence() {
-    for (OldTarget t : Config.getInst().writeTo()) {
-      if (t.isDataDependency()) {
-        return true;
-      }
-    }
-    return false;
+public class ThreadsMapper extends Mapper {
+  Map<Long, Processor> threads = new HashMap<>();
+
+  public ThreadsMapper(Processor next) {
+    super(next);
   }
 
-  public static boolean callDependence() {
-    for (OldTarget t : Config.getInst().writeTo()) {
-      if (!t.isDataDependency()) {
-        return true;
-      }
-    }
-    return false;
+  @Override
+  public void start(long threadId) {
+    threads.put(threadId, next.copy());
   }
 
-  public static boolean lineNeeded() {
-    return Config.getInst().format().contains("{line}");
+  @Override
+  public void edge(long threadId, StackItem from, StackItem to) throws IOException {
+    threads.get(threadId).edge(threadId, from, to);
   }
 
-  public static String outDir() {
-    String str = Config.getInst().outDir();
-    if (!str.endsWith(File.separator)) {
-      return str + File.separator;
+  @Override
+  public void edge(long threadId, StackItem from, StackItem to, String info) throws IOException {
+    threads.get(threadId).edge(threadId, from, to, info);
+  }
+
+  @Override
+  public void end() {
+    // TODO add threadId to end?
+  }
+
+  @Override
+  public void close() throws IOException {
+    for (Processor p : threads.values()) {
+      p.close();
     }
-    return str;
+  }
+
+  @Override
+  public ThreadsMapper copy() {
+    return new ThreadsMapper(next);
   }
 }

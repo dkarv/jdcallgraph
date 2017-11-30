@@ -38,7 +38,7 @@ public class FileWriter {
    */
   BufferedWriter writer;
 
-  FileWriter(String fileName) throws IOException {
+  public FileWriter(String fileName) throws IOException {
     fileName = OsUtils.escapeFilename(ComputedConfig.outDir() + fileName);
     File target = new File(fileName).getCanonicalFile();
     target.getParentFile().mkdirs();
@@ -50,11 +50,11 @@ public class FileWriter {
     writer.close();
   }
 
-  void append(String text) throws IOException {
+  public void append(String text) throws IOException {
     writer.write(text);
   }
 
-  void append(char c) throws IOException {
+  public void append(char c) throws IOException {
     writer.append(c);
   }
 }

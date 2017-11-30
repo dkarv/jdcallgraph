@@ -21,43 +21,51 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package com.dkarv.jdcallgraph.util.config;
+package com.dkarv.jdcallgraph.util.target;
 
-import com.dkarv.jdcallgraph.util.options.OldTarget;
+import com.dkarv.jdcallgraph.util.*;
+import com.dkarv.jdcallgraph.util.options.*;
 
 import java.io.*;
 
 /**
- * Some config options that are computed with others.
+ * Process all elements in a graph.
  */
-public class ComputedConfig {
-  public static boolean dataDependence() {
-    for (OldTarget t : Config.getInst().writeTo()) {
-      if (t.isDataDependency()) {
-        return true;
-      }
-    }
-    return false;
-  }
+public interface Processor {
+  /**
+   * Whether this processor or any childs needs this property.
+   */
+  boolean needs(Property p);
 
-  public static boolean callDependence() {
-    for (OldTarget t : Config.getInst().writeTo()) {
-      if (!t.isDataDependency()) {
-        return true;
-      }
-    }
-    return false;
-  }
+  /**
+   * Start a new graph.
+   */
+  void start(long threadId) throws IOException;
 
-  public static boolean lineNeeded() {
-    return Config.getInst().format().contains("{line}");
-  }
+  /**
+   * Add an edge.
+   */
+  void edge(long threadId, StackItem from, StackItem to) throws IOException;
 
-  public static String outDir() {
-    String str = Config.getInst().outDir();
-    if (!str.endsWith(File.separator)) {
-      return str + File.separator;
-    }
-    return str;
-  }
+  /**
+   * Add an edge with some additional information.
+   */
+  void edge(long threadId, StackItem from, StackItem to, String info) throws IOException;
+
+  /**
+   * End of current stream reached. This is a good point to close the file written to if you write
+   * to a new one per graph or flush any caches.
+   */
+  void end() throws IOException;
+
+  /**
+   * Shutdown this processor. No call will happen after this.
+   */
+  void close() throws IOException;
+
+  /**
+   * Create a copy of this Processor. This only has to copy the logic behind the processor and not
+   * the current state.
+   */
+  Processor copy();
 }

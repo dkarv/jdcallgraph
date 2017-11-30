@@ -24,54 +24,58 @@
 package com.dkarv.jdcallgraph.data;
 
 import com.dkarv.jdcallgraph.util.StackItem;
+import com.dkarv.jdcallgraph.util.options.OldTarget;
 import com.dkarv.jdcallgraph.util.options.Target;
 import com.dkarv.jdcallgraph.util.config.Config;
 import com.dkarv.jdcallgraph.util.log.Logger;
+import com.dkarv.jdcallgraph.util.target.*;
 import com.dkarv.jdcallgraph.writer.CsvTraceFileWriter;
 import com.dkarv.jdcallgraph.writer.DotFileWriter;
 import com.dkarv.jdcallgraph.writer.GraphWriter;
 import com.dkarv.jdcallgraph.writer.RemoveDuplicatesWriter;
 
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 public class DataDependenceGraph {
   private static final Logger LOG = new Logger(DataDependenceGraph.class);
-  private static final String FOLDER = "ddg/";
-  final List<GraphWriter> writers = new ArrayList<>();
+
+  // final List<GraphWriter> writers = new ArrayList<>();
+  final List<Target> writers = new ArrayList<>();
+  private final long threadId;
 
   private Map<String, StackItem> lastWrites = new HashMap<>();
 
-  public DataDependenceGraph(long threadId) throws IOException {
-    Target[] targets = Config.getInst().writeTo();
-    for (Target target : targets) {
-      if (target.isDataDependency()) {
-        GraphWriter writer = createWriter(target);
-        writer.start(FOLDER + "data_" + threadId);
-        writers.add(writer);
-      }
-    }
-  }
+  /**
+   * Clinit methods are only called once. This is an issue because we don't add transitive data dependence nodes. Assume this scenario:
+   * static1 {
+   * x = 1;
+   * }
+   * static2 {
+   * y = x * 2;
+   * }
+   * <p>
+   * Only static2 is listed as dependency. The target is to also have static1 in there. That means:
+   * - For all reads in static1 add an edge to clinitDD.
+   * - For all reads to a variable that was written in static1, check if static1 depends on other staticX
+   * <p>
+   * TODO make configurable
+   */
+  //private static final boolean transitiveDDClinit = true;
 
-  private GraphWriter createWriter(Target target) {
-    switch (target) {
-      case DD_DOT:
-        return new RemoveDuplicatesWriter(new DotFileWriter());
-      case DD_TRACE:
-        return new CsvTraceFileWriter();
-      default:
-        throw new IllegalArgumentException("Unknown target for a data dependency graph: " + target);
+  //private static final Map<StackItem, Set<StackItem>> clinitDD = new HashMap<>();
+
+  public DataDependenceGraph(long threadId) throws IOException {
+    this.threadId = threadId;
+    for (Target t : Config.getInst().targets()) {
+      if (t.needs(Property.NEEDS_DATA)) {
+        writers.add(t);
+      }
     }
   }
 
   public void addWrite(StackItem location, String field) throws IOException {
     this.lastWrites.put(field, location);
-    // for (GraphWriter writer : writers) {
-    //   writer.node(location);
-    // }
   }
 
   public void addRead(StackItem location, String field) throws IOException {
@@ -79,18 +83,39 @@ public class DataDependenceGraph {
     if (lastWrite != null) {
       if (!lastWrite.equals(location)) {
         // ignore dependency on itself
-        // LOG.debug("Location {} depends on {}", location, lastWrite);
-        for (GraphWriter writer : writers) {
-          writer.edge(lastWrite, location, field);
+        for (Target t : writers) {
+          t.edge(threadId, lastWrite, location, field);
         }
+
+        /*
+        // TODO move this to a processor
+        if (transitiveDDClinit && lastWrite.isClinit()) {
+          if (location.isClinit()) {
+            Set<StackItem> set = clinitDD.get(location);
+            if (set == null) {
+              set = new HashSet<>();
+              clinitDD.put(location, set);
+            }
+            set.add(lastWrite);
+          }
+
+          Set<StackItem> dependencies = clinitDD.get(lastWrite);
+          if (dependencies != null) {
+            for (StackItem dependency : dependencies) {
+              for (GraphWriter writer : writers) {
+                writer.edge(dependency, lastWrite, "clinit dependency");
+              }
+            }
+          }
+        }*/
       }
     }
   }
 
   public void finish() throws IOException {
-    for (GraphWriter writer : writers) {
-      writer.end();
-      writer.close();
+    for (Target t : writers) {
+      t.end();
+      t.close();
     }
   }
 }

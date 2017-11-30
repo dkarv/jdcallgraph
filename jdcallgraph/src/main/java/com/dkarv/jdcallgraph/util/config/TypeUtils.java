@@ -23,9 +23,10 @@
  */
 package com.dkarv.jdcallgraph.util.config;
 
-import java.lang.reflect.Array;
+import java.lang.reflect.*;
 
 public class TypeUtils {
+  @SuppressWarnings("unchecked")
   public static Object cast(Class<?> c, String value) {
     if (c.isAssignableFrom(String.class)) {
       return value;
@@ -44,7 +45,17 @@ public class TypeUtils {
       }
       return array;
     } else {
-      throw new IllegalArgumentException("Cannot cast to field of type " + c);
+      Constructor init;
+      try {
+        init = c.getConstructor(String.class);
+      } catch (NoSuchMethodException e) {
+        throw new IllegalArgumentException("Cannot cast to field of type " + c);
+      }
+      try {
+        return init.newInstance(value);
+      } catch (InstantiationException | IllegalAccessException | InvocationTargetException e) {
+        throw new IllegalStateException("Error creating new " + c);
+      }
     }
   }
 

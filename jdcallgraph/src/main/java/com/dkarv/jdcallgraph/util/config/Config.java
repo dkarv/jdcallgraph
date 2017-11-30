@@ -23,11 +23,7 @@
  */
 package com.dkarv.jdcallgraph.util.config;
 
-import com.dkarv.jdcallgraph.util.options.DuplicateDetection;
-import com.dkarv.jdcallgraph.util.options.GroupBy;
-import com.dkarv.jdcallgraph.util.options.Target;
-
-import java.io.File;
+import com.dkarv.jdcallgraph.util.options.*;
 
 public abstract class Config {
 
@@ -50,7 +46,7 @@ public abstract class Config {
   public abstract GroupBy groupBy();
 
   @Option
-  public abstract Target[] writeTo();
+  public abstract OldTarget[] writeTo();
 
   @Option
   public abstract DuplicateDetection duplicateDetection();
@@ -75,4 +71,6 @@ public abstract class Config {
       throw new IllegalArgumentException("Invalid log level: " + logLevel());
     }
   }
+
+  public abstract Target[] targets();
 }

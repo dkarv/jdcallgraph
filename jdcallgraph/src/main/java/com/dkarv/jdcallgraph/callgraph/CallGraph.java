@@ -23,7 +23,7 @@
  */
 package com.dkarv.jdcallgraph.callgraph;
 
-import com.dkarv.jdcallgraph.util.options.Target;
+import com.dkarv.jdcallgraph.util.options.OldTarget;
 import com.dkarv.jdcallgraph.writer.*;
 import com.dkarv.jdcallgraph.util.*;
 import com.dkarv.jdcallgraph.util.config.Config;
@@ -42,8 +42,8 @@ public class CallGraph {
 
   public CallGraph(long threadId) {
     this.threadId = threadId;
-    Target[] targets = Config.getInst().writeTo();
-    for (Target target : targets) {
+    OldTarget[] targets = Config.getInst().writeTo();
+    for (OldTarget target : targets) {
       if (!target.isDataDependency()) {
         // Do not handle the DATA dependence graph
         writers.add(createWriter(target, false));
@@ -51,7 +51,7 @@ public class CallGraph {
     }
   }
 
-  static GraphWriter createWriter(Target t, boolean multiGraph) {
+  static GraphWriter createWriter(OldTarget t, boolean multiGraph) {
     // TODO redo this with new remove duplicate strategies
     switch (t) {
       case DOT:
