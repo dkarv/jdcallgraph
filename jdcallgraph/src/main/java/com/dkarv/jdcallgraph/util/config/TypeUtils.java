@@ -54,7 +54,7 @@ public class TypeUtils {
       try {
         return init.newInstance(value);
       } catch (InstantiationException | IllegalAccessException | InvocationTargetException e) {
-        throw new IllegalStateException("Error creating new " + c);
+        throw new IllegalStateException("Error creating new " + c, e);
       }
     }
   }

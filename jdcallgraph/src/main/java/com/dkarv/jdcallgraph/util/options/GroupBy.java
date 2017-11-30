@@ -26,6 +26,7 @@ package com.dkarv.jdcallgraph.util.options;
 /**
  * Group the call graphs by the given strategy.
  */
+@Deprecated
 public enum GroupBy {
   ENTRY, THREAD
 

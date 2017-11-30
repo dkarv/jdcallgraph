@@ -34,7 +34,7 @@ import java.io.*;
 public class ComputedConfig {
   public static boolean dataDependence() {
     for (Target t : Config.getInst().targets()) {
-      if (t.needs(Property.NEEDS_DATA)) {
+      if (t.needs(Property.DATA_DEPENDENCY)) {
         return true;
       }
     }
@@ -43,7 +43,7 @@ public class ComputedConfig {
 
   public static boolean callDependence() {
     for (Target t : Config.getInst().targets()) {
-      if (t.needs(Property.NEEDS_CALLS)) {
+      if (t.needs(Property.METHOD_DEPENDENCY)) {
         return true;
       }
     }

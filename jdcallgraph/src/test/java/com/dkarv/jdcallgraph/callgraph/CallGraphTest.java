@@ -1,14 +1,9 @@
 package com.dkarv.jdcallgraph.callgraph;
 
 import com.dkarv.jdcallgraph.util.options.*;
-import com.dkarv.jdcallgraph.writer.DotFileWriter;
-import com.dkarv.jdcallgraph.writer.GraphWriter;
-import com.dkarv.jdcallgraph.writer.CsvMatrixFileWriter;
-import com.dkarv.jdcallgraph.writer.RemoveDuplicatesWriter;
 import com.dkarv.jdcallgraph.util.StackItem;
 import com.dkarv.jdcallgraph.util.config.Config;
 import com.dkarv.jdcallgraph.util.config.ConfigUtils;
-import org.hamcrest.CoreMatchers;
 import org.junit.Assert;
 import org.junit.Test;
 import org.mockito.Mockito;

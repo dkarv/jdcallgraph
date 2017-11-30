@@ -24,15 +24,10 @@
 package com.dkarv.jdcallgraph.data;
 
 import com.dkarv.jdcallgraph.util.StackItem;
-import com.dkarv.jdcallgraph.util.options.OldTarget;
 import com.dkarv.jdcallgraph.util.options.Target;
 import com.dkarv.jdcallgraph.util.config.Config;
 import com.dkarv.jdcallgraph.util.log.Logger;
 import com.dkarv.jdcallgraph.util.target.*;
-import com.dkarv.jdcallgraph.writer.CsvTraceFileWriter;
-import com.dkarv.jdcallgraph.writer.DotFileWriter;
-import com.dkarv.jdcallgraph.writer.GraphWriter;
-import com.dkarv.jdcallgraph.writer.RemoveDuplicatesWriter;
 
 import java.io.IOException;
 import java.util.*;
@@ -43,10 +38,11 @@ public class DataDependenceGraph {
   private final List<Target> writers = new ArrayList<>();
   private Map<String, StackItem> lastWrites = new HashMap<>();
 
-  public DataDependenceGraph() {
+  public DataDependenceGraph() throws IOException {
     for (Target t : Config.getInst().targets()) {
-      if (t.needs(Property.NEEDS_DATA)) {
+      if (t.needs(Property.DATA_DEPENDENCY)) {
         writers.add(t);
+        t.start();
       }
     }
   }
@@ -68,9 +64,5 @@ public class DataDependenceGraph {
   }
 
   public void finish() throws IOException {
-    for (Target t : writers) {
-      t.end();
-      t.close();
-    }
   }
 }

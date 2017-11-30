@@ -28,13 +28,22 @@ import com.dkarv.jdcallgraph.util.*;
 import com.dkarv.jdcallgraph.util.log.Logger;
 
 import javax.sound.sampled.*;
-import java.io.IOException;
+import java.io.*;
 import java.util.HashMap;
 import java.util.Map;
 
 public class FieldAccessRecorder {
   private static final Logger LOG = new Logger(FieldAccessRecorder.class);
-  private static final DataDependenceGraph graph = new DataDependenceGraph();
+  private static final DataDependenceGraph graph;
+
+  static {
+    try {
+      graph = new DataDependenceGraph();
+    } catch (IOException e) {
+      LOG.error("Error setting up data dependence graph", e);
+      throw new IllegalStateException("Error setting up data dependence graph", e);
+    }
+  }
 
   public static void write(String fromClass, String fromMethod, int lineNumber, String fieldClass, String fieldName) {
     try {

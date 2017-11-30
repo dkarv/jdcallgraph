@@ -50,7 +50,7 @@ public class CallRecorder {
       long threadId = Thread.currentThread().getId();
       CallGraph graph = GRAPHS.get(threadId);
       if (graph == null) {
-        graph = new CallGraph(threadId);
+        graph = new CallGraph();
         GRAPHS.put(threadId, graph);
       }
       graph.called(item);

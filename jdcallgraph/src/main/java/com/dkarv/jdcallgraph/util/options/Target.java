@@ -25,6 +25,9 @@ package com.dkarv.jdcallgraph.util.options;
 
 import com.dkarv.jdcallgraph.util.log.*;
 import com.dkarv.jdcallgraph.util.target.*;
+import com.dkarv.jdcallgraph.util.target.Writer;
+
+import java.io.*;
 
 public class Target extends DelegatingProcessor {
   private static final Logger LOG = new Logger(Target.class);
@@ -48,14 +51,28 @@ public class Target extends DelegatingProcessor {
     src = targets[0].split(" ");
   }
 
+  private boolean started = false;
+
+  public void start() throws IOException {
+    if (started) {
+      return;
+    }
+    StringBuilder name = new StringBuilder();
+    for (String s : src) {
+      name.append(s);
+    }
+    next.start(name.toString());
+    started = true;
+  }
+
   @Override
   public boolean needs(Property p) {
     String need = null;
     switch (p) {
-      case NEEDS_CALLS:
+      case METHOD_DEPENDENCY:
         need = "cg";
         break;
-      case NEEDS_DATA:
+      case DATA_DEPENDENCY:
         need = "ddg";
         break;
     }
@@ -71,5 +88,4 @@ public class Target extends DelegatingProcessor {
   public Target copy() {
     return new Target(src, next.copy());
   }
-
 }

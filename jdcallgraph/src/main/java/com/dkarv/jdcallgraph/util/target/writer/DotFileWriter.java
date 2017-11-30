@@ -35,20 +35,21 @@ import java.io.*;
 /**
  * cg ddg | thread | dot
  * <p>
- * Target > ThreadsMapper > DotFileWriter
+ * Target > ThreadMapper > DotFileWriter
  * <p>
  * Target.start(1)
- * .ThreadsMapper.start(1)
+ * .ThreadMapper.start(1)
  * ..DotFileWriter1.start(1)
  * Target.edge(1, A, B)
- * .ThreadsMapper.edge(1, A, B)
+ * .ThreadMapper.edge(1, A, B)
  * ..DotFileWriter1.edge(1, A, B)
  * <p>
  * Target.start(2)
- * .ThreadsMapper.start(2)
+ * .ThreadMapper.start(2)
  */
 public class DotFileWriter extends Writer {
   private static final Logger LOG = new Logger(DotFileWriter.class);
+  private boolean started = false;
   FileWriter writer;
 
   @Override
@@ -63,12 +64,14 @@ public class DotFileWriter extends Writer {
 
   @Override
   public void start(String id) throws IOException {
+    LOG.debug("Start {} on {}", id, this);
     if (writer != null) {
       // close an old writer to make sure everything is flushed to disk
       close();
     }
     writer = new FileWriter(id + ".dot");
     writer.append("digraph \"" + id + "\"\n{\n");
+    started = true;
   }
 
   @Override
@@ -86,15 +89,22 @@ public class DotFileWriter extends Writer {
   @Override
   public void end() throws IOException {
     writer.append("}\n");
+    started = false;
   }
 
   @Override
   public void close() throws IOException {
+    if (writer == null) {
+      return;
+    }
+    if (started) {
+      end();
+    }
     writer.close();
   }
 
   @Override
   public Processor copy() {
-    return null;
+    return new DotFileWriter();
   }
 }

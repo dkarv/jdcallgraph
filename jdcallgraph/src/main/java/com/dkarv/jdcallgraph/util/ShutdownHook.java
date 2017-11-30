@@ -24,7 +24,11 @@
 package com.dkarv.jdcallgraph.util;
 
 import com.dkarv.jdcallgraph.*;
+import com.dkarv.jdcallgraph.util.config.*;
 import com.dkarv.jdcallgraph.util.log.Logger;
+import com.dkarv.jdcallgraph.util.options.*;
+
+import java.io.*;
 
 public class ShutdownHook {
   private static final Logger LOG = new Logger(ShutdownHook.class);
@@ -44,7 +48,19 @@ public class ShutdownHook {
         } catch (NoClassDefFoundError | ExceptionInInitializerError e) {
           // might be triggered when shutdown already ongoing
         }
+
+        closeTargets();
       }
     });
+  }
+
+  private static void closeTargets() {
+    for (Target t : Config.getInst().targets()) {
+      try {
+        t.close();
+      } catch (IOException e) {
+        LOG.error("Error closing target", e);
+      }
+    }
   }
 }

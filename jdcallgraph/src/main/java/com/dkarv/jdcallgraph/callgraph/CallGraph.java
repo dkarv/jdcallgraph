@@ -25,7 +25,6 @@ package com.dkarv.jdcallgraph.callgraph;
 
 import com.dkarv.jdcallgraph.util.options.*;
 import com.dkarv.jdcallgraph.util.target.*;
-import com.dkarv.jdcallgraph.writer.*;
 import com.dkarv.jdcallgraph.util.*;
 import com.dkarv.jdcallgraph.util.config.Config;
 import com.dkarv.jdcallgraph.util.log.Logger;
@@ -35,16 +34,15 @@ import java.util.*;
 
 public class CallGraph {
   private static final Logger LOG = new Logger(CallGraph.class);
-  private final long threadId;
   final Stack<StackItem> calls = new Stack<>();
 
   final List<Target> writers = new ArrayList<>();
 
-  public CallGraph(long threadId) {
-    this.threadId = threadId;
+  public CallGraph() throws IOException {
     for (Target t : Config.getInst().targets()) {
-      if (t.needs(Property.NEEDS_DATA)) {
+      if (t.needs(Property.METHOD_DEPENDENCY)) {
         writers.add(t);
+        t.start();
       }
     }
   }
@@ -53,7 +51,6 @@ public class CallGraph {
     if (calls.isEmpty()) {
       calls.push(method);
       for (Target t : writers) {
-        t.start("cg");
         t.node(method);
       }
     } else {
@@ -120,13 +117,6 @@ public class CallGraph {
           LOG.error("Shutdown and safe element still on stack: {}", item);
         }
       }
-      for (Target w : writers) {
-        w.end();
-      }
-    }
-
-    for (Target w : writers) {
-      w.close();
     }
   }
 }

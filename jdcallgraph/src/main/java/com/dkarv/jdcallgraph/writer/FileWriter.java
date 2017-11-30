@@ -46,7 +46,6 @@ public class FileWriter {
   }
 
   public void close() throws IOException {
-    writer.flush();
     writer.close();
   }
 

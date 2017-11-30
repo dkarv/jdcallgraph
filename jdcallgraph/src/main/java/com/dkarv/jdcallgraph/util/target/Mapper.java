@@ -40,12 +40,12 @@ public abstract class Mapper implements Processor {
   public static Mapper getFor(String specification, Processor next) {
     switch (specification.trim()) {
       case "thread":
-        return new ThreadsMapper(next);
+        return new ThreadMapper(next);
       case "entry":
         // FIXME
-        return new ThreadsMapper(next);
+        return new ThreadMapper(next);
       case "test":
-        return new ThreadsMapper(next);
+        return new ThreadMapper(next);
     }
     throw new IllegalArgumentException("Unknown mapper: " + specification);
   }

@@ -24,6 +24,6 @@
 package com.dkarv.jdcallgraph.util.target;
 
 public enum Property {
-  NEEDS_CALLS,
-  NEEDS_DATA
+  METHOD_DEPENDENCY,
+  DATA_DEPENDENCY
 }

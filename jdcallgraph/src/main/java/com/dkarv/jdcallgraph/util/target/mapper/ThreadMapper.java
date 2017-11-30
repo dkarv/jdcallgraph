@@ -24,15 +24,17 @@
 package com.dkarv.jdcallgraph.util.target.mapper;
 
 import com.dkarv.jdcallgraph.util.*;
+import com.dkarv.jdcallgraph.util.log.*;
 import com.dkarv.jdcallgraph.util.target.*;
 
 import java.io.*;
 import java.util.*;
 
-public class ThreadsMapper extends Mapper {
+public class ThreadMapper extends Mapper {
+  private static final Logger LOG = new Logger(ThreadMapper.class);
   private Map<Long, Processor> threads = new HashMap<>();
 
-  public ThreadsMapper(Processor next) {
+  public ThreadMapper(Processor next) {
     super(next);
   }
 
@@ -42,6 +44,7 @@ public class ThreadsMapper extends Mapper {
 
   @Override
   public void start(String id) throws IOException {
+    LOG.debug("Start: {}/{} on {}", id, getId(), this);
     Processor copy = next.copy();
     threads.put(getId(), copy);
     copy.start(id + "/" + getId());
@@ -64,7 +67,7 @@ public class ThreadsMapper extends Mapper {
 
   @Override
   public void end() throws IOException {
-    threads.remove(getId()).end();
+    threads.get(getId()).end();
   }
 
   @Override
@@ -72,10 +75,11 @@ public class ThreadsMapper extends Mapper {
     for (Processor p : threads.values()) {
       p.close();
     }
+    threads.clear();
   }
 
   @Override
-  public ThreadsMapper copy() {
-    return new ThreadsMapper(next);
+  public ThreadMapper copy() {
+    return new ThreadMapper(next);
   }
 }
