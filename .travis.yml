@@ -34,7 +34,9 @@ addons:
   sonarcloud:
     organization: "dkarv-github"
     branches:
-    - "*"
+    - master
+    - develop
+    - improve-writers
 
 
 cache:
