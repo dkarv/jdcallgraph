@@ -26,8 +26,11 @@ package com.dkarv.jdcallgraph.instr;
 import com.dkarv.jdcallgraph.instr.javassist.*;
 import com.dkarv.jdcallgraph.util.config.*;
 import com.dkarv.jdcallgraph.util.log.*;
+import com.dkarv.jdcallgraph.util.options.*;
+import com.dkarv.jdcallgraph.util.target.*;
 import javassist.*;
 import javassist.bytecode.*;
+import javassist.bytecode.annotation.*;
 
 import java.io.*;
 import java.lang.instrument.*;
@@ -42,8 +45,8 @@ public class JavassistInstr extends Instr implements ClassFileTransformer {
   private final static Logger LOG = new Logger(JavassistInstr.class);
 
   private final FieldTracer fieldTracer;
-
   private final boolean callDependence;
+  private final boolean subTestDetection;
 
   public JavassistInstr(List<Pattern> excludes) {
     super(excludes);
@@ -53,6 +56,7 @@ public class JavassistInstr extends Instr implements ClassFileTransformer {
       fieldTracer = null;
     }
     this.callDependence = ComputedConfig.callDependence();
+    this.subTestDetection = Target.anyNeeds(Config.getInst().targets(), Property.SUB_TEST);
   }
 
   /**
@@ -66,22 +70,27 @@ public class JavassistInstr extends Instr implements ClassFileTransformer {
 
   public byte[] transform(ClassLoader loader, String className, Class clazz,
                           ProtectionDomain domain, byte[] bytes) {
-    boolean enhanceClass = true;
+    try {
+      boolean enhanceClass = true;
 
-    String name = className.replace("/", ".");
+      String name = className.replace("/", ".");
 
-    for (Pattern p : excludes) {
-      Matcher m = p.matcher(name);
-      if (m.matches()) {
-        LOG.trace("Skipping class {}", name);
-        enhanceClass = false;
-        break;
+      for (Pattern p : excludes) {
+        Matcher m = p.matcher(name);
+        if (m.matches()) {
+          LOG.trace("Skipping class {}", name);
+          enhanceClass = false;
+          break;
+        }
       }
-    }
 
-    if (enhanceClass) {
-      byte[] b = enhanceClass(bytes);
-      if (b != null) return b;
+      if (enhanceClass) {
+        byte[] b = enhanceClass(bytes);
+        if (b != null) return b;
+      }
+      return bytes;
+    } catch (Throwable t) {
+      LOG.error("Error in transform", t);
     }
     return bytes;
   }
@@ -150,7 +159,20 @@ public class JavassistInstr extends Instr implements ClassFileTransformer {
     if (callDependence) {
       int lineNumber = getLineNumber(method);
 
-      String args = '"' + className + '"' + ',' + '"' + mName + '"' + ',' + lineNumber;
+      boolean isSubTest = false;
+      MethodInfo info = method.getMethodInfo2();
+      if (subTestDetection && info.isMethod() && !Modifier.isStatic(info.getAccessFlags())) {
+        // FIXME check if class extends Testcase
+        isSubTest = checkTestAnnotation(method);
+      }
+
+      String args;
+      if (isSubTest) {
+        LOG.debug("subtest detection enabled on {}::{}", className, mName);
+        args = "getClass().getCanonicalName()" + ',' + '"' + mName + '"' + ',' + lineNumber;
+      } else {
+        args = '"' + className + '"' + ',' + '"' + mName + '"' + ',' + lineNumber;
+      }
 
       boolean returnSafe = !(method instanceof CtConstructor);
       String srcBefore = "com.dkarv.jdcallgraph.CallRecorder.beforeMethod(" + args + "," +
@@ -161,6 +183,25 @@ public class JavassistInstr extends Instr implements ClassFileTransformer {
       method.insertBefore(srcBefore);
       method.insertAfter(srcAfter, true);
     }
+  }
+
+  private static boolean checkTestAnnotation(CtBehavior method) {
+    MethodInfo mi = method.getMethodInfo2();
+    AnnotationsAttribute attr = ((AnnotationsAttribute) mi.getAttribute(AnnotationsAttribute.invisibleTag));
+    if (attr != null) {
+      Annotation anno = attr.getAnnotation("org.junit.Test");
+      if (anno != null) {
+        return true;
+      }
+    }
+
+
+    attr = ((AnnotationsAttribute) mi.getAttribute(AnnotationsAttribute.visibleTag));
+    if (attr == null) {
+      return false;
+    }
+    Annotation anno = attr.getAnnotation("org.junit.Test");
+    return anno != null;
   }
 
   public static int getLineNumber(CtBehavior method) {

@@ -21,26 +21,39 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package com.dkarv.jdcallgraph.instr.bytebuddy.tracer;
+package com.dkarv.jdcallgraph.util;
 
-import com.dkarv.jdcallgraph.instr.bytebuddy.util.*;
-import com.dkarv.jdcallgraph.util.*;
-import com.dkarv.jdcallgraph.util.log.*;
-import net.bytebuddy.asm.*;
+import java.util.*;
 
-public class MethodTracer {
-  public static final Logger LOG = new Logger(MethodTracer.class);
+public class StackItemCache {
+  private static final Map<String, Map<String, StackItem>> CACHE = new HashMap<>();
 
-  @Advice.OnMethodEnter(inline = false)
-  public static StackItem enter(@Callable.Type String type,
-                                @Callable.Name String method,
-                                @Callable.Signature String signature) {
-    LOG.debug("Enter {}::{}", type, method);
-    return CallableTracer.enter(type, Format.shortName(method), signature, true);
+  public static StackItem get(String type, String method, boolean returnSafe) {
+    Map<String, StackItem> methodMap = getBy(type);
+    StackItem item = methodMap.get(method);
+    if (item == null) {
+      item = new StackItem(type, method, LineNumbers.get(type, method), returnSafe);
+      methodMap.put(method, item);
+    }
+    return item;
   }
 
-  @Advice.OnMethodExit(inline = false, onThrowable = Throwable.class, suppress = Throwable.class)
-  public static void exit(@Advice.Enter StackItem item) {
-    CallableTracer.exit(item);
+  public static StackItem get(String type, String method, int lineNumber, boolean returnSafe) {
+    Map<String, StackItem> methodMap = getBy(type);
+    StackItem item = methodMap.get(method);
+    if (item == null) {
+      item = new StackItem(type, method, lineNumber, returnSafe);
+      methodMap.put(method, item);
+    }
+    return item;
+  }
+
+  private static Map<String, StackItem> getBy(String type) {
+    Map<String, StackItem> map = CACHE.get(type);
+    if (map == null) {
+      map = new HashMap<>();
+      CACHE.put(type, map);
+    }
+    return map;
   }
 }

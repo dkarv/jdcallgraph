@@ -21,26 +21,26 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package com.dkarv.jdcallgraph.instr.bytebuddy.tracer;
+package com.dkarv.jdcallgraph.instr.bytebuddy.util;
 
-import com.dkarv.jdcallgraph.instr.bytebuddy.util.*;
-import com.dkarv.jdcallgraph.util.*;
 import com.dkarv.jdcallgraph.util.log.*;
-import net.bytebuddy.asm.*;
+import net.bytebuddy.description.method.*;
+import net.bytebuddy.description.type.*;
+import net.bytebuddy.matcher.*;
 
-public class MethodTracer {
-  public static final Logger LOG = new Logger(MethodTracer.class);
+import java.util.regex.*;
 
-  @Advice.OnMethodEnter(inline = false)
-  public static StackItem enter(@Callable.Type String type,
-                                @Callable.Name String method,
-                                @Callable.Signature String signature) {
-    LOG.debug("Enter {}::{}", type, method);
-    return CallableTracer.enter(type, Format.shortName(method), signature, true);
-  }
+public class TestMethodMatcher implements ElementMatcher<MethodDescription> {
+  private static final Logger LOG = new Logger(TestMethodMatcher.class);
 
-  @Advice.OnMethodExit(inline = false, onThrowable = Throwable.class, suppress = Throwable.class)
-  public static void exit(@Advice.Enter StackItem item) {
-    CallableTracer.exit(item);
+  @Override
+  public boolean matches(MethodDescription target) {
+    for (TypeDescription t : target.getDeclaredAnnotations().asTypeList()) {
+      if ("org.junit.Test".equals(t.getCanonicalName())) {
+        LOG.debug("Test method detected: {}", target);
+        return true;
+      }
+    }
+    return false;
   }
 }

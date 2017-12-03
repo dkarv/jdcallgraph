@@ -24,8 +24,8 @@
 package com.dkarv.jdcallgraph;
 
 import com.dkarv.jdcallgraph.callgraph.CallGraph;
+import com.dkarv.jdcallgraph.util.*;
 import com.dkarv.jdcallgraph.util.log.Logger;
-import com.dkarv.jdcallgraph.util.StackItem;
 
 import java.io.IOException;
 import java.util.HashMap;
@@ -41,7 +41,7 @@ public class CallRecorder {
 
   public static void beforeMethod(String className, String methodName, int lineNumber, boolean
       returnSafe) {
-    beforeMethod(new StackItem(className, methodName, lineNumber, returnSafe));
+    beforeMethod(StackItemCache.get(className, methodName, lineNumber, returnSafe));
   }
 
   public static void beforeMethod(StackItem item) {
@@ -61,7 +61,7 @@ public class CallRecorder {
 
   public static void afterMethod(String className, String methodName, int lineNumber, boolean
       returnSafe) {
-    afterMethod(new StackItem(className, methodName, lineNumber, returnSafe));
+    afterMethod(StackItemCache.get(className, methodName, lineNumber, returnSafe));
   }
 
   public static void afterMethod(StackItem item) {

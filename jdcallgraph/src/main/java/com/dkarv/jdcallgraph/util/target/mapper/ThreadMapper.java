@@ -44,7 +44,6 @@ public class ThreadMapper extends Mapper {
 
   @Override
   public void start(String id) throws IOException {
-    LOG.debug("Start: {}/{} on {}", id, getId(), this);
     Processor copy = next.copy();
     threads.put(getId(), copy);
     copy.start(id + "/" + getId());

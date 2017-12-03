@@ -25,8 +25,7 @@ package com.dkarv.jdcallgraph.instr.bytebuddy.tracer;
 
 import com.dkarv.jdcallgraph.CallRecorder;
 import com.dkarv.jdcallgraph.instr.bytebuddy.util.*;
-import com.dkarv.jdcallgraph.util.LineNumbers;
-import com.dkarv.jdcallgraph.util.StackItem;
+import com.dkarv.jdcallgraph.util.*;
 import com.dkarv.jdcallgraph.util.config.*;
 import com.dkarv.jdcallgraph.util.log.*;
 
@@ -35,14 +34,18 @@ public abstract class CallableTracer {
   private static final boolean needsLine = ComputedConfig.lineNeeded();
   private static final boolean ignoreEmptyClinit = Config.getInst().ignoreEmptyClinit();
 
-  public static StackItem enter(String type, String method, String signature, boolean returnSafe) {
+  /**
+   * Same as normal enter method but pass another class. If necessary take the line number from it.
+   */
+  public static StackItem enter(String type, String method, String signature, boolean returnSafe, String clazz) {
     try {
       signature = Format.simplifySignatureArrays(signature);
+      String fullMethod = method + signature;
 
       int lineNumber;
       if (needsLine) {
-        lineNumber = LineNumbers.get(type, method + signature);
-        if(ignoreEmptyClinit && lineNumber == -1 && "<clinit>".equals(method)) {
+        lineNumber = LineNumbers.get(clazz, fullMethod);
+        if (ignoreEmptyClinit && lineNumber == -1 && "<clinit>".equals(method)) {
           // ignore
           return null;
         }
@@ -50,13 +53,17 @@ public abstract class CallableTracer {
         lineNumber = -1;
       }
 
-      StackItem item = new StackItem(type, method, signature, lineNumber, returnSafe);
+      StackItem item = StackItemCache.get(type, fullMethod, lineNumber, returnSafe);
       CallRecorder.beforeMethod(item);
       return item;
     } catch (Throwable t) {
       LOG.error("Error processing enter", t);
       return null;
     }
+  }
+
+  public static StackItem enter(String type, String method, String signature, boolean returnSafe) {
+    return enter(type, method, signature, returnSafe, type);
   }
 
   public static void exit(StackItem item) {

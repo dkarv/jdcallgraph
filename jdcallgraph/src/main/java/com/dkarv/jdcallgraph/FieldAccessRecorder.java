@@ -48,7 +48,7 @@ public class FieldAccessRecorder {
   public static void write(String fromClass, String fromMethod, int lineNumber, String fieldClass, String fieldName) {
     try {
       LOG.trace("Write to {}::{} from {}::{}", fieldClass, fieldName, fromClass, fromMethod);
-      graph.addWrite(new StackItem(fromClass, fromMethod, lineNumber, true), fieldClass + "::" +
+      graph.addWrite(StackItemCache.get(fromClass, fromMethod, lineNumber, true), fieldClass + "::" +
           fieldName);
     } catch (Exception e) {
       LOG.error("Error in write", e);
@@ -58,7 +58,7 @@ public class FieldAccessRecorder {
   public static void read(String fromClass, String fromMethod, int lineNumber, String fieldClass, String fieldName) {
     try {
       LOG.trace("Read to {}::{} from {}::{}", fieldClass, fieldName, fromClass, fromMethod);
-      graph.addRead(new StackItem(fromClass, fromMethod, lineNumber, true), fieldClass + "::" +
+      graph.addRead(StackItemCache.get(fromClass, fromMethod, lineNumber, true), fieldClass + "::" +
           fieldName);
     } catch (Exception e) {
       LOG.error("Error in read", e);

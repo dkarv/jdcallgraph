@@ -31,7 +31,7 @@ import net.bytebuddy.asm.*;
 public class ConstructorTracer {
   public static final Logger LOG = new Logger(ConstructorTracer.class);
 
-  @Advice.OnMethodEnter(inline = false, suppress = Throwable.class)
+  @Advice.OnMethodEnter(inline = false)
   public static StackItem enter(@Callable.Type String type,
                                 @Callable.Name String method,
                                 @Callable.Signature String signature) {

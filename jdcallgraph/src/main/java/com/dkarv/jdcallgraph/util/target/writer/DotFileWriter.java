@@ -64,7 +64,6 @@ public class DotFileWriter extends Writer {
 
   @Override
   public void start(String id) throws IOException {
-    LOG.debug("Start {} on {}", id, this);
     if (writer != null) {
       // close an old writer to make sure everything is flushed to disk
       close();

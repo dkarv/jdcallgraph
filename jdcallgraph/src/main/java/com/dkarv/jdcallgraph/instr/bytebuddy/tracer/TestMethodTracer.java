@@ -28,15 +28,23 @@ import com.dkarv.jdcallgraph.util.*;
 import com.dkarv.jdcallgraph.util.log.*;
 import net.bytebuddy.asm.*;
 
-public class MethodTracer {
-  public static final Logger LOG = new Logger(MethodTracer.class);
+public class TestMethodTracer {
+  public static final Logger LOG = new Logger(TestMethodTracer.class);
 
   @Advice.OnMethodEnter(inline = false)
   public static StackItem enter(@Callable.Type String type,
                                 @Callable.Name String method,
-                                @Callable.Signature String signature) {
-    LOG.debug("Enter {}::{}", type, method);
-    return CallableTracer.enter(type, Format.shortName(method), signature, true);
+                                @Callable.Signature String signature,
+                                @Advice.This(optional = false) Object thiz) {
+    LOG.debug("Enter test {}::{}", type, method);
+    String clazz;
+    if (thiz == null) {
+      LOG.info("Can't compute dynamic test class");
+      clazz = type;
+    } else {
+      clazz = thiz.getClass().getCanonicalName();
+    }
+    return CallableTracer.enter(clazz, Format.shortName(method), signature, true, type);
   }
 
   @Advice.OnMethodExit(inline = false, onThrowable = Throwable.class, suppress = Throwable.class)

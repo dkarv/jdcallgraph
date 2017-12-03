@@ -33,7 +33,7 @@ public class StackItem {
 
   private final String formatted;
 
-  public StackItem(String className, String methodName, int lineNumber, boolean returnSafe) {
+  StackItem(String className, String methodName, int lineNumber, boolean returnSafe) {
     this.className = className;
     this.methodName = methodName;
     this.lineNumber = lineNumber;
@@ -43,11 +43,11 @@ public class StackItem {
     this.formatted = Formatter.format(this);
   }
 
-  public StackItem(String type, String method, String signature, int lineNumber) {
+  /*public StackItem(String type, String method, String signature, int lineNumber) {
     this(type, method, signature, lineNumber, true);
-  }
+  }*/
 
-  public StackItem(String type, String method, String signature, int lineNumber, boolean returnSafe) {
+  /*public StackItem(String type, String method, String signature, int lineNumber, boolean returnSafe) {
     this.className = type;
     // TODO store them separated
     this.methodName = method + signature;
@@ -55,7 +55,7 @@ public class StackItem {
     this.returnSafe = returnSafe;
 
     this.formatted = Formatter.format(this);
-  }
+  }*/
 
   public String getClassName() {
     return className;

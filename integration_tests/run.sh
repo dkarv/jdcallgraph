@@ -9,15 +9,18 @@ mkdir -p target
 mkdir -p result
 
 # Compile
+echo "Compile verifier"
 find src/com/dkarv/verifier -name "*.java" -print | \
 xargs javac -d target || exit 255
 
+echo "Compile project"
 find src/com/dkarv/testcases/$1 -name "*.java" -print | \
-xargs javac -cp target -d target || exit 255
+xargs javac -cp target:lib/junit-4.12.jar -d target || exit 255
 
 
 function run {
-    java -cp target \
+    echo "Run $1 with $2"
+    java -cp target:lib/junit-4.12.jar \
     -javaagent:../jdcallgraph/target/jdcallgraph-0.2-agent.jar=./$2 \
     com/dkarv/testcases/$1/Main
     if java -cp target com/dkarv/testcases/$1/Verification ; then

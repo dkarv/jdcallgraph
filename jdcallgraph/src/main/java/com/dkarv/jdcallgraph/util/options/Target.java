@@ -75,6 +75,9 @@ public class Target extends DelegatingProcessor {
       case DATA_DEPENDENCY:
         need = "ddg";
         break;
+      case SUB_TEST:
+        // FIXME dynamic
+        return true;
     }
     for (String s : src) {
       if (s.equals(need)) {
@@ -87,5 +90,14 @@ public class Target extends DelegatingProcessor {
   @Override
   public Target copy() {
     return new Target(src, next.copy());
+  }
+
+  public static boolean anyNeeds(Target[] targets, Property p) {
+    for (Target t : targets) {
+      if (t.needs(p)) {
+        return true;
+      }
+    }
+    return false;
   }
 }
