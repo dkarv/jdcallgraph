@@ -32,8 +32,8 @@ matrix:
 
 addons:
   sonarcloud:
-    organization: "sonarcloud_organization_key"
-    branches: *
+    organization: "dkarv-github"
+    branches: "*"
 
 
 cache:
