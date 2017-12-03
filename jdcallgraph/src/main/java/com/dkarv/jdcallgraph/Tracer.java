@@ -25,8 +25,9 @@ package com.dkarv.jdcallgraph;
 
 import com.dkarv.jdcallgraph.instr.ByteBuddyInstr;
 import com.dkarv.jdcallgraph.instr.JavassistInstr;
-import com.dkarv.jdcallgraph.util.*;
-import com.dkarv.jdcallgraph.util.config.*;
+import com.dkarv.jdcallgraph.util.ShutdownHook;
+import com.dkarv.jdcallgraph.util.config.Config;
+import com.dkarv.jdcallgraph.util.config.ConfigReader;
 import com.dkarv.jdcallgraph.util.log.Logger;
 
 import java.io.File;
@@ -41,7 +42,7 @@ import java.util.regex.Pattern;
  * Instrument the target classes.
  */
 public class Tracer {
-  private final static Logger LOG = new Logger(Tracer.class);
+  private static final Logger LOG = new Logger(Tracer.class);
 
   /**
    * Program entry point. Loads the config and starts itself as instrumentation.
@@ -51,13 +52,15 @@ public class Tracer {
    * @throws IOException            io error
    * @throws IllegalAccessException problem loading the config options
    */
-  public static void premain(String argument, Instrumentation instrumentation) throws IOException, IllegalAccessException {
+  public static void premain(String argument, Instrumentation instrumentation)
+      throws IOException, IllegalAccessException {
     if (argument != null) {
       new ConfigReader(
           Tracer.class.getResourceAsStream("/com/dkarv/jdcallgraph/defaults.ini"),
           new FileInputStream(new File(argument))).read();
     } else {
-      System.err.println("You did not specify a config file. Will use the default config options instead.");
+      System.err.println(
+          "You did not specify a config file. Will use the default config options instead.");
       new ConfigReader(
           Tracer.class.getResourceAsStream("/com/dkarv/jdcallgraph/defaults.ini")).read();
     }

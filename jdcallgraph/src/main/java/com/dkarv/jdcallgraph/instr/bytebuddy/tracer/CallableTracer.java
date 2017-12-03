@@ -24,10 +24,13 @@
 package com.dkarv.jdcallgraph.instr.bytebuddy.tracer;
 
 import com.dkarv.jdcallgraph.CallRecorder;
-import com.dkarv.jdcallgraph.instr.bytebuddy.util.*;
-import com.dkarv.jdcallgraph.util.*;
-import com.dkarv.jdcallgraph.util.config.*;
-import com.dkarv.jdcallgraph.util.log.*;
+import com.dkarv.jdcallgraph.instr.bytebuddy.util.Format;
+import com.dkarv.jdcallgraph.util.LineNumbers;
+import com.dkarv.jdcallgraph.util.StackItem;
+import com.dkarv.jdcallgraph.util.StackItemCache;
+import com.dkarv.jdcallgraph.util.config.ComputedConfig;
+import com.dkarv.jdcallgraph.util.config.Config;
+import com.dkarv.jdcallgraph.util.log.Logger;
 
 public abstract class CallableTracer {
   private static final Logger LOG = new Logger(CallableTracer.class);

@@ -24,53 +24,46 @@
 package com.dkarv.jdcallgraph;
 
 import com.dkarv.jdcallgraph.data.DataDependenceGraph;
-import com.dkarv.jdcallgraph.util.*;
+import com.dkarv.jdcallgraph.util.LineNumbers;
+import com.dkarv.jdcallgraph.util.StackItemCache;
 import com.dkarv.jdcallgraph.util.log.Logger;
-
-import javax.sound.sampled.*;
-import java.io.*;
-import java.util.HashMap;
-import java.util.Map;
+import java.io.IOException;
 
 public class FieldAccessRecorder {
   private static final Logger LOG = new Logger(FieldAccessRecorder.class);
-  private static final DataDependenceGraph graph;
+  private static final DataDependenceGraph graph = new DataDependenceGraph();
 
-  static {
-    try {
-      graph = new DataDependenceGraph();
-    } catch (IOException e) {
-      LOG.error("Error setting up data dependence graph", e);
-      throw new IllegalStateException("Error setting up data dependence graph", e);
-    }
-  }
-
-  public static void write(String fromClass, String fromMethod, int lineNumber, String fieldClass, String fieldName) {
+  public static void write(String fromClass, String fromMethod, int lineNumber, String fieldClass,
+                           String fieldName) {
     try {
       LOG.trace("Write to {}::{} from {}::{}", fieldClass, fieldName, fromClass, fromMethod);
-      graph.addWrite(StackItemCache.get(fromClass, fromMethod, lineNumber, true), fieldClass + "::" +
-          fieldName);
+      graph
+          .addWrite(StackItemCache.get(fromClass, fromMethod, lineNumber, true),
+              fieldClass + "::" + fieldName);
     } catch (Exception e) {
       LOG.error("Error in write", e);
     }
   }
 
-  public static void read(String fromClass, String fromMethod, int lineNumber, String fieldClass, String fieldName) {
+  public static void read(String fromClass, String fromMethod, int lineNumber, String fieldClass,
+                          String fieldName) {
     try {
       LOG.trace("Read to {}::{} from {}::{}", fieldClass, fieldName, fromClass, fromMethod);
-      graph.addRead(StackItemCache.get(fromClass, fromMethod, lineNumber, true), fieldClass + "::" +
-          fieldName);
+      graph.addRead(StackItemCache.get(fromClass, fromMethod, lineNumber, true),
+          fieldClass + "::" + fieldName);
     } catch (Exception e) {
       LOG.error("Error in read", e);
     }
   }
 
-  public static void beforeRead(String fieldClass, String fieldName, String fromClass, String fromMethod) {
+  public static void beforeRead(String fieldClass, String fieldName, String fromClass,
+                                String fromMethod) {
     int lineNumber = LineNumbers.get(fromClass, fromMethod);
     read(fromClass, fromMethod, lineNumber, fieldClass, fieldName);
   }
 
-  public static void beforeWrite(String fieldClass, String fieldName, String fromClass, String fromMethod) {
+  public static void beforeWrite(String fieldClass, String fieldName, String fromClass,
+                                 String fromMethod) {
     int lineNumber = LineNumbers.get(fromClass, fromMethod);
     write(fromClass, fromMethod, lineNumber, fieldClass, fieldName);
   }

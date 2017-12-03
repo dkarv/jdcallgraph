@@ -25,5 +25,5 @@ package com.dkarv.jdcallgraph.util.target;
 
 public enum Property {
   METHOD_DEPENDENCY,
-  SUB_TEST, DATA_DEPENDENCY
+  DATA_DEPENDENCY
 }

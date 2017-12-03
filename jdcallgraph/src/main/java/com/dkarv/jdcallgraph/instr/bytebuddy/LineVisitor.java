@@ -23,7 +23,7 @@
  */
 package com.dkarv.jdcallgraph.instr.bytebuddy;
 
-import com.dkarv.jdcallgraph.instr.bytebuddy.util.*;
+import com.dkarv.jdcallgraph.instr.bytebuddy.util.Format;
 import com.dkarv.jdcallgraph.util.LineNumbers;
 import com.dkarv.jdcallgraph.util.log.Logger;
 import net.bytebuddy.asm.Advice;
@@ -41,14 +41,22 @@ public class LineVisitor implements AsmVisitorWrapper.ForDeclaredMethods.MethodV
 
 
   @Override
-  public MethodVisitor wrap(TypeDescription instrumentedType, MethodDescription instrumentedMethod, MethodVisitor methodVisitor, Implementation.Context implementationContext, TypePool typePool, int writerFlags, int readerFlags) {
+  public MethodVisitor wrap(TypeDescription instrumentedType, MethodDescription instrumentedMethod,
+                            MethodVisitor methodVisitor,
+                            Implementation.Context implementationContext, TypePool typePool,
+                            int writerFlags, int readerFlags) {
     return instrumentedMethod.isAbstract() || instrumentedMethod.isNative()
         || LineNumbers.contains(instrumentedType.getName(), instrumentedMethod.getName())
         ? methodVisitor
-        : doWrap(instrumentedType, instrumentedMethod, methodVisitor, implementationContext, writerFlags, readerFlags);
+        : doWrap(instrumentedType, instrumentedMethod, methodVisitor, implementationContext,
+        writerFlags, readerFlags);
   }
 
-  private MethodVisitor doWrap(final TypeDescription instrumentedType, final MethodDescription instrumentedMethod, MethodVisitor methodVisitor, Implementation.Context implementationContext, int writerFlags, int readerFlags) {
+  private MethodVisitor doWrap(final TypeDescription instrumentedType,
+                               final MethodDescription instrumentedMethod,
+                               MethodVisitor methodVisitor,
+                               Implementation.Context implementationContext, int writerFlags,
+                               int readerFlags) {
     return new MethodVisitor(Opcodes.ASM6, methodVisitor) {
       boolean addedLine = false;
 
@@ -77,7 +85,8 @@ public class LineVisitor implements AsmVisitorWrapper.ForDeclaredMethods.MethodV
         super.visitEnd();
         if (!addedLine) {
           // should only happen for clinit
-          String signature = Advice.OffsetMapping.ForOrigin.Renderer.ForJavaSignature.INSTANCE.apply(instrumentedType, instrumentedMethod);
+          String signature = Advice.OffsetMapping.ForOrigin.Renderer.ForJavaSignature.INSTANCE
+              .apply(instrumentedType, instrumentedMethod);
           LineNumbers.add(instrumentedType.getName(), instrumentedMethod.getName() + signature, 0);
         }
       }

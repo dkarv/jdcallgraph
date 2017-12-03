@@ -23,14 +23,23 @@
  */
 package com.dkarv.jdcallgraph.instr;
 
-import static net.bytebuddy.matcher.ElementMatchers.*;
+import static net.bytebuddy.matcher.ElementMatchers.isConstructor;
+import static net.bytebuddy.matcher.ElementMatchers.not;
 
-import com.dkarv.jdcallgraph.instr.bytebuddy.*;
-import com.dkarv.jdcallgraph.instr.bytebuddy.tracer.*;
+import com.dkarv.jdcallgraph.instr.bytebuddy.FieldAdvice;
 import com.dkarv.jdcallgraph.instr.bytebuddy.LineVisitor;
-import com.dkarv.jdcallgraph.instr.bytebuddy.util.*;
+import com.dkarv.jdcallgraph.instr.bytebuddy.TracerLogger;
+import com.dkarv.jdcallgraph.instr.bytebuddy.tracer.Callable;
+import com.dkarv.jdcallgraph.instr.bytebuddy.tracer.ConstructorTracer;
+import com.dkarv.jdcallgraph.instr.bytebuddy.tracer.MethodTracer;
+import com.dkarv.jdcallgraph.instr.bytebuddy.tracer.TestMethodTracer;
+import com.dkarv.jdcallgraph.instr.bytebuddy.util.NoAnonymousConstructorsMatcher;
+import com.dkarv.jdcallgraph.instr.bytebuddy.util.TestMethodMatcher;
 import com.dkarv.jdcallgraph.util.config.ComputedConfig;
 import com.dkarv.jdcallgraph.util.log.Logger;
+import java.lang.instrument.Instrumentation;
+import java.util.List;
+import java.util.regex.Pattern;
 import net.bytebuddy.agent.builder.AgentBuilder;
 import net.bytebuddy.agent.builder.ResettableClassFileTransformer;
 import net.bytebuddy.asm.Advice;
@@ -38,18 +47,15 @@ import net.bytebuddy.asm.AsmVisitorWrapper;
 import net.bytebuddy.description.method.MethodDescription;
 import net.bytebuddy.description.type.TypeDescription;
 import net.bytebuddy.dynamic.DynamicType;
-import net.bytebuddy.matcher.*;
+import net.bytebuddy.matcher.ElementMatcher;
+import net.bytebuddy.matcher.ElementMatchers;
 import net.bytebuddy.utility.JavaModule;
-
-import java.lang.instrument.Instrumentation;
-import java.util.List;
-import java.util.regex.Pattern;
 
 /**
  * Instrument the target classes.
  */
 public class ByteBuddyInstr extends Instr {
-  private final static Logger LOG = new Logger(ByteBuddyInstr.class);
+  private static final Logger LOG = new Logger(ByteBuddyInstr.class);
 
   public ByteBuddyInstr(List<Pattern> excludes) {
     super(excludes);
@@ -80,18 +86,25 @@ public class ByteBuddyInstr extends Instr {
         })
         .transform(new AgentBuilder.Transformer() {
           @Override
-          public DynamicType.Builder<?> transform(DynamicType.Builder<?> builder, TypeDescription typeDescription, ClassLoader classLoader, JavaModule module) {
+          public DynamicType.Builder<?> transform(DynamicType.Builder<?> builder,
+                                                  TypeDescription typeDescription,
+                                                  ClassLoader classLoader, JavaModule module) {
             if (ComputedConfig.callDependence()) {
-              builder = builder.visit(new AsmVisitorWrapper.ForDeclaredMethods().method(not(isConstructor()).and(not(new TestMethodMatcher())), methodAdvice));
-              builder = builder.visit(new AsmVisitorWrapper.ForDeclaredMethods().method(not(isConstructor()).and(new TestMethodMatcher()), testMethodAdvice));
-              builder = builder.visit(new AsmVisitorWrapper.ForDeclaredMethods().method(isConstructor(), constructorAdvice));
+              builder = builder.visit(new AsmVisitorWrapper.ForDeclaredMethods()
+                  .method(not(isConstructor()).and(not(new TestMethodMatcher())), methodAdvice));
+              builder = builder.visit(new AsmVisitorWrapper.ForDeclaredMethods()
+                  .method(not(isConstructor()).and(new TestMethodMatcher()), testMethodAdvice));
+              builder = builder.visit(new AsmVisitorWrapper.ForDeclaredMethods()
+                  .method(isConstructor(), constructorAdvice));
 
             }
             if (ComputedConfig.dataDependence()) {
-              builder = builder.visit(new AsmVisitorWrapper.ForDeclaredMethods().method(new NoAnonymousConstructorsMatcher(), fieldAdvice));
+              builder = builder.visit(new AsmVisitorWrapper.ForDeclaredMethods()
+                  .method(new NoAnonymousConstructorsMatcher(), fieldAdvice));
             }
             if (ComputedConfig.lineNeeded()) {
-              builder = builder.visit(new AsmVisitorWrapper.ForDeclaredMethods().method(ElementMatchers.<MethodDescription>any(), lineVisitor));
+              builder = builder.visit(new AsmVisitorWrapper.ForDeclaredMethods()
+                  .method(ElementMatchers.<MethodDescription>any(), lineVisitor));
             }
             return builder;
           }

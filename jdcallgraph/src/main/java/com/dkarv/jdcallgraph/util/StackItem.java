@@ -23,9 +23,10 @@
  */
 package com.dkarv.jdcallgraph.util;
 
+import com.dkarv.jdcallgraph.util.node.Node;
 import com.dkarv.jdcallgraph.util.options.Formatter;
 
-public class StackItem {
+public class StackItem implements Node {
   private final String className;
   private final String methodName;
   private final int lineNumber;

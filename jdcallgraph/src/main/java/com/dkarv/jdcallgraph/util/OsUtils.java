@@ -32,4 +32,11 @@ public class OsUtils {
     }
     return fileName;
   }
+
+  public static char fileSeparator() {
+    if (isWindows) {
+      return '\\';
+    }
+    return '/';
+  }
 }

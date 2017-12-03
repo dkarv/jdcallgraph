@@ -42,10 +42,7 @@ public abstract class Mapper implements Processor {
       case "thread":
         return new ThreadMapper(next);
       case "entry":
-        // FIXME
-        return new ThreadMapper(next);
-      case "test":
-        return new ThreadMapper(next);
+        return new EntryMapper(next);
     }
     throw new IllegalArgumentException("Unknown mapper: " + specification);
   }

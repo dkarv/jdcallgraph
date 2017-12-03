@@ -25,6 +25,7 @@ package com.dkarv.jdcallgraph.util.target.mapper;
 
 import com.dkarv.jdcallgraph.util.*;
 import com.dkarv.jdcallgraph.util.log.*;
+import com.dkarv.jdcallgraph.util.node.Node;
 import com.dkarv.jdcallgraph.util.target.*;
 
 import java.io.*;
@@ -46,21 +47,21 @@ public class ThreadMapper extends Mapper {
   public void start(String id) throws IOException {
     Processor copy = next.copy();
     threads.put(getId(), copy);
-    copy.start(id + "/" + getId());
+    copy.start(id + OsUtils.fileSeparator() + getId());
   }
 
   @Override
-  public void node(StackItem method) throws IOException {
+  public void node(Node method) throws IOException {
     threads.get(getId()).node(method);
   }
 
   @Override
-  public void edge(StackItem from, StackItem to) throws IOException {
+  public void edge(Node from, Node to) throws IOException {
     threads.get(getId()).edge(from, to);
   }
 
   @Override
-  public void edge(StackItem from, StackItem to, String info) throws IOException {
+  public void edge(Node from, Node to, String info) throws IOException {
     threads.get(getId()).edge(from, to, info);
   }
 

@@ -13,7 +13,7 @@ import java.io.IOException;
 public class CallGraphTest {
   @Test
   public void testFinish() throws IOException {
-    CallGraph graph = new CallGraph(1);
+    CallGraph graph = new CallGraph();
     Target writer = Mockito.mock(Target.class);
     StackItem item = Mockito.mock(StackItem.class);
     graph.writers.add(0, writer);
@@ -32,7 +32,7 @@ public class CallGraphTest {
     Mockito.when(c.targets()).thenReturn(new Target[]{t});
     ConfigUtils.inject(c);
 
-    CallGraph graph = new CallGraph(1);
+    CallGraph graph = new CallGraph();
     Target writer = Mockito.mock(Target.class);
     StackItem[] items = new StackItem[]{
         Mockito.mock(StackItem.class),

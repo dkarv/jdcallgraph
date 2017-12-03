@@ -38,11 +38,10 @@ public class CallGraph {
 
   final List<Target> writers = new ArrayList<>();
 
-  public CallGraph() throws IOException {
+  public CallGraph() {
     for (Target t : Config.getInst().targets()) {
       if (t.needs(Property.METHOD_DEPENDENCY)) {
         writers.add(t);
-        t.start();
       }
     }
   }
@@ -51,6 +50,7 @@ public class CallGraph {
     if (calls.isEmpty()) {
       calls.push(method);
       for (Target t : writers) {
+        t.start();
         t.node(method);
       }
     } else {

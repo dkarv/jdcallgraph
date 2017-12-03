@@ -23,39 +23,19 @@
  */
 package com.dkarv.jdcallgraph.util.target.writer;
 
-import com.dkarv.jdcallgraph.util.*;
-import com.dkarv.jdcallgraph.util.log.*;
-import com.dkarv.jdcallgraph.util.target.*;
+import com.dkarv.jdcallgraph.util.node.Node;
+import com.dkarv.jdcallgraph.util.log.Logger;
+import com.dkarv.jdcallgraph.util.target.Processor;
+import com.dkarv.jdcallgraph.util.target.Property;
 import com.dkarv.jdcallgraph.util.target.Writer;
-import com.dkarv.jdcallgraph.writer.*;
 import com.dkarv.jdcallgraph.writer.FileWriter;
 
-import java.io.*;
+import java.io.IOException;
 
-/**
- * cg ddg | thread | dot
- * <p>
- * Target > ThreadMapper > DotFileWriter
- * <p>
- * Target.start(1)
- * .ThreadMapper.start(1)
- * ..DotFileWriter1.start(1)
- * Target.edge(1, A, B)
- * .ThreadMapper.edge(1, A, B)
- * ..DotFileWriter1.edge(1, A, B)
- * <p>
- * Target.start(2)
- * .ThreadMapper.start(2)
- */
-public class DotFileWriter extends Writer {
-  private static final Logger LOG = new Logger(DotFileWriter.class);
+public class CsvFileWriter extends Writer {
+  private static final Logger LOG = new Logger(CsvFileWriter.class);
   private boolean started = false;
   FileWriter writer;
-
-  @Override
-  public void node(StackItem method) throws IOException {
-    writer.append("\t\"" + method.toString() + "\" [style=filled,fillcolor=red];\n");
-  }
 
   @Override
   public boolean needs(Property p) {
@@ -68,26 +48,32 @@ public class DotFileWriter extends Writer {
       // close an old writer to make sure everything is flushed to disk
       close();
     }
-    writer = new FileWriter(id + ".dot");
-    writer.append("digraph \"" + id + "\"\n{\n");
+    writer = new FileWriter(id + ".csv");
     started = true;
   }
 
   @Override
-  public void edge(StackItem from, StackItem to) throws IOException {
-    LOG.trace("{} -> {}", from, to);
-    writer.append("\t\"" + from.toString() + "\" -> \"" + to.toString() + "\";\n");
-
+  public void node(Node method) throws IOException {
+    writer.append('\n');
+    writer.append(method.toString());
+    writer.append("; ");
   }
 
   @Override
-  public void edge(StackItem from, StackItem to, String info) throws IOException {
-    writer.append("\t\"" + from.toString() + "\" -> \"" + to.toString() + "\" [label=\"" + info + "\"];\n");
+  public void edge(Node from, Node to) throws IOException {
+    // this assumes the from is already written to the csv
+    writer.append(to.toString());
+    writer.append("; ");
+  }
+
+  @Override
+  public void edge(Node from, Node to, String info) throws IOException {
+    edge(from, to);
   }
 
   @Override
   public void end() throws IOException {
-    writer.append("}\n");
+    writer.append('\n');
     started = false;
   }
 
@@ -104,6 +90,6 @@ public class DotFileWriter extends Writer {
 
   @Override
   public Processor copy() {
-    return new DotFileWriter();
+    return new CsvFileWriter();
   }
 }

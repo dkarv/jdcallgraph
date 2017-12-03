@@ -23,11 +23,10 @@
  */
 package com.dkarv.jdcallgraph.util.target.writer;
 
-import com.dkarv.jdcallgraph.util.*;
 import com.dkarv.jdcallgraph.util.log.*;
+import com.dkarv.jdcallgraph.util.node.Node;
 import com.dkarv.jdcallgraph.util.target.*;
 import com.dkarv.jdcallgraph.util.target.Writer;
-import com.dkarv.jdcallgraph.writer.*;
 import com.dkarv.jdcallgraph.writer.FileWriter;
 
 import java.io.*;
@@ -53,16 +52,6 @@ public class DotFileWriter extends Writer {
   FileWriter writer;
 
   @Override
-  public void node(StackItem method) throws IOException {
-    writer.append("\t\"" + method.toString() + "\" [style=filled,fillcolor=red];\n");
-  }
-
-  @Override
-  public boolean needs(Property p) {
-    return false;
-  }
-
-  @Override
   public void start(String id) throws IOException {
     if (writer != null) {
       // close an old writer to make sure everything is flushed to disk
@@ -74,15 +63,26 @@ public class DotFileWriter extends Writer {
   }
 
   @Override
-  public void edge(StackItem from, StackItem to) throws IOException {
+  public void node(Node method) throws IOException {
+    writer.append("\t\"" + method.toString() + "\" [style=filled,fillcolor=red];\n");
+  }
+
+  @Override
+  public boolean needs(Property p) {
+    return false;
+  }
+
+  @Override
+  public void edge(Node from, Node to) throws IOException {
     LOG.trace("{} -> {}", from, to);
     writer.append("\t\"" + from.toString() + "\" -> \"" + to.toString() + "\";\n");
 
   }
 
   @Override
-  public void edge(StackItem from, StackItem to, String info) throws IOException {
-    writer.append("\t\"" + from.toString() + "\" -> \"" + to.toString() + "\" [label=\"" + info + "\"];\n");
+  public void edge(Node from, Node to, String info) throws IOException {
+    writer.append(
+        "\t\"" + from.toString() + "\" -> \"" + to.toString() + "\" [label=\"" + info + "\"];\n");
   }
 
   @Override

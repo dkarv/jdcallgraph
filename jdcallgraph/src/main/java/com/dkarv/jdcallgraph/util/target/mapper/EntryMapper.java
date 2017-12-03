@@ -23,10 +23,57 @@
  */
 package com.dkarv.jdcallgraph.util.target.mapper;
 
+import com.dkarv.jdcallgraph.util.node.Node;
+import com.dkarv.jdcallgraph.util.OsUtils;
 import com.dkarv.jdcallgraph.util.target.*;
+import java.io.IOException;
 
-public abstract class EntryMapper extends Mapper {
+public class EntryMapper extends Mapper {
+  private String id;
+  private Processor current;
+
   public EntryMapper(Processor next) {
     super(next);
+  }
+
+  @Override
+  public void start(String id) throws IOException {
+    current = null;
+    this.id = id;
+  }
+
+  @Override
+  public void node(Node method) throws IOException {
+    if (current == null) {
+      current = next.copy();
+      current.start(id + OsUtils.fileSeparator() + method.toString());
+    }
+    current.node(method);
+  }
+
+  @Override
+  public void edge(Node from, Node to) throws IOException {
+    current.edge(from, to);
+  }
+
+  @Override
+  public void edge(Node from, Node to, String info) throws IOException {
+    current.edge(from, to, info);
+  }
+
+  @Override
+  public void end() throws IOException {
+    current.end();
+  }
+
+  @Override
+  public void close() throws IOException {
+    current.close();
+    current = null;
+  }
+
+  @Override
+  public Processor copy() {
+    return new EntryMapper(next.copy());
   }
 }

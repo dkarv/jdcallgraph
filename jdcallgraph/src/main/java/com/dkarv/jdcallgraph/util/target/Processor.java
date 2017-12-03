@@ -23,13 +23,18 @@
  */
 package com.dkarv.jdcallgraph.util.target;
 
-import com.dkarv.jdcallgraph.util.*;
-import com.dkarv.jdcallgraph.util.options.*;
+import com.dkarv.jdcallgraph.util.node.Node;
 
 import java.io.*;
 
 /**
- * Process all elements in a graph.
+ * Process all elements in a graph. The order must always be the following:
+ * 1. start()
+ * 2. node()
+ * 3. edge()*
+ * 4. end()
+ * Steps 1-4 can be repeated
+ * 5. close()
  */
 public interface Processor {
   /**
@@ -45,17 +50,17 @@ public interface Processor {
   /**
    * Single node: No edge.
    */
-  void node(StackItem method) throws IOException;
+  void node(Node method) throws IOException;
 
   /**
    * Add an edge.
    */
-  void edge(StackItem from, StackItem to) throws IOException;
+  void edge(Node from, Node to) throws IOException;
 
   /**
    * Add an edge with some additional information.
    */
-  void edge(StackItem from, StackItem to, String info) throws IOException;
+  void edge(Node from, Node to, String info) throws IOException;
 
   /**
    * End of current stream reached. This is a good point to close the file written to if you write

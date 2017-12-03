@@ -23,26 +23,38 @@
  */
 package com.dkarv.jdcallgraph.instr;
 
-import com.dkarv.jdcallgraph.instr.javassist.*;
-import com.dkarv.jdcallgraph.util.config.*;
-import com.dkarv.jdcallgraph.util.log.*;
-import com.dkarv.jdcallgraph.util.options.*;
-import com.dkarv.jdcallgraph.util.target.*;
-import javassist.*;
-import javassist.bytecode.*;
-import javassist.bytecode.annotation.*;
-
-import java.io.*;
-import java.lang.instrument.*;
-import java.security.*;
-import java.util.*;
-import java.util.regex.*;
+import com.dkarv.jdcallgraph.instr.javassist.FieldTracer;
+import com.dkarv.jdcallgraph.util.config.ComputedConfig;
+import com.dkarv.jdcallgraph.util.config.Config;
+import com.dkarv.jdcallgraph.util.log.Logger;
+import com.dkarv.jdcallgraph.util.options.Target;
+import com.dkarv.jdcallgraph.util.target.Property;
+import java.io.ByteArrayInputStream;
+import java.io.IOException;
+import java.lang.instrument.ClassFileTransformer;
+import java.lang.instrument.Instrumentation;
+import java.security.ProtectionDomain;
+import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+import javassist.CannotCompileException;
+import javassist.ClassPool;
+import javassist.CtBehavior;
+import javassist.CtClass;
+import javassist.CtConstructor;
+import javassist.Modifier;
+import javassist.NotFoundException;
+import javassist.bytecode.AnnotationsAttribute;
+import javassist.bytecode.CodeAttribute;
+import javassist.bytecode.Descriptor;
+import javassist.bytecode.MethodInfo;
+import javassist.bytecode.annotation.Annotation;
 
 /**
  * Instrument the target classes.
  */
 public class JavassistInstr extends Instr implements ClassFileTransformer {
-  private final static Logger LOG = new Logger(JavassistInstr.class);
+  private static final Logger LOG = new Logger(JavassistInstr.class);
 
   private final FieldTracer fieldTracer;
   private final boolean callDependence;
@@ -56,7 +68,8 @@ public class JavassistInstr extends Instr implements ClassFileTransformer {
       fieldTracer = null;
     }
     this.callDependence = ComputedConfig.callDependence();
-    this.subTestDetection = Target.anyNeeds(Config.getInst().targets(), Property.SUB_TEST);
+    // FIXME make configurable
+    this.subTestDetection = true;
   }
 
   /**
@@ -86,7 +99,9 @@ public class JavassistInstr extends Instr implements ClassFileTransformer {
 
       if (enhanceClass) {
         byte[] b = enhanceClass(bytes);
-        if (b != null) return b;
+        if (b != null) {
+          return b;
+        }
       }
       return bytes;
     } catch (Throwable t) {
@@ -175,10 +190,10 @@ public class JavassistInstr extends Instr implements ClassFileTransformer {
       }
 
       boolean returnSafe = !(method instanceof CtConstructor);
-      String srcBefore = "com.dkarv.jdcallgraph.CallRecorder.beforeMethod(" + args + "," +
-          returnSafe + ");";
-      String srcAfter = "com.dkarv.jdcallgraph.CallRecorder.afterMethod(" + args + "," +
-          returnSafe + ");";
+      String srcBefore =
+          "com.dkarv.jdcallgraph.CallRecorder.beforeMethod(" + args + "," + returnSafe + ");";
+      String srcAfter =
+          "com.dkarv.jdcallgraph.CallRecorder.afterMethod(" + args + "," + returnSafe + ");";
 
       method.insertBefore(srcBefore);
       method.insertAfter(srcAfter, true);
@@ -187,7 +202,8 @@ public class JavassistInstr extends Instr implements ClassFileTransformer {
 
   private static boolean checkTestAnnotation(CtBehavior method) {
     MethodInfo mi = method.getMethodInfo2();
-    AnnotationsAttribute attr = ((AnnotationsAttribute) mi.getAttribute(AnnotationsAttribute.invisibleTag));
+    AnnotationsAttribute attr =
+        ((AnnotationsAttribute) mi.getAttribute(AnnotationsAttribute.invisibleTag));
     if (attr != null) {
       Annotation anno = attr.getAnnotation("org.junit.Test");
       if (anno != null) {

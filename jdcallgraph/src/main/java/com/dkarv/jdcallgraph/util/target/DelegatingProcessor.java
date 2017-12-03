@@ -23,8 +23,7 @@
  */
 package com.dkarv.jdcallgraph.util.target;
 
-import com.dkarv.jdcallgraph.util.*;
-
+import com.dkarv.jdcallgraph.util.node.Node;
 import java.io.*;
 
 /**
@@ -44,17 +43,17 @@ public abstract class DelegatingProcessor implements Processor {
   }
 
   @Override
-  public void node(StackItem node) throws IOException {
+  public void node(Node node) throws IOException {
     next.node(node);
   }
 
   @Override
-  public void edge(StackItem from, StackItem to) throws IOException {
+  public void edge(Node from, Node to) throws IOException {
     next.edge(from, to);
   }
 
   @Override
-  public void edge(StackItem from, StackItem to, String info) throws IOException {
+  public void edge(Node from, Node to, String info) throws IOException {
     next.edge(from, to, info);
   }
 

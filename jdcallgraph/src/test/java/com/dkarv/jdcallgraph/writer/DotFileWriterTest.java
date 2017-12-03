@@ -2,8 +2,10 @@ package com.dkarv.jdcallgraph.writer;
 
 import com.dkarv.jdcallgraph.helper.TestUtils;
 import com.dkarv.jdcallgraph.util.StackItem;
-import com.dkarv.jdcallgraph.util.config.Config;
 import com.dkarv.jdcallgraph.util.config.ConfigUtils;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.util.Arrays;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Rule;
@@ -11,12 +13,8 @@ import org.junit.Test;
 import org.junit.rules.TemporaryFolder;
 import org.mockito.Mockito;
 
-import java.io.FileNotFoundException;
-import java.io.IOException;
-import java.nio.file.*;
-import java.util.*;
-
 public class DotFileWriterTest {
+  /*
   @Rule
   public TemporaryFolder tmp = new TemporaryFolder();
 
@@ -79,5 +77,5 @@ public class DotFileWriterTest {
     writer.end();
     writer.writer.close();
     Assert.assertEquals("}\n", read("end.dot"));
-  }
+  }*/
 }

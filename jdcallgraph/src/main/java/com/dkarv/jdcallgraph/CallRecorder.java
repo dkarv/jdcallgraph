@@ -24,7 +24,8 @@
 package com.dkarv.jdcallgraph;
 
 import com.dkarv.jdcallgraph.callgraph.CallGraph;
-import com.dkarv.jdcallgraph.util.*;
+import com.dkarv.jdcallgraph.util.StackItem;
+import com.dkarv.jdcallgraph.util.StackItemCache;
 import com.dkarv.jdcallgraph.util.log.Logger;
 
 import java.io.IOException;

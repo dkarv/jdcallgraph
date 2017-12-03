@@ -18,7 +18,7 @@ public class CallGraph2Test {
   private CallGraph graph;
 
   @Before
-  public void before() {
+  public void before() throws IOException {
     Config c = Mockito.mock(Config.class);
     Target t = Mockito.mock(Target.class);
     Mockito.when(c.targets()).thenReturn(new Target[]{t});
@@ -26,7 +26,7 @@ public class CallGraph2Test {
     Mockito.when(item.toString()).thenReturn("method()");
     writer = Mockito.mock(Target.class);
     ConfigUtils.inject(c);
-    graph = Mockito.spy(new CallGraph(123));
+    graph = Mockito.spy(new CallGraph());
     graph.writers.add(0, writer);
   }
 

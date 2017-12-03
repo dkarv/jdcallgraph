@@ -23,10 +23,10 @@
  */
 package com.dkarv.jdcallgraph.instr.bytebuddy.tracer;
 
-import com.dkarv.jdcallgraph.instr.bytebuddy.util.*;
-import com.dkarv.jdcallgraph.util.*;
-import com.dkarv.jdcallgraph.util.log.*;
-import net.bytebuddy.asm.*;
+import com.dkarv.jdcallgraph.instr.bytebuddy.util.Format;
+import com.dkarv.jdcallgraph.util.StackItem;
+import com.dkarv.jdcallgraph.util.log.Logger;
+import net.bytebuddy.asm.Advice;
 
 public class MethodTracer {
   public static final Logger LOG = new Logger(MethodTracer.class);

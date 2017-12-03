@@ -37,12 +37,12 @@ public class DataDependenceGraph {
 
   private final List<Target> writers = new ArrayList<>();
   private Map<String, StackItem> lastWrites = new HashMap<>();
+  private boolean initialized = false;
 
-  public DataDependenceGraph() throws IOException {
+  public DataDependenceGraph() {
     for (Target t : Config.getInst().targets()) {
       if (t.needs(Property.DATA_DEPENDENCY)) {
         writers.add(t);
-        t.start();
       }
     }
   }
@@ -55,6 +55,13 @@ public class DataDependenceGraph {
     StackItem lastWrite = lastWrites.get(field);
     if (lastWrite != null) {
       if (!lastWrite.equals(location)) {
+        if (!initialized) {
+          for (Target t : writers) {
+            t.start();
+            t.node(lastWrite);
+          }
+          initialized = true;
+        }
         // ignore dependency on itself
         for (Target t : writers) {
           t.edge(lastWrite, location, field);

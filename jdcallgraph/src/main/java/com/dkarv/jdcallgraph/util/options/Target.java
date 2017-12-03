@@ -28,6 +28,8 @@ import com.dkarv.jdcallgraph.util.target.*;
 import com.dkarv.jdcallgraph.util.target.Writer;
 
 import java.io.*;
+import java.util.HashSet;
+import java.util.Set;
 
 public class Target extends DelegatingProcessor {
   private static final Logger LOG = new Logger(Target.class);
@@ -67,20 +69,17 @@ public class Target extends DelegatingProcessor {
 
   @Override
   public boolean needs(Property p) {
-    String need = null;
+    Set<String> need = new HashSet<>();
     switch (p) {
       case METHOD_DEPENDENCY:
-        need = "cg";
+        need.add("cg");
         break;
       case DATA_DEPENDENCY:
-        need = "ddg";
+        need.add("ddg");
         break;
-      case SUB_TEST:
-        // FIXME dynamic
-        return true;
     }
     for (String s : src) {
-      if (s.equals(need)) {
+      if (need.contains(s)) {
         return true;
       }
     }

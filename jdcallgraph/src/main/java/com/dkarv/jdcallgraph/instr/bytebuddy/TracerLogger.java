@@ -33,39 +33,44 @@ public class TracerLogger implements AgentBuilder.Listener {
   private static final Logger LOG = new Logger(TracerLogger.class);
   private final boolean verbose;
 
-  public TracerLogger(boolean verbose){
+  public TracerLogger(boolean verbose) {
     this.verbose = verbose;
   }
 
   @Override
-  public void onDiscovery(String typeName, ClassLoader classLoader, JavaModule module, boolean loaded) {
-    if(verbose){
+  public void onDiscovery(String typeName, ClassLoader classLoader, JavaModule module,
+                          boolean loaded) {
+    if (verbose) {
       LOG.trace("onDiscovery: {}, {}, {}", typeName, module, loaded);
     }
   }
 
   @Override
-  public void onTransformation(TypeDescription typeDescription, ClassLoader classLoader, JavaModule module, boolean loaded, DynamicType dynamicType) {
-    if(verbose){
+  public void onTransformation(TypeDescription typeDescription, ClassLoader classLoader,
+                               JavaModule module, boolean loaded, DynamicType dynamicType) {
+    if (verbose) {
       LOG.trace("onTransformation: {}, {}, {}, {}", typeDescription, module, loaded, dynamicType);
     }
   }
 
   @Override
-  public void onIgnored(TypeDescription typeDescription, ClassLoader classLoader, JavaModule module, boolean loaded) {
-    if(verbose){
+  public void onIgnored(TypeDescription typeDescription, ClassLoader classLoader, JavaModule module,
+                        boolean loaded) {
+    if (verbose) {
       LOG.trace("onIgnored: {}, {}, {}", typeDescription, module, loaded);
     }
   }
 
   @Override
-  public void onError(String typeName, ClassLoader classLoader, JavaModule module, boolean loaded, Throwable throwable) {
+  public void onError(String typeName, ClassLoader classLoader, JavaModule module, boolean loaded,
+                      Throwable throwable) {
     LOG.error("onError: {}, {}, {}", typeName, module, loaded, throwable);
   }
 
   @Override
-  public void onComplete(String typeName, ClassLoader classLoader, JavaModule module, boolean loaded) {
-    if(verbose){
+  public void onComplete(String typeName, ClassLoader classLoader, JavaModule module,
+                         boolean loaded) {
+    if (verbose) {
       LOG.trace("onComplete: {}, {}, {}", typeName, module, loaded);
     }
   }

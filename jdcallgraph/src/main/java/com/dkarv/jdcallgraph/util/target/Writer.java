@@ -23,25 +23,23 @@
  */
 package com.dkarv.jdcallgraph.util.target;
 
-import com.dkarv.jdcallgraph.util.*;
+import com.dkarv.jdcallgraph.util.node.Node;
+import com.dkarv.jdcallgraph.util.target.writer.CsvFileWriter;
 import com.dkarv.jdcallgraph.util.target.writer.DotFileWriter;
-import com.dkarv.jdcallgraph.writer.*;
 
-import java.io.*;
+import java.io.IOException;
 
 public abstract class Writer implements Processor {
   public static Writer getFor(String w) {
     switch (w.trim()) {
       case "dot":
         return new DotFileWriter();
-      case "matrix":
-        // FIXME
-        return new DotFileWriter();
       case "csv":
-        return new DotFileWriter();
+        return new CsvFileWriter();
     }
     throw new IllegalArgumentException("Invalid writer: " + w);
   }
 
-  public abstract void node(StackItem method) throws IOException;
+  @Override
+  public abstract void node(Node method) throws IOException;
 }
