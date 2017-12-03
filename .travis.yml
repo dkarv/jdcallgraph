@@ -30,6 +30,12 @@ matrix:
   - os: osx (Times out)
 
 
+addons:
+  sonarcloud:
+    organization: "sonarcloud_organization_key"
+    branches: *
+
+
 cache:
   directories:
   - $HOME/.m2
@@ -39,7 +45,7 @@ script:
 - if [ "$TRAVIS_BRANCH" == "master" ]; then echo "rm cache" && rm -r $HOME/.m2; fi
 - cd jdcallgraph
 - if [ "$TRAVIS_JDK_VERSION" == "oraclejdk9" ]; then mvn clean verify; fi
-- if [ "$TRAVIS_JDK_VERSION" != "oraclejdk9" ]; then mvn clean verify cobertura:cobertura coveralls:report; fi
+- if [ "$TRAVIS_JDK_VERSION" != "oraclejdk9" ]; then mvn clean org.jacoco:jacoco-maven-plugin:prepare-agent install sonar:sonar coveralls:report; fi
 - cd ../integration_tests && ./all.sh
 
 
