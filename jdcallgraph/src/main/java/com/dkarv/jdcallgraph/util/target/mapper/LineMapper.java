@@ -45,7 +45,7 @@ public class LineMapper extends Mapper {
   public void node(Node method) throws IOException {
     if (method instanceof StackItem) {
       StackItem x = (StackItem) method;
-      next.node(method);
+      next.node(new TextNode(x.getClassName() + "::" + x.getShortMethodName()));
       next.edge(method, new TextNode(Integer.toString(x.getLineNumber())));
     }
     next.node(method);

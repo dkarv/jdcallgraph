@@ -23,70 +23,63 @@
  */
 package com.dkarv.jdcallgraph.util.target.mapper;
 
-import com.dkarv.jdcallgraph.util.*;
-import com.dkarv.jdcallgraph.util.log.*;
+import com.dkarv.jdcallgraph.util.OsUtils;
+import com.dkarv.jdcallgraph.util.StackItem;
 import com.dkarv.jdcallgraph.util.node.Node;
-import com.dkarv.jdcallgraph.util.target.*;
+import com.dkarv.jdcallgraph.util.target.Mapper;
+import com.dkarv.jdcallgraph.util.target.Processor;
+import java.io.IOException;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
 
-import java.io.*;
-import java.util.*;
+public class TraceMapper extends Mapper {
+  private final Set<Node> trace = new HashSet<>();
+  private Node currentItem;
 
-public class ThreadMapper extends Mapper {
-  private static final Logger LOG = new Logger(ThreadMapper.class);
-  private Map<Long, Processor> threads = new HashMap<>();
-  private String lastId;
-
-  public ThreadMapper(Processor next) {
+  public TraceMapper(Processor next) {
     super(next);
-  }
-
-  private Processor getP() throws IOException {
-    long thread = Thread.currentThread().getId();
-    Processor p = threads.get(thread);
-    if (p == null) {
-      p = next.copy();
-      threads.put(thread, p);
-      p.start(lastId + OsUtils.fileSeparator() + thread);
-    }
-    return p;
   }
 
   @Override
   public void start(String id) throws IOException {
-    lastId = id;
-    getP();
+    next.start(id + OsUtils.fileSeparator() + "trace");
   }
 
   @Override
   public void node(Node method) throws IOException {
-    getP().node(method);
+    currentItem = method;
+    next.node(method);
+    trace.clear();
   }
 
   @Override
   public void edge(Node from, Node to) throws IOException {
-    getP().edge(from, to);
+    if (!trace.contains(to)) {
+      next.edge(currentItem, to);
+      trace.add(to);
+    }
   }
 
   @Override
   public void edge(Node from, Node to, String info) throws IOException {
-    getP().edge(from, to, info);
+    this.edge(from, to);
   }
 
   @Override
   public void end() throws IOException {
-    getP().end();
+    next.end();
+    trace.clear();
   }
 
   @Override
   public void close() throws IOException {
-    for (Processor p : threads.values()) {
-      p.close();
-    }
-    threads.clear();
+    next.close();
   }
 
   @Override
-  public ThreadMapper copy() {
-    return new ThreadMapper(next);
+  public Processor copy() {
+    return new TraceMapper(next.copy());
   }
 }

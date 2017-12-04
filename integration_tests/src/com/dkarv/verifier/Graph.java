@@ -11,7 +11,12 @@ public class Graph {
   private final Map<String, Set<String>> edges = new HashMap<>();
 
   public void read(File directory) throws IOException {
-    for (File file : directory.listFiles()) {
+    for (File file : directory.listFiles(new FileFilter() {
+      @Override
+      public boolean accept(File pathname) {
+        return pathname.isFile() && pathname.toString().endsWith(".dot");
+      }
+    })) {
       for (String line : Files.readAllLines(file.toPath(), StandardCharsets.UTF_8)) {
         Matcher m = P.matcher(line);
         if (m.matches()) {

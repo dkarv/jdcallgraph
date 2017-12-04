@@ -23,70 +23,67 @@
  */
 package com.dkarv.jdcallgraph.util.target.mapper;
 
-import com.dkarv.jdcallgraph.util.*;
-import com.dkarv.jdcallgraph.util.log.*;
+import com.dkarv.jdcallgraph.util.OsUtils;
 import com.dkarv.jdcallgraph.util.node.Node;
-import com.dkarv.jdcallgraph.util.target.*;
+import com.dkarv.jdcallgraph.util.target.Mapper;
+import com.dkarv.jdcallgraph.util.target.Processor;
+import java.io.IOException;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
 
-import java.io.*;
-import java.util.*;
+public class CoverageMapper extends Mapper {
+  private final Map<Node, Set<Node>> usedIn = new HashMap<>();
+  private Node currentItem;
 
-public class ThreadMapper extends Mapper {
-  private static final Logger LOG = new Logger(ThreadMapper.class);
-  private Map<Long, Processor> threads = new HashMap<>();
-  private String lastId;
-
-  public ThreadMapper(Processor next) {
+  public CoverageMapper(Processor next) {
     super(next);
-  }
-
-  private Processor getP() throws IOException {
-    long thread = Thread.currentThread().getId();
-    Processor p = threads.get(thread);
-    if (p == null) {
-      p = next.copy();
-      threads.put(thread, p);
-      p.start(lastId + OsUtils.fileSeparator() + thread);
-    }
-    return p;
   }
 
   @Override
   public void start(String id) throws IOException {
-    lastId = id;
-    getP();
+    next.start(id + OsUtils.fileSeparator() + "coverage");
   }
 
   @Override
   public void node(Node method) throws IOException {
-    getP().node(method);
+    currentItem = method;
   }
 
   @Override
   public void edge(Node from, Node to) throws IOException {
-    getP().edge(from, to);
+    Set<Node> list = usedIn.get(to);
+    if (list == null) {
+      list = new HashSet<>();
+      usedIn.put(to, list);
+    }
+    list.add(currentItem);
   }
 
   @Override
   public void edge(Node from, Node to, String info) throws IOException {
-    getP().edge(from, to, info);
+    this.edge(from, to);
   }
 
   @Override
   public void end() throws IOException {
-    getP().end();
+
   }
 
   @Override
   public void close() throws IOException {
-    for (Processor p : threads.values()) {
-      p.close();
+    for (Map.Entry<Node, Set<Node>> entry : usedIn.entrySet()) {
+      next.node(entry.getKey());
+      for (Node n : entry.getValue()) {
+        next.edge(entry.getKey(), n);
+      }
     }
-    threads.clear();
+    next.close();
   }
 
   @Override
-  public ThreadMapper copy() {
-    return new ThreadMapper(next);
+  public Processor copy() {
+    return new CoverageMapper(next.copy());
   }
 }

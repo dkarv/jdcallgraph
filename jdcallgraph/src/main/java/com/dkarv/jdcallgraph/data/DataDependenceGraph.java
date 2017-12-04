@@ -71,5 +71,8 @@ public class DataDependenceGraph {
   }
 
   public void finish() throws IOException {
+    for(Target t : writers) {
+      t.end();
+    }
   }
 }

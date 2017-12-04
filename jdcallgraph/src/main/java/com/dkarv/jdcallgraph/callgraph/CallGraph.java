@@ -46,7 +46,7 @@ public class CallGraph {
     }
   }
 
-  public void called(StackItem method) throws IOException {
+  public synchronized void called(StackItem method) throws IOException {
     if (calls.isEmpty()) {
       calls.push(method);
       for (Target t : writers) {
@@ -82,7 +82,7 @@ public class CallGraph {
     }
   }
 
-  public void returned(StackItem method) throws IOException {
+  public synchronized void returned(StackItem method) throws IOException {
     // TODO optimize for the case removed == 1
     Stack<StackItem> trace = new Stack<>();
     int removed = 0;
@@ -109,7 +109,7 @@ public class CallGraph {
     }
   }
 
-  public void finish() throws IOException {
+  public synchronized void finish() throws IOException {
     if (!calls.isEmpty()) {
       LOG.info("Shutdown but call graph not empty: {}", calls);
       for (StackItem item : calls) {

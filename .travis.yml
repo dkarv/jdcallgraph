@@ -54,9 +54,6 @@ script:
 
 before_deploy:
 - cd ../jdcallgraph
-- pwd
-- ls target
-- ls target/jdcallgraph-*-agent.jar
 deploy:
   provider: releases
   api_key:

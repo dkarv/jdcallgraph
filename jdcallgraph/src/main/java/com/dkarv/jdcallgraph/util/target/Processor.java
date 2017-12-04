@@ -30,8 +30,7 @@ import java.io.*;
 /**
  * Process all elements in a graph. The order must always be the following:
  * 1. start()
- * 2. node()
- * 3. edge()*
+ * 2. [node()|edge()]*
  * 4. end()
  * Steps 1-4 can be repeated
  * 5. close()

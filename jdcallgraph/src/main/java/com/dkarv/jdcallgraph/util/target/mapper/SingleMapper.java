@@ -23,70 +23,79 @@
  */
 package com.dkarv.jdcallgraph.util.target.mapper;
 
-import com.dkarv.jdcallgraph.util.*;
-import com.dkarv.jdcallgraph.util.log.*;
 import com.dkarv.jdcallgraph.util.node.Node;
-import com.dkarv.jdcallgraph.util.target.*;
+import com.dkarv.jdcallgraph.util.target.Mapper;
+import com.dkarv.jdcallgraph.util.target.Processor;
+import java.io.IOException;
+import java.util.HashMap;
+import java.util.HashSet;
 
-import java.io.*;
-import java.util.*;
+public class SingleMapper extends Mapper {
+  private final HashMap<Node, HashSet<Node>> edges = new HashMap<>();
+  private final HashMap<Node, HashMap<Node, HashSet<String>>> labels = new HashMap<>();
 
-public class ThreadMapper extends Mapper {
-  private static final Logger LOG = new Logger(ThreadMapper.class);
-  private Map<Long, Processor> threads = new HashMap<>();
-  private String lastId;
-
-  public ThreadMapper(Processor next) {
+  public SingleMapper(Processor next) {
     super(next);
-  }
-
-  private Processor getP() throws IOException {
-    long thread = Thread.currentThread().getId();
-    Processor p = threads.get(thread);
-    if (p == null) {
-      p = next.copy();
-      threads.put(thread, p);
-      p.start(lastId + OsUtils.fileSeparator() + thread);
-    }
-    return p;
   }
 
   @Override
   public void start(String id) throws IOException {
-    lastId = id;
-    getP();
+    edges.clear();
+    labels.clear();
+    next.start(id);
   }
 
   @Override
   public void node(Node method) throws IOException {
-    getP().node(method);
+    next.node(method);
   }
 
   @Override
   public void edge(Node from, Node to) throws IOException {
-    getP().edge(from, to);
+    HashSet<Node> set = edges.get(from);
+    if (set == null) {
+      set = new HashSet<>();
+      edges.put(from, set);
+    }
+    if (!set.contains(to)) {
+      set.add(to);
+      next.edge(from, to);
+    }
   }
 
   @Override
   public void edge(Node from, Node to, String info) throws IOException {
-    getP().edge(from, to, info);
+    HashMap<Node, HashSet<String>> sets = labels.get(from);
+    if (sets == null) {
+      sets = new HashMap<>();
+      labels.put(from, sets);
+    }
+
+    HashSet<String> set = sets.get(to);
+    if (set == null) {
+      set = new HashSet<>();
+      sets.put(to, set);
+    }
+    if (!set.contains(info)) {
+      set.add(info);
+      next.edge(from, to, info);
+    }
   }
 
   @Override
   public void end() throws IOException {
-    getP().end();
+    next.end();
+    edges.clear();
+    labels.clear();
   }
 
   @Override
   public void close() throws IOException {
-    for (Processor p : threads.values()) {
-      p.close();
-    }
-    threads.clear();
+    next.close();
   }
 
   @Override
-  public ThreadMapper copy() {
-    return new ThreadMapper(next);
+  public Processor copy() {
+    return new SingleMapper(next.copy());
   }
 }

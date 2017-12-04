@@ -54,16 +54,15 @@ public class CsvFileWriter extends Writer {
 
   @Override
   public void node(Node method) throws IOException {
-    writer.append('\n');
     writer.append(method.toString());
-    writer.append("; ");
+    writer.append(";");
   }
 
   @Override
   public void edge(Node from, Node to) throws IOException {
     // this assumes the from is already written to the csv
     writer.append(to.toString());
-    writer.append("; ");
+    writer.append(";");
   }
 
   @Override

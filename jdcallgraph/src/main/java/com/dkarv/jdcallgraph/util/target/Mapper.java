@@ -43,6 +43,14 @@ public abstract class Mapper implements Processor {
         return new ThreadMapper(next);
       case "entry":
         return new EntryMapper(next);
+      case "line":
+        return new LineMapper(next);
+      case "coverage":
+        return new CoverageMapper(next);
+      case "trace":
+        return new TraceMapper(next);
+      case "single":
+        return new SingleMapper(next);
     }
     throw new IllegalArgumentException("Unknown mapper: " + specification);
   }
