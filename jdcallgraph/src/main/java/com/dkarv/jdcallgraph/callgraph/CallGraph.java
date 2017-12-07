@@ -50,7 +50,7 @@ public class CallGraph {
     if (calls.isEmpty()) {
       calls.push(method);
       for (Target t : writers) {
-        t.start();
+        t.start(null);
         t.node(method);
       }
     } else {
@@ -95,9 +95,16 @@ public class CallGraph {
         found = true;
       }
     }
-    if (removed != 1) {
-      LOG.error("Error when method {} returned:", method);
-      LOG.error("Removed {} entries. Stack trace {}", removed, trace);
+    if (removed == 0) {
+      LOG.error("Could not find element {} on stack", method);
+    }
+    if (removed > 1) {
+      LOG.warn("Removed {} entries when {} returned. Stack trace {}", removed, method, trace);
+      for (StackItem item : trace) {
+        if (item.isReturnSafe() && !item.equals(method)) {
+          LOG.error("Element {} was removed although its return is safe", item);
+        }
+      }
     }
     if (!found) {
       LOG.error("Couldn't find the returned method call on stack");

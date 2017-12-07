@@ -78,14 +78,16 @@ public class ConfigReader {
     Config.instance.check();
   }
 
-  void read(BufferedReader input, Map<String, Object> options, Map<String, Method> targets) throws IOException {
+  void read(BufferedReader input, Map<String, Object> options, Map<String, Method> targets)
+      throws IOException {
     String multiLineValue = null;
 
     while (true) {
       String line = input.readLine();
       if (line == null) {
         if (multiLineValue != null) {
-          throw new IllegalArgumentException("Error in config file: Did not finish multi line option");
+          throw new IllegalArgumentException(
+              "Error in config file: Did not finish multi line option");
         }
         break;
       }

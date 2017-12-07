@@ -29,24 +29,28 @@ import com.dkarv.jdcallgraph.util.target.*;
 import java.io.IOException;
 
 public class EntryMapper extends Mapper {
-  private String id;
+  private String[] ids;
   private Processor current;
 
-  public EntryMapper(Processor next) {
-    super(next);
+  public EntryMapper(Processor next, boolean addId) {
+    super(next, addId);
   }
 
   @Override
-  public void start(String id) throws IOException {
+  public void start(String[] ids) throws IOException {
     current = null;
-    this.id = id;
+    this.ids = ids;
   }
 
   @Override
   public void node(Node method) throws IOException {
     if (current == null) {
-      current = next.copy();
-      current.start(id + OsUtils.fileSeparator() + method.toString());
+      if (next.isCollecting()) {
+        current = next;
+      } else {
+        current = next.copy();
+      }
+      current.start(super.extend(ids, method.toString()));
     }
     current.node(method);
   }
@@ -68,12 +72,14 @@ public class EntryMapper extends Mapper {
 
   @Override
   public void close() throws IOException {
-    current.close();
-    current = null;
+    if (current != null) {
+      current.close();
+      current = null;
+    }
   }
 
   @Override
   public Processor copy() {
-    return new EntryMapper(next.copy());
+    return new EntryMapper(next.copy(), addId);
   }
 }

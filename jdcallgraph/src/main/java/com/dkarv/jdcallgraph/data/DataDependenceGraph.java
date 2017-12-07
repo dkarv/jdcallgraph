@@ -57,7 +57,7 @@ public class DataDependenceGraph {
       if (!lastWrite.equals(location)) {
         if (!initialized) {
           for (Target t : writers) {
-            t.start();
+            t.start(null);
             t.node(lastWrite);
           }
           initialized = true;
@@ -71,7 +71,7 @@ public class DataDependenceGraph {
   }
 
   public void finish() throws IOException {
-    for(Target t : writers) {
+    for (Target t : writers) {
       t.end();
     }
   }

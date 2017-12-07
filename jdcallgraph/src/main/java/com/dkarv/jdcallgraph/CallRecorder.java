@@ -45,18 +45,23 @@ public class CallRecorder {
     beforeMethod(StackItemCache.get(className, methodName, lineNumber, returnSafe));
   }
 
+  private static CallGraph getGraph(long threadId) {
+    CallGraph graph = GRAPHS.get(threadId);
+    if (graph == null) {
+      graph = new CallGraph();
+      GRAPHS.put(threadId, graph);
+    }
+    return graph;
+  }
+
   public static void beforeMethod(StackItem item) {
     try {
       LOG.trace(">> {}{}", item, item.isReturnSafe() ? "" : " (return unsafe)");
       long threadId = Thread.currentThread().getId();
-      CallGraph graph = GRAPHS.get(threadId);
-      if (graph == null) {
-        graph = new CallGraph();
-        GRAPHS.put(threadId, graph);
-      }
+      CallGraph graph = getGraph(threadId);
       graph.called(item);
     } catch (Throwable e) {
-      LOG.error("Error in beforeMethod", e);
+      LOG.error("Error in beforeMethod({})", item, e);
     }
   }
 
@@ -76,7 +81,7 @@ public class CallRecorder {
       }
       graph.returned(item);
     } catch (Throwable e) {
-      LOG.error("Error in afterMethod", e);
+      LOG.error("Error in afterMethod({})", item, e);
     }
   }
 

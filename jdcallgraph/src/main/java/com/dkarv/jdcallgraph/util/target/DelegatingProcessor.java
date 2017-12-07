@@ -38,8 +38,8 @@ public abstract class DelegatingProcessor implements Processor {
   }
 
   @Override
-  public void start(String id) throws IOException {
-    next.start(id);
+  public void start(String[] ids) throws IOException {
+    next.start(ids);
   }
 
   @Override
@@ -65,5 +65,10 @@ public abstract class DelegatingProcessor implements Processor {
   @Override
   public void close() throws IOException {
     next.close();
+  }
+
+  @Override
+  public boolean isCollecting() {
+    return false;
   }
 }

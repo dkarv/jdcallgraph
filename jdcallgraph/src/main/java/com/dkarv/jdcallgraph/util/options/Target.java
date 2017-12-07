@@ -24,6 +24,7 @@
 package com.dkarv.jdcallgraph.util.options;
 
 import com.dkarv.jdcallgraph.util.log.*;
+import com.dkarv.jdcallgraph.util.node.Node;
 import com.dkarv.jdcallgraph.util.target.*;
 import com.dkarv.jdcallgraph.util.target.Writer;
 
@@ -34,6 +35,7 @@ import java.util.Set;
 public class Target extends DelegatingProcessor {
   private static final Logger LOG = new Logger(Target.class);
   private final String[] src;
+  private State state;
 
   private Target(String[] src, Processor next) {
     this.src = src;
@@ -46,7 +48,7 @@ public class Target extends DelegatingProcessor {
       throw new IllegalArgumentException("Target specification too short: " + specification);
     }
     Processor p = Writer.getFor(targets[targets.length - 1]);
-    for (int i = 1; i < targets.length - 1; i++) {
+    for (int i = targets.length - 2; i > 0; i--) {
       p = Mapper.getFor(targets[i], p);
     }
     next = p;
@@ -55,7 +57,7 @@ public class Target extends DelegatingProcessor {
 
   private boolean started = false;
 
-  public void start() throws IOException {
+  public void start(String[] ids) throws IOException {
     if (started) {
       return;
     }
@@ -63,7 +65,7 @@ public class Target extends DelegatingProcessor {
     for (String s : src) {
       name.append(s);
     }
-    next.start(name.toString());
+    next.start(new String[]{name.toString()});
     started = true;
   }
 
@@ -88,7 +90,22 @@ public class Target extends DelegatingProcessor {
 
   @Override
   public Target copy() {
-    return new Target(src, next.copy());
+    throw new UnsupportedOperationException("A target should never be copied");
+  }
+
+  @Override
+  public void node(Node node) throws IOException {
+    next.node(node);
+  }
+
+  @Override
+  public void edge(Node from, Node to) throws IOException {
+    next.edge(from, to);
+  }
+
+  @Override
+  public void edge(Node from, Node to, String info) throws IOException {
+    next.edge(from, to, info);
   }
 
   public static boolean anyNeeds(Target[] targets, Property p) {
@@ -98,5 +115,15 @@ public class Target extends DelegatingProcessor {
       }
     }
     return false;
+  }
+
+  private void assertState(State should) {
+    if (state != should) {
+      throw new IllegalStateException("Expected state " + should + " but was " + state);
+    }
+  }
+
+  enum State {
+    CREATED, STARTED, NODE, EDGE
   }
 }

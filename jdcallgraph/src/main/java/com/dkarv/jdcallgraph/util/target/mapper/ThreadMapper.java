@@ -23,37 +23,41 @@
  */
 package com.dkarv.jdcallgraph.util.target.mapper;
 
-import com.dkarv.jdcallgraph.util.*;
-import com.dkarv.jdcallgraph.util.log.*;
+import com.dkarv.jdcallgraph.util.log.Logger;
 import com.dkarv.jdcallgraph.util.node.Node;
-import com.dkarv.jdcallgraph.util.target.*;
-
-import java.io.*;
-import java.util.*;
+import com.dkarv.jdcallgraph.util.target.Mapper;
+import com.dkarv.jdcallgraph.util.target.Processor;
+import java.io.IOException;
+import java.util.HashMap;
+import java.util.Map;
 
 public class ThreadMapper extends Mapper {
   private static final Logger LOG = new Logger(ThreadMapper.class);
   private Map<Long, Processor> threads = new HashMap<>();
-  private String lastId;
+  private String[] lastIds;
 
-  public ThreadMapper(Processor next) {
-    super(next);
+  public ThreadMapper(Processor next, boolean addId) {
+    super(next, addId);
   }
 
   private Processor getP() throws IOException {
     long thread = Thread.currentThread().getId();
     Processor p = threads.get(thread);
     if (p == null) {
-      p = next.copy();
+      if (next.isCollecting()) {
+        p = next;
+      } else {
+        p = next.copy();
+      }
+      p.start(super.extend(lastIds, Long.toString(thread)));
       threads.put(thread, p);
-      p.start(lastId + OsUtils.fileSeparator() + thread);
     }
     return p;
   }
 
   @Override
-  public void start(String id) throws IOException {
-    lastId = id;
+  public void start(String[] ids) throws IOException {
+    lastIds = ids;
     getP();
   }
 
@@ -87,6 +91,6 @@ public class ThreadMapper extends Mapper {
 
   @Override
   public ThreadMapper copy() {
-    return new ThreadMapper(next);
+    return new ThreadMapper(next.copy(), addId);
   }
 }

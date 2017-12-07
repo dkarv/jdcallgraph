@@ -25,7 +25,9 @@ package com.dkarv.jdcallgraph.util.target.mapper;
 
 import com.dkarv.jdcallgraph.util.OsUtils;
 import com.dkarv.jdcallgraph.util.StackItem;
+import com.dkarv.jdcallgraph.util.log.Logger;
 import com.dkarv.jdcallgraph.util.node.Node;
+import com.dkarv.jdcallgraph.util.node.TextNode;
 import com.dkarv.jdcallgraph.util.target.Mapper;
 import com.dkarv.jdcallgraph.util.target.Processor;
 import java.io.IOException;
@@ -34,17 +36,13 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
-public class TraceMapper extends Mapper {
+public class TraceMapper extends CollectorMapper {
+  private static final Logger LOG = new Logger(TraceMapper.class);
   private final Set<Node> trace = new HashSet<>();
   private Node currentItem;
 
-  public TraceMapper(Processor next) {
-    super(next);
-  }
-
-  @Override
-  public void start(String id) throws IOException {
-    next.start(id + OsUtils.fileSeparator() + "trace");
+  public TraceMapper(Processor next, boolean addId) {
+    super(next, addId, "trace");
   }
 
   @Override
@@ -56,9 +54,20 @@ public class TraceMapper extends Mapper {
 
   @Override
   public void edge(Node from, Node to) throws IOException {
-    if (!trace.contains(to)) {
-      next.edge(currentItem, to);
-      trace.add(to);
+    if (currentItem == null) {
+      if (!trace.contains(to)) {
+        LOG.warn("currentItem not set for: {} -> {}", from, to);
+        currentItem = new TextNode("missing");
+        next.node(currentItem);
+        next.edge(currentItem, to);
+        trace.add(to);
+      }
+      // throw new IllegalStateException("Call node() before edge()");
+    } else {
+      if (!trace.contains(to)) {
+        next.edge(currentItem, to);
+        trace.add(to);
+      }
     }
   }
 
@@ -71,6 +80,7 @@ public class TraceMapper extends Mapper {
   public void end() throws IOException {
     next.end();
     trace.clear();
+    currentItem = null;
   }
 
   @Override
@@ -80,6 +90,7 @@ public class TraceMapper extends Mapper {
 
   @Override
   public Processor copy() {
-    return new TraceMapper(next.copy());
+    return new TraceMapper(next.copy(), addId);
   }
+
 }

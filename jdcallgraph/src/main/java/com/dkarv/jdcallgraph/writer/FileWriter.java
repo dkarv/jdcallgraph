@@ -42,7 +42,8 @@ public class FileWriter {
     fileName = OsUtils.escapeFilename(ComputedConfig.outDir() + fileName);
     File target = new File(fileName).getCanonicalFile();
     target.getParentFile().mkdirs();
-    writer = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(target, true), "UTF-8"), BUFFER_SIZE);
+    writer = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(target, true), "UTF-8"),
+        BUFFER_SIZE);
   }
 
   public void close() throws IOException {

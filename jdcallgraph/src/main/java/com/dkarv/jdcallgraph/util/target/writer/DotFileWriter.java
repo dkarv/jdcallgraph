@@ -48,18 +48,15 @@ import java.io.*;
  */
 public class DotFileWriter extends Writer {
   private static final Logger LOG = new Logger(DotFileWriter.class);
-  private boolean started = false;
   FileWriter writer;
 
   @Override
-  public void start(String id) throws IOException {
-    if (writer != null) {
-      // close an old writer to make sure everything is flushed to disk
-      close();
+  public void start(String[] ids) throws IOException {
+    if(writer == null) {
+      String filename = super.buildFilename(ids, "dot");
+      writer = new FileWriter(filename);
+      writer.append("digraph \"" + filename + "\"\n{\n");
     }
-    writer = new FileWriter(id + ".dot");
-    writer.append("digraph \"" + id + "\"\n{\n");
-    started = true;
   }
 
   @Override
@@ -88,16 +85,12 @@ public class DotFileWriter extends Writer {
   @Override
   public void end() throws IOException {
     writer.append("}\n");
-    started = false;
   }
 
   @Override
   public void close() throws IOException {
     if (writer == null) {
       return;
-    }
-    if (started) {
-      end();
     }
     writer.close();
   }

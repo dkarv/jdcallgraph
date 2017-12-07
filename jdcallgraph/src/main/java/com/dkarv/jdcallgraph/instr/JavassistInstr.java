@@ -77,23 +77,26 @@ public class JavassistInstr extends Instr implements ClassFileTransformer {
    *
    * @param instrumentation instrumentation
    */
+  @Override
   public void instrument(Instrumentation instrumentation) {
     instrumentation.addTransformer(this);
   }
 
+  @Override
   public byte[] transform(ClassLoader loader, String className, Class clazz,
                           ProtectionDomain domain, byte[] bytes) {
     try {
-      boolean enhanceClass = true;
+      boolean enhanceClass = className != null;
+      if (enhanceClass) {
+        String name = className.replace("/", ".");
 
-      String name = className.replace("/", ".");
-
-      for (Pattern p : excludes) {
-        Matcher m = p.matcher(name);
-        if (m.matches()) {
-          LOG.trace("Skipping class {}", name);
-          enhanceClass = false;
-          break;
+        for (Pattern p : excludes) {
+          Matcher m = p.matcher(name);
+          if (m.matches()) {
+            LOG.trace("Skipping class {}", name);
+            enhanceClass = false;
+            break;
+          }
         }
       }
 
@@ -105,7 +108,7 @@ public class JavassistInstr extends Instr implements ClassFileTransformer {
       }
       return bytes;
     } catch (Throwable t) {
-      LOG.error("Error in transform", t);
+      LOG.error("Error in transform of {} {}. Bytes: {}", className, clazz, bytes, t);
     }
     return bytes;
   }

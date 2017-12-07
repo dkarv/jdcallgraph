@@ -44,7 +44,7 @@ public interface Processor {
   /**
    * Start a new graph.
    */
-  void start(String id) throws IOException;
+  void start(String[] ids) throws IOException;
 
   /**
    * Single node: No edge.
@@ -77,4 +77,9 @@ public interface Processor {
    * the current state.
    */
   Processor copy();
+
+  /**
+   * Whether this processor is a collecting one. That means it collects multiple graphs. And there shouldn't be a new one every time it is
+   */
+  boolean isCollecting();
 }

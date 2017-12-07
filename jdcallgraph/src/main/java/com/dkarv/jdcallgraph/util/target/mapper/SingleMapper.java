@@ -34,15 +34,15 @@ public class SingleMapper extends Mapper {
   private final HashMap<Node, HashSet<Node>> edges = new HashMap<>();
   private final HashMap<Node, HashMap<Node, HashSet<String>>> labels = new HashMap<>();
 
-  public SingleMapper(Processor next) {
-    super(next);
+  public SingleMapper(Processor next, boolean addId) {
+    super(next, addId);
   }
 
   @Override
-  public void start(String id) throws IOException {
+  public void start(String[] ids) throws IOException {
     edges.clear();
     labels.clear();
-    next.start(id);
+    next.start(super.extend(ids, "single"));
   }
 
   @Override
@@ -96,6 +96,6 @@ public class SingleMapper extends Mapper {
 
   @Override
   public Processor copy() {
-    return new SingleMapper(next.copy());
+    return new SingleMapper(next.copy(), addId);
   }
 }

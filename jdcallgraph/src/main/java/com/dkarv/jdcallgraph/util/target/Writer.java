@@ -23,6 +23,7 @@
  */
 package com.dkarv.jdcallgraph.util.target;
 
+import com.dkarv.jdcallgraph.util.OsUtils;
 import com.dkarv.jdcallgraph.util.node.Node;
 import com.dkarv.jdcallgraph.util.target.writer.CsvFileWriter;
 import com.dkarv.jdcallgraph.util.target.writer.DotFileWriter;
@@ -42,4 +43,25 @@ public abstract class Writer implements Processor {
 
   @Override
   public abstract void node(Node method) throws IOException;
+
+  public String buildFilename(String[] ids, String extension) {
+    StringBuilder filename = new StringBuilder();
+    boolean first = true;
+    for (String id : ids) {
+      if (!first) {
+        filename.append(OsUtils.fileSeparator());
+      } else {
+        first = false;
+      }
+      filename.append(id);
+    }
+    filename.append('.');
+    filename.append(extension);
+    return filename.toString();
+  }
+
+  @Override
+  public boolean isCollecting() {
+    return false;
+  }
 }

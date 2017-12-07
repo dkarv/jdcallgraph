@@ -23,56 +23,32 @@
  */
 package com.dkarv.jdcallgraph.util.target.mapper;
 
-import com.dkarv.jdcallgraph.util.StackItem;
-import com.dkarv.jdcallgraph.util.node.Node;
-import com.dkarv.jdcallgraph.util.OsUtils;
-import com.dkarv.jdcallgraph.util.node.TextNode;
 import com.dkarv.jdcallgraph.util.target.Mapper;
 import com.dkarv.jdcallgraph.util.target.Processor;
 import java.io.IOException;
 
-public class LineMapper extends Mapper {
-  public LineMapper(Processor next, boolean addId) {
+/**
+ * A mapper that collects multiple graphs.
+ */
+public abstract class CollectorMapper extends Mapper {
+  private final String id;
+  private boolean started = false;
+
+  public CollectorMapper(Processor next, boolean addId, String id) {
     super(next, addId);
+    this.id = id;
   }
 
   @Override
   public void start(String[] ids) throws IOException {
-    next.start(super.extend(ids, "lines"));
-  }
-
-  @Override
-  public void node(Node method) throws IOException {
-    if (method instanceof StackItem) {
-      StackItem x = (StackItem) method;
-      next.node(new TextNode(x.getClassName() + "::" + x.getShortMethodName()));
-      next.edge(method, new TextNode(Integer.toString(x.getLineNumber())));
+    if (!started) {
+      next.start(super.extend(ids, id));
+      started = true;
     }
-    next.node(method);
   }
 
   @Override
-  public void edge(Node from, Node to) throws IOException {
-
-  }
-
-  @Override
-  public void edge(Node from, Node to, String info) throws IOException {
-
-  }
-
-  @Override
-  public void end() throws IOException {
-    next.end();
-  }
-
-  @Override
-  public void close() throws IOException {
-    next.close();
-  }
-
-  @Override
-  public Processor copy() {
-    return new LineMapper(next.copy(), addId);
+  public boolean isCollecting() {
+    return true;
   }
 }

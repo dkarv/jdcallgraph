@@ -23,18 +23,16 @@
  */
 package com.dkarv.jdcallgraph.util.target.writer;
 
-import com.dkarv.jdcallgraph.util.node.Node;
 import com.dkarv.jdcallgraph.util.log.Logger;
+import com.dkarv.jdcallgraph.util.node.Node;
 import com.dkarv.jdcallgraph.util.target.Processor;
 import com.dkarv.jdcallgraph.util.target.Property;
 import com.dkarv.jdcallgraph.util.target.Writer;
 import com.dkarv.jdcallgraph.writer.FileWriter;
-
 import java.io.IOException;
 
 public class CsvFileWriter extends Writer {
   private static final Logger LOG = new Logger(CsvFileWriter.class);
-  private boolean started = false;
   FileWriter writer;
 
   @Override
@@ -43,13 +41,10 @@ public class CsvFileWriter extends Writer {
   }
 
   @Override
-  public void start(String id) throws IOException {
-    if (writer != null) {
-      // close an old writer to make sure everything is flushed to disk
-      close();
+  public void start(String[] ids) throws IOException {
+    if (writer == null) {
+      writer = new FileWriter(super.buildFilename(ids, "csv"));
     }
-    writer = new FileWriter(id + ".csv");
-    started = true;
   }
 
   @Override
@@ -73,16 +68,12 @@ public class CsvFileWriter extends Writer {
   @Override
   public void end() throws IOException {
     writer.append('\n');
-    started = false;
   }
 
   @Override
   public void close() throws IOException {
     if (writer == null) {
       return;
-    }
-    if (started) {
-      end();
     }
     writer.close();
   }

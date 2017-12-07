@@ -23,9 +23,7 @@
  */
 package com.dkarv.jdcallgraph.util.target.mapper;
 
-import com.dkarv.jdcallgraph.util.OsUtils;
 import com.dkarv.jdcallgraph.util.node.Node;
-import com.dkarv.jdcallgraph.util.target.Mapper;
 import com.dkarv.jdcallgraph.util.target.Processor;
 import java.io.IOException;
 import java.util.HashMap;
@@ -33,17 +31,12 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
-public class CoverageMapper extends Mapper {
+public class CoverageMapper extends CollectorMapper {
   private final Map<Node, Set<Node>> usedIn = new HashMap<>();
   private Node currentItem;
 
-  public CoverageMapper(Processor next) {
-    super(next);
-  }
-
-  @Override
-  public void start(String id) throws IOException {
-    next.start(id + OsUtils.fileSeparator() + "coverage");
+  public CoverageMapper(Processor next, boolean addId) {
+    super(next, addId, "coverage");
   }
 
   @Override
@@ -84,6 +77,6 @@ public class CoverageMapper extends Mapper {
 
   @Override
   public Processor copy() {
-    return new CoverageMapper(next.copy());
+    return new CoverageMapper(next, addId);
   }
 }
