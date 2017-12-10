@@ -191,8 +191,9 @@ public class Tracer implements ClassFileTransformer {
     boolean isTest = false;
     MethodInfo info = method.getMethodInfo2();
     if (info.isMethod() && !Modifier.isStatic(info.getAccessFlags())) {
-      // FIXME check if class extends Testcase
-      isTest = checkTestAnnotation(method);
+      isTest =
+          checkTestAnnotation(method) || checkExtendsTestcase(method.getDeclaringClass(), method);
+
     }
 
     int lineNumber = getLineNumber(method);
@@ -215,6 +216,18 @@ public class Tracer implements ClassFileTransformer {
     //  CtClass etype = ClassPool.getDefault().get("java.lang.Exception");
     //  method.addCatch("{ " + srcAfter + " throw $e; }", etype);
     //}
+  }
+
+  private boolean checkExtendsTestcase(CtClass type, CtBehavior method) throws NotFoundException {
+    if ("junit.framework.TestCase".equals(type.getName())) {
+      return !(method instanceof CtConstructor) &&
+          method.getName().startsWith("test") &&
+          method.getName().length() > 4 &&
+          method.getParameterTypes().length == 0 &&
+          Modifier.isPublic(method.getModifiers());
+    }
+    CtClass sup = type.getSuperclass();
+    return sup != null && checkExtendsTestcase(sup, method);
   }
 
   private static boolean checkTestAnnotation(CtBehavior method) {

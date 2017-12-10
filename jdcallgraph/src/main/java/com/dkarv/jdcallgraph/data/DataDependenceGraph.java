@@ -46,12 +46,12 @@ public class DataDependenceGraph {
 
   private Map<String, StackItem> lastWrites = new HashMap<>();
 
-  public DataDependenceGraph(long threadId) throws IOException {
+  public DataDependenceGraph() throws IOException {
     Target[] targets = Config.getInst().writeTo();
     for (Target target : targets) {
       if (target.isDataDependency() && target != Target.COMBINED_DOT) {
         GraphWriter writer = createWriter(target);
-        writer.start(FOLDER + "data_" + threadId);
+        writer.start(FOLDER + "ddg");
         writers.add(writer);
       }
     }
@@ -70,10 +70,10 @@ public class DataDependenceGraph {
 
   public void addWrite(StackItem location, String field) throws IOException {
     LOG.trace("Write to {} from {}", field, location);
-    this.lastWrites.put(field, location);
-    // for (GraphWriter writer : writers) {
-    //   writer.node(location);
-    // }
+    StackItem item = this.lastWrites.get(field);
+    if (!location.equals(item)) {
+      this.lastWrites.put(field, location);
+    }
   }
 
   public void addRead(StackItem location, String field, CallGraph callGraph) throws IOException {
@@ -84,7 +84,8 @@ public class DataDependenceGraph {
         // ignore dependency on itself
         // LOG.debug("Location {} depends on {}", location, lastWrite);
         for (GraphWriter writer : writers) {
-          writer.edge(lastWrite, location, "[label=\"" + field + "\"]");
+          writer.edge(lastWrite, location);
+          // writer.edge(lastWrite, location, "[label=\"" + field + "\"]");
         }
         if (callGraph != null) {
           callGraph.dataEdge(lastWrite, location);

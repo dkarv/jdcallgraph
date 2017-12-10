@@ -43,6 +43,9 @@ public class CallRecorder {
   public static void beforeMethod(String className, String methodName, int lineNumber,
                                   boolean isTest) {
     try {
+      if (isTest) {
+        LOG.info("* Starting {}::{}", className, methodName);
+      }
       LOG.trace("beforeMethod: {}:{}#{}", className, methodName, lineNumber);
       long threadId = Thread.currentThread().getId();
       CallGraph graph = GRAPHS.get(threadId);
@@ -60,6 +63,9 @@ public class CallRecorder {
   public static void afterMethod(String className, String methodName, int lineNumber,
                                  boolean isTest) {
     try {
+      if (isTest) {
+        LOG.info("* Finished {}::{}", className, methodName);
+      }
       LOG.trace("afterMethod: {}:{}#{}", className, methodName, lineNumber);
       long threadId = Thread.currentThread().getId();
       CallGraph graph = GRAPHS.get(threadId);

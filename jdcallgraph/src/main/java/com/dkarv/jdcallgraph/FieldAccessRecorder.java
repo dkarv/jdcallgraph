@@ -27,13 +27,10 @@ import com.dkarv.jdcallgraph.callgraph.CallGraph;
 import com.dkarv.jdcallgraph.data.DataDependenceGraph;
 import com.dkarv.jdcallgraph.util.StackItem;
 import com.dkarv.jdcallgraph.util.StackItemCache;
-import com.dkarv.jdcallgraph.util.config.*;
+import com.dkarv.jdcallgraph.util.config.Config;
 import com.dkarv.jdcallgraph.util.log.Logger;
-import com.dkarv.jdcallgraph.util.options.*;
-
+import com.dkarv.jdcallgraph.util.options.Target;
 import java.io.IOException;
-import java.util.HashMap;
-import java.util.Map;
 
 public class FieldAccessRecorder {
   private static final Logger LOG = new Logger(FieldAccessRecorder.class);
@@ -41,7 +38,7 @@ public class FieldAccessRecorder {
   /**
    * Collect the call graph per thread.
    */
-  static final Map<Long, DataDependenceGraph> GRAPHS = new HashMap<>();
+  static final DataDependenceGraph GRAPH;
   private static final boolean needCombined;
 
   static {
@@ -52,21 +49,19 @@ public class FieldAccessRecorder {
       }
     }
     needCombined = combined;
+    try {
+      GRAPH = new DataDependenceGraph();
+    } catch (IOException e) {
+      throw new IllegalStateException("Error setting up data dependence graph", e);
+    }
   }
 
   public static void write(String fromClass, String fromMethod, int lineNumber, String fieldClass,
                            String fieldName) {
     try {
       LOG.trace("Write to {}::{} from {}::{}", fieldClass, fieldName, fromClass, fromMethod);
-      long threadId = Thread.currentThread().getId();
-      DataDependenceGraph graph = GRAPHS.get(threadId);
-      if (graph == null) {
-        graph = new DataDependenceGraph(threadId);
-        GRAPHS.put(threadId, graph);
-      }
       StackItem item = StackItemCache.get(fromClass, fromMethod, lineNumber, false);
-      graph.addWrite(item,
-          fieldClass + "::" + fieldName);
+      GRAPH.addWrite(item, fieldClass + "::" + fieldName);
     } catch (Exception e) {
       LOG.error("Error in write", e);
     }
@@ -76,20 +71,14 @@ public class FieldAccessRecorder {
                           String fieldName) {
     try {
       LOG.trace("Read to {}::{} from {}::{}", fieldClass, fieldName, fromClass, fromMethod);
-      long threadId = Thread.currentThread().getId();
-      DataDependenceGraph graph = GRAPHS.get(threadId);
-      if (graph == null) {
-        LOG.trace("Read not interesting because there was no write before");
-        return;
-      }
+      CallGraph callGraph;
       if (needCombined) {
-        CallGraph callGraph = CallRecorder.GRAPHS.get(threadId);
-        StackItem item = StackItemCache.get(fromClass, fromMethod, lineNumber, false);
-        graph.addRead(item, fieldClass + "::" + fieldName, callGraph);
+        callGraph = CallRecorder.GRAPHS.get(Thread.currentThread().getId());
       } else {
-        StackItem item = StackItemCache.get(fromClass, fromMethod, lineNumber, false);
-        graph.addRead(item, fieldClass + "::" + fieldName, null);
+        callGraph = null;
       }
+      StackItem item = StackItemCache.get(fromClass, fromMethod, lineNumber, false);
+      GRAPH.addRead(item, fieldClass + "::" + fieldName, callGraph);
     } catch (Exception e) {
       LOG.error("Error in read", e);
     }
@@ -100,12 +89,10 @@ public class FieldAccessRecorder {
   }
 
   public static void shutdown() {
-    for (DataDependenceGraph g : GRAPHS.values()) {
-      try {
-        g.finish();
-      } catch (IOException e) {
-        LOG.error("Error finishing call graph {}", g, e);
-      }
+    try {
+      GRAPH.finish();
+    } catch (IOException e) {
+      LOG.error("Error finishing call graph.", e);
     }
   }
 }

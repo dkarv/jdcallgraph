@@ -112,9 +112,9 @@ public class FieldTracer extends ExprEditor {
           ",\"" + f.getFieldName() + "\"";
       if (isWrite) {
         if (IGNORE_THIS.matcher(f.getFieldName()).find()) {
-          LOG.info("Ignore write to this in {} from {}", f.getClassName(), from);
+          LOG.debug("Ignore write to this in {} from {}", f.getClassName(), from);
         } else if (IGNORE_VAL.matcher(f.getFieldName()).find()) {
-          LOG.info("Ignore write to val {}:{} from {}", f.getClassName(), f.getFieldName(), from);
+          LOG.debug("Ignore write to val {}:{} from {}", f.getClassName(), f.getFieldName(), from);
         } else {
           f.replace("{ $_ = $proceed($$); " +
               "com.dkarv.jdcallgraph.FieldAccessRecorder.write(" + from + field + "); }");

@@ -23,27 +23,13 @@
  */
 package com.dkarv.jdcallgraph.util;
 
-import java.util.*;
+import java.util.LinkedHashMap;
+import java.util.Map;
 
-public class StackItemCache {
-  private static final Map<String, Map<String, StackItem>> CACHE = new MaxSizeHashMap<>();
+public class MaxSizeHashMap<K, V> extends LinkedHashMap<K, V> {
+  private static final int MAX_ENTRIES = 1000;
 
-  public static StackItem get(String type, String method, int lineNumber, boolean isTest) {
-    Map<String, StackItem> methodMap = getBy(type);
-    StackItem item = methodMap.get(method);
-    if (item == null) {
-      item = new StackItem(type, method, lineNumber, isTest);
-      methodMap.put(method, item);
-    }
-    return item;
-  }
-
-  private static Map<String, StackItem> getBy(String type) {
-    Map<String, StackItem> map = CACHE.get(type);
-    if (map == null) {
-      map = new HashMap<>();
-      CACHE.put(type, map);
-    }
-    return map;
+  protected boolean removeEldestEntry(Map.Entry eldest) {
+    return size() > MAX_ENTRIES;
   }
 }
