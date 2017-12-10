@@ -24,6 +24,7 @@
 package com.dkarv.jdcallgraph;
 
 import com.dkarv.jdcallgraph.callgraph.CallGraph;
+import com.dkarv.jdcallgraph.util.StackItemCache;
 import com.dkarv.jdcallgraph.util.log.Logger;
 import com.dkarv.jdcallgraph.util.StackItem;
 
@@ -49,7 +50,8 @@ public class CallRecorder {
         graph = new CallGraph(threadId);
         GRAPHS.put(threadId, graph);
       }
-      graph.called(new StackItem(className, methodName, lineNumber, isTest));
+      StackItem item = StackItemCache.get(className, methodName, lineNumber, isTest);
+      graph.called(item);
     } catch (Throwable e) {
       LOG.error("Error in beforeMethod", e);
     }
@@ -65,7 +67,8 @@ public class CallRecorder {
         // not interesting
         return;
       }
-      graph.returned(new StackItem(className, methodName, lineNumber, isTest));
+      StackItem item = StackItemCache.get(className, methodName, lineNumber, isTest);
+      graph.returned(item);
     } catch (Throwable e) {
       LOG.error("Error in afterMethod", e);
     }

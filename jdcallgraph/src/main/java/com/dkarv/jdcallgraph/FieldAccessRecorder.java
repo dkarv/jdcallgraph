@@ -26,6 +26,7 @@ package com.dkarv.jdcallgraph;
 import com.dkarv.jdcallgraph.callgraph.CallGraph;
 import com.dkarv.jdcallgraph.data.DataDependenceGraph;
 import com.dkarv.jdcallgraph.util.StackItem;
+import com.dkarv.jdcallgraph.util.StackItemCache;
 import com.dkarv.jdcallgraph.util.config.*;
 import com.dkarv.jdcallgraph.util.log.Logger;
 import com.dkarv.jdcallgraph.util.options.*;
@@ -63,7 +64,8 @@ public class FieldAccessRecorder {
         graph = new DataDependenceGraph(threadId);
         GRAPHS.put(threadId, graph);
       }
-      graph.addWrite(new StackItem(fromClass, fromMethod, lineNumber, false),
+      StackItem item = StackItemCache.get(fromClass, fromMethod, lineNumber, false);
+      graph.addWrite(item,
           fieldClass + "::" + fieldName);
     } catch (Exception e) {
       LOG.error("Error in write", e);
@@ -82,11 +84,11 @@ public class FieldAccessRecorder {
       }
       if (needCombined) {
         CallGraph callGraph = CallRecorder.GRAPHS.get(threadId);
-        graph.addRead(new StackItem(fromClass, fromMethod, lineNumber, false), fieldClass + "::" +
-            fieldName, callGraph);
+        StackItem item = StackItemCache.get(fromClass, fromMethod, lineNumber, false);
+        graph.addRead(item, fieldClass + "::" + fieldName, callGraph);
       } else {
-        graph.addRead(new StackItem(fromClass, fromMethod, lineNumber, false), fieldClass + "::" +
-            fieldName, null);
+        StackItem item = StackItemCache.get(fromClass, fromMethod, lineNumber, false);
+        graph.addRead(item, fieldClass + "::" + fieldName, null);
       }
     } catch (Exception e) {
       LOG.error("Error in read", e);
