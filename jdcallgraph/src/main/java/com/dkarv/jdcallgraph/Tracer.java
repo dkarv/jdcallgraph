@@ -62,12 +62,14 @@ public class Tracer implements ClassFileTransformer {
    * @throws IOException            io error
    * @throws IllegalAccessException problem loading the config options
    */
-  public static void premain(String argument, Instrumentation instrumentation) throws IOException, IllegalAccessException {
+  public static void premain(String argument, Instrumentation instrumentation)
+      throws IOException, IllegalAccessException {
     ShutdownHook.init();
     if (argument != null) {
       new ConfigReader(new File(argument)).read();
     } else {
-      System.err.println("You did not specify a config file. Will use the default config options instead.");
+      System.err.println(
+          "You did not specify a config file. Will use the default config options instead.");
     }
 
 
@@ -106,7 +108,9 @@ public class Tracer implements ClassFileTransformer {
 
     if (enhanceClass) {
       byte[] b = enhanceClass(bytes);
-      if (b != null) return b;
+      if (b != null) {
+        return b;
+      }
     }
     return bytes;
   }
@@ -184,9 +188,23 @@ public class Tracer implements ClassFileTransformer {
       method.instrument(fieldTracer);
     }
 
+    boolean isTest = false;
+    MethodInfo info = method.getMethodInfo2();
+    if (info.isMethod() && !Modifier.isStatic(info.getAccessFlags())) {
+      // FIXME check if class extends Testcase
+      isTest = checkTestAnnotation(method);
+    }
+
     int lineNumber = getLineNumber(method);
 
-    String args = '"' + className + '"' + ',' + '"' + mName + '"' + ',' + lineNumber;
+    String args;
+    if (isTest) {
+      LOG.debug("subtest detection enabled on {}::{}", className, mName);
+      args =
+          "getClass().getCanonicalName()" + ',' + '"' + mName + '"' + ',' + lineNumber + ',' + true;
+    } else {
+      args = '"' + className + '"' + ',' + '"' + mName + '"' + ',' + lineNumber + ',' + false;
+    }
 
     String srcBefore = "com.dkarv.jdcallgraph.CallRecorder.beforeMethod(" + args + ");";
     String srcAfter = "com.dkarv.jdcallgraph.CallRecorder.afterMethod(" + args + ");";
@@ -197,6 +215,26 @@ public class Tracer implements ClassFileTransformer {
     //  CtClass etype = ClassPool.getDefault().get("java.lang.Exception");
     //  method.addCatch("{ " + srcAfter + " throw $e; }", etype);
     //}
+  }
+
+  private static boolean checkTestAnnotation(CtBehavior method) {
+    MethodInfo mi = method.getMethodInfo2();
+    AnnotationsAttribute attr =
+        ((AnnotationsAttribute) mi.getAttribute(AnnotationsAttribute.invisibleTag));
+    if (attr != null) {
+      javassist.bytecode.annotation.Annotation anno = attr.getAnnotation("org.junit.Test");
+      if (anno != null) {
+        return true;
+      }
+    }
+
+
+    attr = ((AnnotationsAttribute) mi.getAttribute(AnnotationsAttribute.visibleTag));
+    if (attr == null) {
+      return false;
+    }
+    javassist.bytecode.annotation.Annotation anno = attr.getAnnotation("org.junit.Test");
+    return anno != null;
   }
 
   public static int getLineNumber(CtBehavior method) {

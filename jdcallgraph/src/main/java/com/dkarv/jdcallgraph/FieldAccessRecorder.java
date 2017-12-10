@@ -33,7 +33,6 @@ import com.dkarv.jdcallgraph.util.options.*;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Stack;
 
 public class FieldAccessRecorder {
   private static final Logger LOG = new Logger(FieldAccessRecorder.class);
@@ -54,7 +53,8 @@ public class FieldAccessRecorder {
     needCombined = combined;
   }
 
-  public static void write(String fromClass, String fromMethod, int lineNumber, String fieldClass, String fieldName) {
+  public static void write(String fromClass, String fromMethod, int lineNumber, String fieldClass,
+                           String fieldName) {
     try {
       LOG.trace("Write to {}::{} from {}::{}", fieldClass, fieldName, fromClass, fromMethod);
       long threadId = Thread.currentThread().getId();
@@ -63,13 +63,15 @@ public class FieldAccessRecorder {
         graph = new DataDependenceGraph(threadId);
         GRAPHS.put(threadId, graph);
       }
-      graph.addWrite(new StackItem(fromClass, fromMethod, lineNumber), fieldClass + "::" + fieldName);
+      graph.addWrite(new StackItem(fromClass, fromMethod, lineNumber, false),
+          fieldClass + "::" + fieldName);
     } catch (Exception e) {
       LOG.error("Error in write", e);
     }
   }
 
-  public static void read(String fromClass, String fromMethod, int lineNumber, String fieldClass, String fieldName) {
+  public static void read(String fromClass, String fromMethod, int lineNumber, String fieldClass,
+                          String fieldName) {
     try {
       LOG.trace("Read to {}::{} from {}::{}", fieldClass, fieldName, fromClass, fromMethod);
       long threadId = Thread.currentThread().getId();
@@ -80,10 +82,10 @@ public class FieldAccessRecorder {
       }
       if (needCombined) {
         CallGraph callGraph = CallRecorder.GRAPHS.get(threadId);
-        graph.addRead(new StackItem(fromClass, fromMethod, lineNumber), fieldClass + "::" +
+        graph.addRead(new StackItem(fromClass, fromMethod, lineNumber, false), fieldClass + "::" +
             fieldName, callGraph);
       } else {
-        graph.addRead(new StackItem(fromClass, fromMethod, lineNumber), fieldClass + "::" +
+        graph.addRead(new StackItem(fromClass, fromMethod, lineNumber, false), fieldClass + "::" +
             fieldName, null);
       }
     } catch (Exception e) {

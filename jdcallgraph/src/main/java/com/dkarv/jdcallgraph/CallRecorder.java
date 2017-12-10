@@ -39,7 +39,8 @@ public class CallRecorder {
    */
   static final Map<Long, CallGraph> GRAPHS = new HashMap<>();
 
-  public static void beforeMethod(String className, String methodName, int lineNumber) {
+  public static void beforeMethod(String className, String methodName, int lineNumber,
+                                  boolean isTest) {
     try {
       LOG.trace("beforeMethod: {}:{}#{}", className, methodName, lineNumber);
       long threadId = Thread.currentThread().getId();
@@ -48,13 +49,14 @@ public class CallRecorder {
         graph = new CallGraph(threadId);
         GRAPHS.put(threadId, graph);
       }
-      graph.called(new StackItem(className, methodName, lineNumber));
+      graph.called(new StackItem(className, methodName, lineNumber, isTest));
     } catch (Throwable e) {
       LOG.error("Error in beforeMethod", e);
     }
   }
 
-  public static void afterMethod(String className, String methodName, int lineNumber) {
+  public static void afterMethod(String className, String methodName, int lineNumber,
+                                 boolean isTest) {
     try {
       LOG.trace("afterMethod: {}:{}#{}", className, methodName, lineNumber);
       long threadId = Thread.currentThread().getId();
@@ -63,7 +65,7 @@ public class CallRecorder {
         // not interesting
         return;
       }
-      graph.returned(new StackItem(className, methodName, lineNumber));
+      graph.returned(new StackItem(className, methodName, lineNumber, isTest));
     } catch (Throwable e) {
       LOG.error("Error in afterMethod", e);
     }

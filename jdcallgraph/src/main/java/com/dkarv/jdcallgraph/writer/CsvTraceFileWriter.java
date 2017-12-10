@@ -31,6 +31,7 @@ import java.util.Set;
 
 public class CsvTraceFileWriter implements GraphWriter {
   FileWriter writer;
+  private boolean interested = true;
 
   private final Set<StackItem> trace = new HashSet<>();
 
@@ -44,13 +45,16 @@ public class CsvTraceFileWriter implements GraphWriter {
 
   @Override
   public void node(StackItem method) throws IOException {
-    writer.append(method.toString());
     trace.clear();
+    interested = method.isTest();
+    if (interested) {
+      writer.append(method.toString());
+    }
   }
 
   @Override
   public void edge(StackItem from, StackItem to) throws IOException {
-    if (!trace.contains(to)) {
+    if (interested && !trace.contains(to)) {
       writer.append(';');
       writer.append(to.toString());
       trace.add(to);
@@ -64,7 +68,9 @@ public class CsvTraceFileWriter implements GraphWriter {
 
   @Override
   public void end() throws IOException {
-    writer.append('\n');
+    if (interested) {
+      writer.append('\n');
+    }
   }
 
   @Override

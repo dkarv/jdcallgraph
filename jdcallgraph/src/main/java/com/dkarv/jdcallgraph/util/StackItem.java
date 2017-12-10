@@ -30,14 +30,22 @@ public class StackItem {
   private final String methodName;
   private final int lineNumber;
 
+  private final boolean test;
+
   private final String formatted;
 
-  public StackItem(String className, String methodName, int lineNumber) {
+  public StackItem(String className, String methodName, int lineNumber, boolean test) {
     this.className = className;
     this.methodName = methodName;
     this.lineNumber = lineNumber;
 
+    this.test = test;
+
     this.formatted = Formatter.format(this);
+  }
+
+  public StackItem(String className, String methodName, int lineNumber) {
+    this(className, methodName, lineNumber, false);
   }
 
   public String getClassName() {
@@ -50,6 +58,10 @@ public class StackItem {
 
   public int getLineNumber() {
     return lineNumber;
+  }
+
+  public boolean isTest() {
+    return test;
   }
 
   @Override

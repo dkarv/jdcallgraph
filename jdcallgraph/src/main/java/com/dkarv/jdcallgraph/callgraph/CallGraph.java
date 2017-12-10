@@ -124,11 +124,11 @@ public class CallGraph {
       }
     }
     if (removed != 1) {
-      LOG.error("Error when method {} returned:", method);
-      LOG.error("Removed {} entries. Stack trace {}", removed, trace);
+      LOG.warn("Error when method {} returned:", method);
+      LOG.warn("Removed {} entries. Stack trace {}", removed, trace);
     }
     if (!found) {
-      LOG.error("Couldn't find the returned method call on stack");
+      LOG.warn("Couldn't find the returned method call on stack");
     }
     if (calls.isEmpty()) {
       for (GraphWriter w : writers) {
