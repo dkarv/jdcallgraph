@@ -38,13 +38,14 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 public class DataDependenceGraph {
   private static final Logger LOG = new Logger(DataDependenceGraph.class);
   private static final String FOLDER = "ddg/";
   final List<GraphWriter> writers = new ArrayList<>();
 
-  private Map<String, StackItem> lastWrites = new HashMap<>();
+  private Map<String, StackItem> lastWrites = new ConcurrentHashMap<>();
 
   public DataDependenceGraph() throws IOException {
     Target[] targets = Config.getInst().writeTo();
