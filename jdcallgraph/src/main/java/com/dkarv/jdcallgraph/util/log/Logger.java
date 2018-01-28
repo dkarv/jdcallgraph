@@ -36,7 +36,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 public class Logger {
-  private final SimpleDateFormat FORMAT = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss:S");
+  private final SimpleDateFormat FORMAT = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss:SSS");
   private final static String[] PREFIX = new String[]{
       "NO", "FATAL", "ERROR", "WARN", "INFO", "DEBUG", "TRACE"
   };
