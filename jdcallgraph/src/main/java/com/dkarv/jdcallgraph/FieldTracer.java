@@ -23,6 +23,7 @@
  */
 package com.dkarv.jdcallgraph;
 
+import com.dkarv.jdcallgraph.util.config.Config;
 import com.dkarv.jdcallgraph.util.log.Logger;
 import javassist.CannotCompileException;
 import javassist.CtBehavior;
@@ -83,6 +84,10 @@ public class FieldTracer extends ExprEditor {
    */
   private static final Pattern IGNORE_VAL = Pattern.compile("^val\\$[a-zA-Z_$][a-zA-Z_$0-9]*$");
 
+  private static final String TARGET =
+      Config.getInst().fastDD() ? FastFieldAccessRecorder.class.getCanonicalName() :
+          FieldAccessRecorder.class.getCanonicalName();
+
   public final void edit(FieldAccess f) throws CannotCompileException {
     CtBehavior method = f.where();
     String className = f.getEnclosingClass().getName();
@@ -101,10 +106,10 @@ public class FieldTracer extends ExprEditor {
       String field = ",\"" + f.getClassName() + "\",\"" + f.getFieldName() + "\"";
       if (isWrite) {
         f.replace("{ $proceed($$); " +
-            "com.dkarv.jdcallgraph.FieldAccessRecorder.write(" + from + field + "); }");
+            TARGET + ".write(" + from + field + "); }");
       } else {
         f.replace("{ $_ = $proceed($$); " +
-            "com.dkarv.jdcallgraph.FieldAccessRecorder.read(" + from + field + "); }");
+            TARGET + ".read(" + from + field + "); }");
       }
     } else {
       String field = ",\"" + f.getClassName() + "@\"" +
@@ -117,11 +122,11 @@ public class FieldTracer extends ExprEditor {
           LOG.debug("Ignore write to val {}:{} from {}", f.getClassName(), f.getFieldName(), from);
         } else {
           f.replace("{ $_ = $proceed($$); " +
-              "com.dkarv.jdcallgraph.FieldAccessRecorder.write(" + from + field + "); }");
+              TARGET + ".write(" + from + field + "); }");
         }
       } else {
         f.replace("{ $_ = $proceed($$); " +
-            "com.dkarv.jdcallgraph.FieldAccessRecorder.read(" + from + field + "); }");
+            TARGET + ".read(" + from + field + "); }");
       }
 
 

@@ -63,6 +63,9 @@ public class Config {
   @Option
   private String format = "{class}::{method}#{line}";
 
+  @Option
+  private boolean fastDD = false;
+
   private boolean dataDependency = false;
 
   void set(Field f, String value) throws IllegalAccessException {
@@ -143,5 +146,9 @@ public class Config {
 
   public String format() {
     return format;
+  }
+
+  public boolean fastDD() {
+    return fastDD;
   }
 }

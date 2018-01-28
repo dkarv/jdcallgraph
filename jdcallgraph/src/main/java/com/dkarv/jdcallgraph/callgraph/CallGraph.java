@@ -37,6 +37,7 @@ public class CallGraph {
   private static final String FOLDER = "cg/";
   private final long threadId;
   final Stack<StackItem> calls = new Stack<>();
+  final Stack<Integer> reads = new Stack<>();
 
   final List<GraphWriter> writers = new ArrayList<>();
 
@@ -90,6 +91,7 @@ public class CallGraph {
   }
 
   public void called(StackItem method) throws IOException {
+    //reads.push(0);
     if (calls.isEmpty()) {
       // First node
       String identifier = checkStartCondition(method);
@@ -112,6 +114,12 @@ public class CallGraph {
   }
 
   public void returned(StackItem method) throws IOException {
+    //if (!reads.isEmpty()) {
+    //  int r = reads.pop();
+    //  if (r != 0) {
+    //    LOG.info("{} did reads: {}", method, r);
+    //  }
+    //}
     Stack<StackItem> trace = new Stack<>();
     int removed = 0;
     boolean found = false;
@@ -138,6 +146,9 @@ public class CallGraph {
   }
 
   public void dataEdge(StackItem from, StackItem to) throws IOException {
+    //if (!reads.isEmpty()) {
+    //  reads.push(reads.pop() + 1);
+    //}
     if (calls.isEmpty()) {
       LOG.info("Ignore dd egde {} -> {}", from, to);
     } else {
