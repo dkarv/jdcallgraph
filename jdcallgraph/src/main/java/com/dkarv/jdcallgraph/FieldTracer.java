@@ -85,7 +85,7 @@ public class FieldTracer extends ExprEditor {
   private static final Pattern IGNORE_VAL = Pattern.compile("^val\\$[a-zA-Z_$][a-zA-Z_$0-9]*$");
 
   private static final String TARGET =
-      Config.getInst().fastDD() ? FastFieldAccessRecorder.class.getCanonicalName() :
+      Config.getInst().fast() ? FastFieldAccessRecorder.class.getCanonicalName() :
           FieldAccessRecorder.class.getCanonicalName();
 
   public final void edit(FieldAccess f) throws CannotCompileException {

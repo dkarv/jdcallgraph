@@ -64,7 +64,7 @@ public class Config {
   private String format = "{class}::{method}#{line}";
 
   @Option
-  private boolean fastDD = false;
+  private boolean fast = false;
 
   private boolean dataDependency = false;
 
@@ -148,7 +148,7 @@ public class Config {
     return format;
   }
 
-  public boolean fastDD() {
-    return fastDD;
+  public boolean fast() {
+    return fast;
   }
 }
