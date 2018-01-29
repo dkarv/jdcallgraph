@@ -30,6 +30,7 @@ import com.dkarv.jdcallgraph.util.StackItemCache;
 import com.dkarv.jdcallgraph.util.config.Config;
 import com.dkarv.jdcallgraph.util.log.Logger;
 import com.dkarv.jdcallgraph.util.options.Target;
+import com.dkarv.jdcallgraph.worker.CallTask;
 import java.io.IOException;
 
 public class FieldAccessRecorder {
@@ -71,14 +72,14 @@ public class FieldAccessRecorder {
                           String fieldName) {
     try {
       LOG.trace("Read to {}::{} from {}::{}", fieldClass, fieldName, fromClass, fromMethod);
-      CallGraph callGraph;
-      if (needCombined) {
-        callGraph = CallRecorder.GRAPHS.get(Thread.currentThread().getId());
-      } else {
-        callGraph = null;
-      }
+      //CallGraph callGraph;
+      //if (needCombined) {
+      //  callGraph = CallTask.GRAPHS.get(Thread.currentThread().getId());
+      //} else {
+      //  callGraph = null;
+      //}
       StackItem item = StackItemCache.get(fromClass, fromMethod, lineNumber, false);
-      GRAPH.addRead(item, fieldClass + "::" + fieldName, callGraph);
+      GRAPH.addRead(item, fieldClass + "::" + fieldName, null);
     } catch (Exception e) {
       LOG.error("Error in read", e);
     }

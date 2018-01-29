@@ -21,30 +21,32 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package com.dkarv.jdcallgraph;
+package com.dkarv.jdcallgraph.worker;
 
 import com.dkarv.jdcallgraph.util.log.Logger;
-import com.dkarv.jdcallgraph.worker.CallQueue;
 
-public class ShutdownHook {
-  private static final Logger LOG = new Logger(ShutdownHook.class);
+public class CallWorker extends Thread {
+  private static final Logger LOG = new Logger(CallWorker.class);
 
-  public static void init() {
-    // initialize
-    Runtime.getRuntime().addShutdownHook(new Thread() {
-      public void run() {
-        LOG.info("JVM Shutdown triggered");
-        try {
-          CallQueue.shutdown();
-        } catch (NoClassDefFoundError | ExceptionInInitializerError e) {
-          // might be triggered when shutdown already ongoing
-        }
-        try {
-          FieldAccessRecorder.shutdown();
-        } catch (NoClassDefFoundError | ExceptionInInitializerError e) {
-          // might be triggered when shutdown already ongoing
-        }
+  @Override
+  public void run() {
+    LOG.info("Start CallWorker");
+
+    while (!isInterrupted()) {
+      CallTask task;
+      try {
+        task = CallQueue.get();
+      } catch (InterruptedException e) {
+        Thread.currentThread().interrupt();
+        break;
       }
-    });
+      try {
+        task.work();
+      } catch (Throwable t) {
+        LOG.error("Error working on {}", task, t);
+      }
+    }
+
+    LOG.info("Stop CallWorker");
   }
 }

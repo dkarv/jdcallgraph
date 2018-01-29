@@ -44,7 +44,7 @@ public class StackItem {
     this.formatted = Formatter.format(this);
   }
 
-  public StackItem(String className, String methodName, int lineNumber) {
+  StackItem(String className, String methodName, int lineNumber) {
     this(className, methodName, lineNumber, false);
   }
 

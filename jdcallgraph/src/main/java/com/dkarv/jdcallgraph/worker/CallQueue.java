@@ -21,41 +21,51 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package com.dkarv.jdcallgraph;
+package com.dkarv.jdcallgraph.worker;
 
-import com.dkarv.jdcallgraph.util.StackItemCache;
 import com.dkarv.jdcallgraph.util.log.Logger;
-import com.dkarv.jdcallgraph.util.StackItem;
+import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.LinkedBlockingQueue;
 
-import com.dkarv.jdcallgraph.worker.CallQueue;
-import com.dkarv.jdcallgraph.worker.CallTask;
+public class CallQueue {
+  private static final Logger LOG = new Logger(CallQueue.class);
+  private static final BlockingQueue<CallTask> QUEUE = new LinkedBlockingQueue<>(1000);
 
-public class CallRecorder {
-  private static final Logger LOG = new Logger(CallRecorder.class);
-
-  public static void beforeMethod(String className, String methodName, int lineNumber,
-                                  boolean isTest) {
+  public static void add(CallTask task) {
     try {
-      if (isTest) {
-        LOG.info("* Starting {}::{}", className, methodName);
-      }
-      StackItem item = StackItemCache.get(className, methodName, lineNumber, isTest);
-      CallQueue.add(new CallTask(item, Thread.currentThread().getId(), true));
-    } catch (Throwable e) {
-      LOG.error("Error in beforeMethod", e);
+      QUEUE.put(task);
+    } catch (InterruptedException e) {
+      Thread.currentThread().interrupt();
     }
   }
 
-  public static void afterMethod(String className, String methodName, int lineNumber,
-                                 boolean isTest) {
-    try {
-      if (isTest) {
-        LOG.info("* Finished {}::{}", className, methodName);
+  public static CallTask get() throws InterruptedException {
+    CallTask task = QUEUE.take();
+    if (QUEUE.isEmpty()) {
+      synchronized (QUEUE) {
+        QUEUE.notifyAll();
       }
-      StackItem item = StackItemCache.get(className, methodName, lineNumber, isTest);
-      CallQueue.add(new CallTask(item, Thread.currentThread().getId(), false));
-    } catch (Throwable e) {
-      LOG.error("Error in afterMethod", e);
     }
+    return task;
+  }
+
+  public static void startWorker() {
+    new CallWorker().start();
+  }
+
+  public static void shutdown() {
+
+    while (!QUEUE.isEmpty()) {
+      try {
+        synchronized (QUEUE) {
+          QUEUE.wait();
+        }
+      } catch (InterruptedException e) {
+        Thread.currentThread().interrupt();
+        break;
+      }
+    }
+    // task queue is empty
+    CallTask.shutdown();
   }
 }

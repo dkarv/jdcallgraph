@@ -98,7 +98,7 @@ public class FastFieldAccessRecorderTest {
 
   private void verifyWrite(int i, int n) throws IOException {
     Mockito.verify(graph, Mockito.times(n))
-        .addWrite(Mockito.eq(new StackItem(methods[i][0], methods[i][1], lines[i])),
+        .addWrite(Mockito.eq(new StackItem(methods[i][0], methods[i][1], lines[i], false)),
             Mockito.eq(fields[i][0] + "::" + fields[i][1]));
   }
 
@@ -108,7 +108,7 @@ public class FastFieldAccessRecorderTest {
 
   private void verifyRead(int i, int n) throws IOException {
     Mockito.verify(graph, Mockito.times(n))
-        .addRead(Mockito.eq(new StackItem(methods[i][0], methods[i][1], lines[i])),
+        .addRead(Mockito.eq(new StackItem(methods[i][0], methods[i][1], lines[i], false)),
             Mockito.eq(fields[i][0] + "::" + fields[i][1]), Mockito.<CallGraph>isNull());
   }
 }

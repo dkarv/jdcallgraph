@@ -26,6 +26,7 @@ package com.dkarv.jdcallgraph;
 import com.dkarv.jdcallgraph.util.config.Config;
 import com.dkarv.jdcallgraph.util.log.Logger;
 import com.dkarv.jdcallgraph.util.config.ConfigReader;
+import com.dkarv.jdcallgraph.worker.CallQueue;
 import javassist.*;
 import javassist.bytecode.*;
 
@@ -74,6 +75,8 @@ public class Tracer implements ClassFileTransformer {
 
 
     Logger.init();
+
+    CallQueue.startWorker();
 
     String[] excls = new String[]{
         "java.*", "sun.*", "com.sun.*", "jdk.internal.*",
