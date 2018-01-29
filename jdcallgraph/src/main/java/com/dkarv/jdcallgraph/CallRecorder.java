@@ -33,27 +33,24 @@ import com.dkarv.jdcallgraph.worker.CallTask;
 public class CallRecorder {
   private static final Logger LOG = new Logger(CallRecorder.class);
 
-  public static void beforeMethod(String className, String methodName, int lineNumber,
-                                  boolean isTest) {
+  public static void beforeMethod(String method, boolean isTest) {
     try {
       if (isTest) {
-        LOG.info("* Starting {}::{}", className, methodName);
+        LOG.info("* Starting {}", method);
       }
-      StackItem item = StackItemCache.get(className, methodName, lineNumber, isTest);
-      CallQueue.add(new CallTask(item, Thread.currentThread().getId(), true));
+      // StackItem item = StackItemCache.get(className, methodName, lineNumber, isTest);
+      CallQueue.add(new CallTask(method, Thread.currentThread().getId(), true));
     } catch (Throwable e) {
       LOG.error("Error in beforeMethod", e);
     }
   }
 
-  public static void afterMethod(String className, String methodName, int lineNumber,
-                                 boolean isTest) {
+  public static void afterMethod(String method, boolean isTest) {
     try {
       if (isTest) {
-        LOG.info("* Finished {}::{}", className, methodName);
+        LOG.info("* Finished {}", method);
       }
-      StackItem item = StackItemCache.get(className, methodName, lineNumber, isTest);
-      CallQueue.add(new CallTask(item, Thread.currentThread().getId(), false));
+      CallQueue.add(new CallTask(method, Thread.currentThread().getId(), false));
     } catch (Throwable e) {
       LOG.error("Error in afterMethod", e);
     }

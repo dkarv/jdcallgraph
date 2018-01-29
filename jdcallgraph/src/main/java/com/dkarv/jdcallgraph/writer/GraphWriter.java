@@ -41,7 +41,7 @@ public interface GraphWriter extends Closeable {
    *
    * @param method method
    */
-  void node(StackItem method) throws IOException;
+  void node(String method, boolean isTest) throws IOException;
 
   /**
    * Add an edge from one method to the other.
@@ -49,13 +49,13 @@ public interface GraphWriter extends Closeable {
    * @param from source node
    * @param to   target node
    */
-  void edge(StackItem from, StackItem to) throws IOException;
+  void edge(String from, String to) throws IOException;
 
   /**
    * Write an edge with additional attributes. If the writer does not support labels it will write
    * the edge without. For dot files the attributes should look like [style=dotted, label="asdf"]
    */
-  void edge(StackItem from, StackItem to, String attributes) throws IOException;
+  void edge(String from, String to, String attributes) throws IOException;
 
   /**
    * Finish the graph.

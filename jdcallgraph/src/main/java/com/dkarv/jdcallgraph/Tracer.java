@@ -26,6 +26,7 @@ package com.dkarv.jdcallgraph;
 import com.dkarv.jdcallgraph.util.config.Config;
 import com.dkarv.jdcallgraph.util.log.Logger;
 import com.dkarv.jdcallgraph.util.config.ConfigReader;
+import com.dkarv.jdcallgraph.util.options.Formatter;
 import com.dkarv.jdcallgraph.worker.CallQueue;
 import javassist.*;
 import javassist.bytecode.*;
@@ -47,6 +48,7 @@ import java.util.regex.Pattern;
  */
 public class Tracer implements ClassFileTransformer {
   private final static Logger LOG = new Logger(Tracer.class);
+  private static final String TARGET = CallRecorder.class.getCanonicalName();
   private final List<Pattern> excludes;
 
   private final FieldTracer fieldTracer = new FieldTracer();
@@ -201,20 +203,28 @@ public class Tracer implements ClassFileTransformer {
 
     int lineNumber = getLineNumber(method);
 
-    String args;
+    StringBuilder srcBefore = new StringBuilder(TARGET);
+    srcBefore.append(".beforeMethod(");
+    StringBuilder srcAfter = new StringBuilder(TARGET);
+    srcAfter.append(".afterMethod(");
+
     if (isTest) {
       LOG.debug("subtest detection enabled on {}::{}", className, mName);
-      args =
-          "getClass().getCanonicalName()" + ',' + '"' + mName + '"' + ',' + lineNumber + ',' + true;
+      srcBefore.append(Formatter.class.getCanonicalName()).append(".formatTest(")
+          .append("getClass().getCanonicalName(),\"").append(mName).append("\",").append(lineNumber)
+          .append(",true);");
+      srcAfter.append(Formatter.class.getCanonicalName()).append(".format(")
+          .append("getClass().getCanonicalName(),\"").append(mName).append("\",").append(lineNumber)
+          .append(",true);");
     } else {
-      args = '"' + className + '"' + ',' + '"' + mName + '"' + ',' + lineNumber + ',' + false;
+      srcBefore.append('"').append(Formatter.format(className, mName, lineNumber))
+          .append("\",false);");
+      srcAfter.append('"').append(Formatter.format(className, mName, lineNumber))
+          .append("\",false);");
     }
 
-    String srcBefore = "com.dkarv.jdcallgraph.CallRecorder.beforeMethod(" + args + ");";
-    String srcAfter = "com.dkarv.jdcallgraph.CallRecorder.afterMethod(" + args + ");";
-
-    method.insertBefore(srcBefore);
-    method.insertAfter(srcAfter, true);
+    method.insertBefore(srcBefore.toString());
+    method.insertAfter(srcAfter.toString(), true);
     //if (isConstructor) {
     //  CtClass etype = ClassPool.getDefault().get("java.lang.Exception");
     //  method.addCatch("{ " + srcAfter + " throw $e; }", etype);

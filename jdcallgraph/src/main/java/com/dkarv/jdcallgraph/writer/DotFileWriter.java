@@ -44,25 +44,31 @@ public class DotFileWriter implements GraphWriter {
   }
 
   @Override
-  public void node(StackItem method) throws IOException {
-    writer.append("\t\"" + method.toString() + "\" [style=filled,fillcolor=green];\n");
+  public void node(String method, boolean isTest) throws IOException {
+    writer.append("\t\"");
+    writer.append(method);
+    writer.append("\" [style=filled,fillcolor=green];\n");
   }
 
   @Override
-  public void edge(StackItem from, StackItem to) throws IOException {
+  public void edge(String from, String to) throws IOException {
     // LOG.debug("{} => {}", from, to);
-    writer.append("\t\"" + from.toString() + "\" -> \"" + to.toString() + "\";\n");
+    writer.append("\t\"");
+    writer.append(from);
+    writer.append("\" -> \"");
+    writer.append(to);
+    writer.append("\";\n");
   }
 
   @Override
-  public void edge(StackItem from, StackItem to, String attributes) throws IOException {
+  public void edge(String from, String to, String attributes) throws IOException {
     writer.append('\t');
     writer.append('"');
-    writer.append(from.toString());
+    writer.append(from);
     writer.append('"');
     writer.append(" -> ");
     writer.append('"');
-    writer.append(to.toString());
+    writer.append(to);
     writer.append('"');
     writer.append(' ');
     writer.append(attributes);

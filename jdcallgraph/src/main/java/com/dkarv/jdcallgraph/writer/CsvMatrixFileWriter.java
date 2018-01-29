@@ -31,7 +31,7 @@ import java.util.*;
 public class CsvMatrixFileWriter implements GraphWriter {
   FileWriter writer;
 
-  private final Map<StackItem, Integer> indexes = new HashMap<>();
+  private final Map<String, Integer> indexes = new HashMap<>();
   private SortedSet<Integer> used;
   private int nextIndex = 0;
 
@@ -44,13 +44,13 @@ public class CsvMatrixFileWriter implements GraphWriter {
   }
 
   @Override
-  public void node(StackItem method) throws IOException {
+  public void node(String method, boolean isTest) throws IOException {
     used = new TreeSet<>();
-    writer.append(method.toString() + ";");
+    writer.append(method + ";");
   }
 
   @Override
-  public void edge(StackItem from, StackItem to) throws IOException {
+  public void edge(String from, String to) throws IOException {
     Integer i = indexes.get(to);
     if (i == null) {
       i = nextIndex++;
@@ -60,7 +60,7 @@ public class CsvMatrixFileWriter implements GraphWriter {
   }
 
   @Override
-  public void edge(StackItem from, StackItem to, String label) throws IOException {
+  public void edge(String from, String to, String label) throws IOException {
     this.edge(from, to);
   }
 
@@ -80,8 +80,8 @@ public class CsvMatrixFileWriter implements GraphWriter {
   @Override
   public void close() throws IOException {
     String[] methods = new String[indexes.size()];
-    for (Map.Entry<StackItem, Integer> entry : indexes.entrySet()) {
-      methods[entry.getValue()] = entry.getKey().toString();
+    for (Map.Entry<String, Integer> entry : indexes.entrySet()) {
+      methods[entry.getValue()] = entry.getKey();
     }
     writer.append(';');
     for (String m : methods) {

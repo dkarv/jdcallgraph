@@ -38,8 +38,8 @@ public class RemoveDuplicatesWriter implements GraphWriter {
   private final static Logger LOG = new Logger(RemoveDuplicatesWriter.class);
 
   private final GraphWriter parentWriter;
-  private final HashMap<StackItem, HashSet<StackItem>> edges = new HashMap<>();
-  private final HashMap<StackItem, HashMap<StackItem, HashSet<String>>> labels = new HashMap<>();
+  private final HashMap<String, HashSet<String>> edges = new HashMap<>();
+  private final HashMap<String, HashMap<String, HashSet<String>>> labels = new HashMap<>();
   private final boolean checkLabel;
 
   public RemoveDuplicatesWriter(GraphWriter parentWriter) {
@@ -57,13 +57,13 @@ public class RemoveDuplicatesWriter implements GraphWriter {
   }
 
   @Override
-  public void node(StackItem method) throws IOException {
-    parentWriter.node(method);
+  public void node(String method, boolean isTest) throws IOException {
+    parentWriter.node(method, isTest);
   }
 
   @Override
-  public void edge(StackItem from, StackItem to) throws IOException {
-    HashSet<StackItem> set = edges.get(from);
+  public void edge(String from, String to) throws IOException {
+    HashSet<String> set = edges.get(from);
     if (set == null) {
       set = new HashSet<>();
       edges.put(from, set);
@@ -75,9 +75,9 @@ public class RemoveDuplicatesWriter implements GraphWriter {
   }
 
   @Override
-  public void edge(StackItem from, StackItem to, String label) throws IOException {
+  public void edge(String from, String to, String label) throws IOException {
     if (checkLabel) {
-      HashMap<StackItem, HashSet<String>> sets = labels.get(from);
+      HashMap<String, HashSet<String>> sets = labels.get(from);
       if (sets == null) {
         sets = new HashMap<>();
         labels.put(from, sets);
@@ -93,7 +93,7 @@ public class RemoveDuplicatesWriter implements GraphWriter {
         parentWriter.edge(from, to, label);
       }
     } else {
-      HashSet<StackItem> set = edges.get(from);
+      HashSet<String> set = edges.get(from);
       if (set == null) {
         set = new HashSet<>();
         edges.put(from, set);

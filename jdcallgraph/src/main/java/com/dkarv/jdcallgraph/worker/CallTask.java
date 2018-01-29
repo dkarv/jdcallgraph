@@ -37,33 +37,33 @@ public class CallTask {
    */
   public static final Map<Long, CallGraph> GRAPHS = new HashMap<>();
 
-  private final StackItem item;
+  private final String method;
   private final long thread;
   private final boolean enter;
 
-  public CallTask(StackItem item, long thread, boolean enter) {
-    this.item = item;
+  public CallTask(String method, long thread, boolean enter) {
+    this.method = method;
     this.thread = thread;
     this.enter = enter;
   }
 
   void work() throws IOException {
     if (enter) {
-      LOG.trace("beforeMethod ({}): {}", thread, item);
+      LOG.trace("beforeMethod ({}): {}", thread, method);
       CallGraph graph = GRAPHS.get(thread);
       if (graph == null) {
         graph = new CallGraph(thread);
         GRAPHS.put(thread, graph);
       }
-      graph.called(item);
+      graph.called(method);
     } else {
-      LOG.trace("afterMethod ({}): {}", thread, item);
+      LOG.trace("afterMethod ({}): {}", thread, method);
       CallGraph graph = GRAPHS.get(thread);
       if (graph == null) {
         // not interesting
         return;
       }
-      graph.returned(item);
+      graph.returned(method);
     }
   }
 

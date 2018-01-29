@@ -45,7 +45,7 @@ public class DataDependenceGraph {
   private static final String FOLDER = "ddg/";
   final List<GraphWriter> writers = new ArrayList<>();
 
-  private Map<String, StackItem> lastWrites = new ConcurrentHashMap<>();
+  private Map<String, String> lastWrites = new ConcurrentHashMap<>();
 
   public DataDependenceGraph() throws IOException {
     Target[] targets = Config.getInst().writeTo();
@@ -69,17 +69,17 @@ public class DataDependenceGraph {
     }
   }
 
-  public void addWrite(StackItem location, String field) throws IOException {
+  public void addWrite(String location, String field) throws IOException {
     LOG.trace("Write to {} from {}", field, location);
-    StackItem item = this.lastWrites.get(field);
+    String item = this.lastWrites.get(field);
     if (!location.equals(item)) {
       this.lastWrites.put(field, location);
     }
   }
 
-  public void addRead(StackItem location, String field, CallGraph callGraph) throws IOException {
+  public void addRead(String location, String field, CallGraph callGraph) throws IOException {
     LOG.trace("Read to {} from {}", field, location);
-    StackItem lastWrite = lastWrites.get(field);
+    String lastWrite = lastWrites.get(field);
     if (lastWrite != null) {
       if (!lastWrite.equals(location)) {
         // ignore dependency on itself
@@ -88,9 +88,9 @@ public class DataDependenceGraph {
           writer.edge(lastWrite, location);
           // writer.edge(lastWrite, location, "[label=\"" + field + "\"]");
         }
-        if (callGraph != null) {
-          callGraph.dataEdge(lastWrite, location);
-        }
+        //if (callGraph != null) {
+        //  callGraph.dataEdge(lastWrite, location);
+        //}
       }
     }
   }

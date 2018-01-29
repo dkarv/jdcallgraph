@@ -41,7 +41,7 @@ public class StackItem {
 
     this.test = test;
 
-    this.formatted = Formatter.format(this);
+    this.formatted = Formatter.format(className, methodName, lineNumber);
   }
 
   StackItem(String className, String methodName, int lineNumber) {
@@ -91,23 +91,39 @@ public class StackItem {
   }
 
   public String getPackageName() {
-    int indexDot = className.lastIndexOf('.');
-    return className.substring(0, indexDot);
+    return StackItem.getPackageName(className);
   }
 
   public String getShortClassName() {
-    int indexDot = className.lastIndexOf('.');
-    return className.substring(indexDot + 1);
+    return StackItem.getShortClassName(className);
   }
 
   public String getShortMethodName() {
-    int indexBracket = methodName.indexOf('(');
-    return methodName.substring(0, indexBracket);
+    return StackItem.getShortMethodName(methodName);
   }
 
   public String getMethodParameters() {
-    int openBracket = methodName.indexOf('(');
-    int closingBracket = methodName.indexOf(')');
-    return methodName.substring(openBracket + 1, closingBracket);
+    return StackItem.getMethodParameters(methodName);
+  }
+
+  public static String getPackageName(String type) {
+    int indexDot = type.lastIndexOf('.');
+    return type.substring(0, indexDot);
+  }
+
+  public static String getShortClassName(String type) {
+    int indexDot = type.lastIndexOf('.');
+    return type.substring(indexDot + 1);
+  }
+
+  public static String getShortMethodName(String method) {
+    int indexBracket = method.indexOf('(');
+    return method.substring(0, indexBracket);
+  }
+
+  public static String getMethodParameters(String method) {
+    int openBracket = method.indexOf('(');
+    int closingBracket = method.indexOf(')');
+    return method.substring(openBracket + 1, closingBracket);
   }
 }

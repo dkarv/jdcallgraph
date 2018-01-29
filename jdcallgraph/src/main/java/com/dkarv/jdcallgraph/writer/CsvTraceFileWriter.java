@@ -33,7 +33,7 @@ public class CsvTraceFileWriter implements GraphWriter {
   FileWriter writer;
   private boolean interested = true;
 
-  private final Set<StackItem> trace = new HashSet<>();
+  private final Set<String> trace = new HashSet<>();
 
   @Override
   public void start(String identifier) throws IOException {
@@ -44,25 +44,24 @@ public class CsvTraceFileWriter implements GraphWriter {
   }
 
   @Override
-  public void node(StackItem method) throws IOException {
+  public void node(String method, boolean isTest) throws IOException {
     trace.clear();
-    interested = method.isTest();
-    if (interested) {
-      writer.append(method.toString());
+    if (isTest) {
+      writer.append(method);
     }
   }
 
   @Override
-  public void edge(StackItem from, StackItem to) throws IOException {
+  public void edge(String from, String to) throws IOException {
     if (interested && !trace.contains(to)) {
       writer.append(';');
-      writer.append(to.toString());
+      writer.append(to);
       trace.add(to);
     }
   }
 
   @Override
-  public void edge(StackItem from, StackItem to, String label) throws IOException {
+  public void edge(String from, String to, String label) throws IOException {
     this.edge(from, to);
   }
 

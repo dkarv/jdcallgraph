@@ -34,33 +34,39 @@ public class Formatter {
   private static final Logger LOG = new Logger(Formatter.class);
   private static final Pattern P = Pattern.compile("\\{(.+?)}");
 
-  public static String format(StackItem item) {
+  public static String formatTest(String type, String method, int lineNumber) {
+    return type + "::" + StackItem.getShortMethodName(method) + "#" + lineNumber;
+  }
+
+  public static String format(String type, String method, int lineNumber) {
+    return type + "#" + lineNumber;
+    /*
     Matcher m = P.matcher(Config.getInst().format());
     StringBuffer result = new StringBuffer();
     while (m.find()) {
-      String replacement = replace(m.group(1), item);
+      String replacement = replace(m.group(1), type, method, lineNumber);
       replacement = Matcher.quoteReplacement(replacement);
       m.appendReplacement(result, replacement);
     }
-    return result.toString();
+    return result.toString();*/
   }
 
-  public static String replace(String id, StackItem item) {
+  public static String replace(String id, String type, String method, int lineNumber) {
     switch (id) {
       case "package":
-        return item.getPackageName();
+        return StackItem.getPackageName(type);
       case "class":
-        return item.getClassName();
+        return type;
       case "classname":
-        return item.getShortClassName();
+        return StackItem.getShortClassName(type);
       case "line":
-        return Integer.toString(item.getLineNumber());
+        return Integer.toString(lineNumber);
       case "method":
-        return item.getMethodName();
+        return method;
       case "methodname":
-        return item.getShortMethodName();
+        return StackItem.getShortMethodName(method);
       case "parameters":
-        return item.getMethodParameters();
+        return StackItem.getMethodParameters(method);
       default:
         LOG.error("Unknown pattern: {}", id);
         // Unknown pattern, return without modification

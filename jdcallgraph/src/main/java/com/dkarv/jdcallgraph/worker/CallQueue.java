@@ -24,12 +24,13 @@
 package com.dkarv.jdcallgraph.worker;
 
 import com.dkarv.jdcallgraph.util.log.Logger;
+import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
 
 public class CallQueue {
   private static final Logger LOG = new Logger(CallQueue.class);
-  private static final BlockingQueue<CallTask> QUEUE = new LinkedBlockingQueue<>(1000);
+  private static final BlockingQueue<CallTask> QUEUE = new ArrayBlockingQueue<>(1000);
 
   public static void add(CallTask task) {
     try {

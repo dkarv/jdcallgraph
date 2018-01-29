@@ -36,8 +36,7 @@ public class CallGraph {
   private static final Logger LOG = new Logger(CallGraph.class);
   private static final String FOLDER = "cg/";
   private final long threadId;
-  final Stack<StackItem> calls = new Stack<>();
-  final Stack<Integer> reads = new Stack<>();
+  final Stack<String> calls = new Stack<>();
 
   final List<GraphWriter> writers = new ArrayList<>();
 
@@ -79,19 +78,18 @@ public class CallGraph {
    * @param method called method
    * @return identifier if method is a valid start condition, null otherwise
    */
-  String checkStartCondition(StackItem method) {
+  String checkStartCondition(String method) {
     switch (Config.getInst().groupBy()) {
       case THREAD:
         return FOLDER + String.valueOf(threadId);
       case ENTRY:
-        return FOLDER + method.toString();
+        return FOLDER + method;
       default:
         throw new IllegalArgumentException("Unknown groupBy: " + Config.getInst().groupBy());
     }
   }
 
-  public void called(StackItem method) throws IOException {
-    reads.push(0);
+  public void called(String method) throws IOException {
     if (calls.isEmpty()) {
       // First node
       String identifier = checkStartCondition(method);
@@ -113,31 +111,26 @@ public class CallGraph {
     }
   }
 
-  public void returned(StackItem method) throws IOException {
-    //if (!reads.isEmpty()) {
-    //  int r = reads.pop();
-    //  if (r != 0) {
-    //    LOG.info("{} did reads: {}", method, r);
-    //  }
-    //}
-    Stack<StackItem> trace = new Stack<>();
-    int removed = 0;
-    boolean found = false;
-    while (!calls.isEmpty() && !found) {
-      removed++;
-      StackItem topItem = calls.pop();
-      trace.push(topItem);
-      if (topItem.equals(method)) {
-        found = true;
+  public void returned(String method) throws IOException {
+    if (!method.equals(calls.pop())) {
+      Stack<String> trace = new Stack<>();
+      int removed = 1;
+      boolean found = false;
+      while (!calls.isEmpty() && !found) {
+        removed++;
+        String topItem = calls.pop();
+        trace.push(topItem);
+        if (topItem.equals(method)) {
+          found = true;
+        }
+      }
+      LOG.warn("Error when method {} returned:", method);
+      LOG.warn("Removed {} entries. Stack trace (top element missing) {}", removed, trace);
+      if (!found) {
+        LOG.error("Couldn't find the returned method call on stack");
       }
     }
-    if (removed != 1) {
-      LOG.warn("Error when method {} returned:", method);
-      LOG.warn("Removed {} entries. Stack trace {}", removed, trace);
-    }
-    if (!found) {
-      LOG.warn("Couldn't find the returned method call on stack");
-    }
+
     if (calls.isEmpty()) {
       for (GraphWriter w : writers) {
         w.end();
@@ -145,10 +138,8 @@ public class CallGraph {
     }
   }
 
+  /*
   public void dataEdge(StackItem from, StackItem to) throws IOException {
-    if (!reads.isEmpty()) {
-      reads.push(reads.pop() + 1);
-    }
     if (calls.isEmpty()) {
       LOG.info("Ignore dd egde {} -> {}", from, to);
     } else {
@@ -158,7 +149,7 @@ public class CallGraph {
         }
       }
     }
-  }
+  }*/
 
   public void finish() throws IOException {
     if (!calls.isEmpty()) {
