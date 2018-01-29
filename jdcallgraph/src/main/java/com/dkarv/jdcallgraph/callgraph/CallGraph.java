@@ -65,8 +65,8 @@ public class CallGraph {
         return new CsvCoverageFileWriter();
       case TRACE:
         return new CsvTraceFileWriter();
-      case LINES:
-        return new LineNumberFileWriter();
+      //case LINES:
+      //  return new LineNumberFileWriter();
       default:
         throw new IllegalArgumentException("Unknown writeTo: " + t);
     }
@@ -97,7 +97,7 @@ public class CallGraph {
         calls.push(method);
         for (GraphWriter w : writers) {
           w.start(identifier);
-          w.node(method);
+          w.node(method, false);
         }
       } else {
         LOG.info("Skip first node {} because start condition not fulfilled", method);

@@ -57,29 +57,25 @@ public class FieldAccessRecorder {
     }
   }
 
-  public static void write(String fromClass, String fromMethod, int lineNumber, String fieldClass,
-                           String fieldName) {
+  public static void write(String method, String field) {
     try {
-      LOG.trace("Write to {}::{} from {}::{}", fieldClass, fieldName, fromClass, fromMethod);
-      StackItem item = StackItemCache.get(fromClass, fromMethod, lineNumber, false);
-      GRAPH.addWrite(item, fieldClass + "::" + fieldName);
+      LOG.trace("Write to {} from {}", field, method);
+      GRAPH.addWrite(method, field);
     } catch (Exception e) {
       LOG.error("Error in write", e);
     }
   }
 
-  public static void read(String fromClass, String fromMethod, int lineNumber, String fieldClass,
-                          String fieldName) {
+  public static void read(String method, String field) {
     try {
-      LOG.trace("Read to {}::{} from {}::{}", fieldClass, fieldName, fromClass, fromMethod);
+      LOG.trace("Read to {} from {}", field, method);
       //CallGraph callGraph;
       //if (needCombined) {
       //  callGraph = CallTask.GRAPHS.get(Thread.currentThread().getId());
       //} else {
       //  callGraph = null;
       //}
-      StackItem item = StackItemCache.get(fromClass, fromMethod, lineNumber, false);
-      GRAPH.addRead(item, fieldClass + "::" + fieldName, null);
+      GRAPH.addRead(method, field, null);
     } catch (Exception e) {
       LOG.error("Error in read", e);
     }

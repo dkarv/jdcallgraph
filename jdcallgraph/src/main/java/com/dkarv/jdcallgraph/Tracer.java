@@ -212,10 +212,10 @@ public class Tracer implements ClassFileTransformer {
       LOG.debug("subtest detection enabled on {}::{}", className, mName);
       srcBefore.append(Formatter.class.getCanonicalName()).append(".formatTest(")
           .append("getClass().getCanonicalName(),\"").append(mName).append("\",").append(lineNumber)
-          .append(",true);");
-      srcAfter.append(Formatter.class.getCanonicalName()).append(".format(")
+          .append("),true);");
+      srcAfter.append(Formatter.class.getCanonicalName()).append(".formatTest(")
           .append("getClass().getCanonicalName(),\"").append(mName).append("\",").append(lineNumber)
-          .append(",true);");
+          .append("),true);");
     } else {
       srcBefore.append('"').append(Formatter.format(className, mName, lineNumber))
           .append("\",false);");

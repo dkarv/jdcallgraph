@@ -25,6 +25,7 @@ package com.dkarv.jdcallgraph;
 
 import com.dkarv.jdcallgraph.util.config.Config;
 import com.dkarv.jdcallgraph.util.log.Logger;
+import com.dkarv.jdcallgraph.util.options.Formatter;
 import javassist.CannotCompileException;
 import javassist.CtBehavior;
 import javassist.NotFoundException;
@@ -98,12 +99,12 @@ public class FieldTracer extends ExprEditor {
     } catch (NotFoundException e) {
       methodName = "<error>";
     }
-    String from = "\"" + className + "\",\"" + methodName + "\"," + lineNumber;
+    String from = '"' + Formatter.format(className, methodName, lineNumber) + "\",";
 
     boolean isWrite = f.isWriter();
     boolean isStatic = f.isStatic();
     if (isStatic) {
-      String field = ",\"" + f.getClassName() + "\",\"" + f.getFieldName() + "\"";
+      String field = "\"" + f.getClassName() + "::" + f.getFieldName() + "\"";
       if (isWrite) {
         f.replace("{ $proceed($$); " +
             TARGET + ".write(" + from + field + "); }");
@@ -112,9 +113,9 @@ public class FieldTracer extends ExprEditor {
             TARGET + ".read(" + from + field + "); }");
       }
     } else {
-      String field = ",\"" + f.getClassName() + "@\"" +
+      String field = '"' + f.getClassName() + "@\"" +
           "+ java.lang.Integer.toHexString(java.lang.System.identityHashCode($0))" +
-          ",\"" + f.getFieldName() + "\"";
+          "+ \"::" + f.getFieldName() + "\"";
       if (isWrite) {
         if (IGNORE_THIS.matcher(f.getFieldName()).find()) {
           LOG.debug("Ignore write to this in {} from {}", f.getClassName(), from);

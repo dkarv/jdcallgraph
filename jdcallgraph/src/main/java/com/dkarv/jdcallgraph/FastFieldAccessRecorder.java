@@ -48,7 +48,8 @@ public class FastFieldAccessRecorder {
   private static final boolean needCombined;
   private static final int SIZE = 10;
   private static final int[] HASH_CACHE = new int[SIZE];
-  private static final String[] CACHE = new String[SIZE];
+  private static final String[] FIELD_CACHE = new String[SIZE];
+  private static final String[] METHOD_CACHE = new String[SIZE];
   private static int POS = SIZE - 1;
 
   static {
@@ -66,32 +67,28 @@ public class FastFieldAccessRecorder {
     }
   }
 
-  public static void write(String fromClass, String fromMethod, int lineNumber, String fieldClass,
-                           String fieldName) {
-    int hash = 31 * fieldClass.hashCode() + fieldName.hashCode();
+  public static void write(String method, String field) {
+    int hash = field.hashCode();
     for (int i = 0; i < SIZE; i++) {
       if (HASH_CACHE[i] == hash) {
         HASH_CACHE[i] = -1;
-        CACHE[i] = null;
+        FIELD_CACHE[i] = null;
+        METHOD_CACHE[i] = null;
       }
     }
 
     try {
-      StackItem item = StackItemCache.get(fromClass, fromMethod, lineNumber, false);
-      GRAPH.addWrite(item, fieldClass + "::" + fieldName);
+      GRAPH.addWrite(method, field);
     } catch (Exception e) {
       LOG.error("Error in write", e);
     }
   }
 
-  public static void read(String fromClass, String fromMethod, int lineNumber, String fieldClass,
-                          String fieldName) {
-    int hash = 31 * fieldClass.hashCode() + fieldName.hashCode();
+  public static void read(String method, String field) {
+    int hash = field.hashCode();
     for (int j = 0, i = POS; j < SIZE; j++, i = (i + 1) % SIZE) {
       if (HASH_CACHE[i] == hash) {
-        String s =
-            fromClass + "%" + fromMethod + "%" + lineNumber + "%" + fieldClass + "%" + fieldName;
-        if (s.equals(CACHE[i])) {
+        if (method.equals(METHOD_CACHE[i]) && field.equals(FIELD_CACHE[i])) {
           // we already saw this read recently
           return;
         }
@@ -101,8 +98,8 @@ public class FastFieldAccessRecorder {
     // store in cache
     POS = (POS - 1 + SIZE) % SIZE;
     HASH_CACHE[POS] = hash;
-    CACHE[POS] =
-        fromClass + "%" + fromMethod + "%" + lineNumber + "%" + fieldClass + "%" + fieldName;
+    METHOD_CACHE[POS] = method;
+    FIELD_CACHE[POS] = field;
 
     try {
       // Does not work with multithreading, we have to migrate it too
@@ -112,8 +109,7 @@ public class FastFieldAccessRecorder {
       //} else {
       //  callGraph = null;
       //}
-      StackItem item = StackItemCache.get(fromClass, fromMethod, lineNumber, false);
-      GRAPH.addRead(item, fieldClass + "::" + fieldName, null);
+      GRAPH.addRead(method, field, null);
     } catch (Exception e) {
       LOG.error("Error in read", e);
     }
