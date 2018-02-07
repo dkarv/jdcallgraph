@@ -31,9 +31,9 @@ import java.util.Set;
 
 public class CsvTraceFileWriter implements GraphWriter {
   FileWriter writer;
-  private boolean interested = true;
 
   private final Set<String> trace = new HashSet<>();
+  private boolean interested = false;
 
   @Override
   public void start(String identifier) throws IOException {
@@ -48,6 +48,7 @@ public class CsvTraceFileWriter implements GraphWriter {
     trace.clear();
     if (isTest) {
       writer.append(method);
+      interested = true;
     }
   }
 
@@ -70,6 +71,7 @@ public class CsvTraceFileWriter implements GraphWriter {
     if (interested) {
       writer.append('\n');
     }
+    interested = false;
   }
 
   @Override

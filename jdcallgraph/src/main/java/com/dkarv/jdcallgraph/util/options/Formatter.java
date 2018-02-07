@@ -35,7 +35,7 @@ public class Formatter {
   private static final Pattern P = Pattern.compile("\\{(.+?)}");
 
   public static String formatTest(String type, String method, int lineNumber) {
-    return type + "::" + StackItem.getShortMethodName(method) + "#" + lineNumber;
+    return type + "::" + StackItem.getShortMethodName(method);
   }
 
   public static String format(String type, String method, int lineNumber) {

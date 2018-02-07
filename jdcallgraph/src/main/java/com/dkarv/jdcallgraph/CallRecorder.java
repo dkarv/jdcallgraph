@@ -39,7 +39,7 @@ public class CallRecorder {
         LOG.info("* Starting {}", method);
       }
       // StackItem item = StackItemCache.get(className, methodName, lineNumber, isTest);
-      CallQueue.add(new CallTask(method, Thread.currentThread().getId(), true));
+      CallQueue.add(new CallTask(method, Thread.currentThread().getId(), true, isTest));
     } catch (Throwable e) {
       LOG.error("Error in beforeMethod", e);
     }
@@ -50,7 +50,7 @@ public class CallRecorder {
       if (isTest) {
         LOG.info("* Finished {}", method);
       }
-      CallQueue.add(new CallTask(method, Thread.currentThread().getId(), false));
+      CallQueue.add(new CallTask(method, Thread.currentThread().getId(), false, isTest));
     } catch (Throwable e) {
       LOG.error("Error in afterMethod", e);
     }

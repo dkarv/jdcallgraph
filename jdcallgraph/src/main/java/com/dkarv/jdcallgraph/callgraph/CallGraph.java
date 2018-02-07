@@ -89,7 +89,7 @@ public class CallGraph {
     }
   }
 
-  public void called(String method) throws IOException {
+  public void called(String method, boolean isTest) throws IOException {
     if (calls.isEmpty()) {
       // First node
       String identifier = checkStartCondition(method);
@@ -97,7 +97,7 @@ public class CallGraph {
         calls.push(method);
         for (GraphWriter w : writers) {
           w.start(identifier);
-          w.node(method, false);
+          w.node(method, isTest);
         }
       } else {
         LOG.info("Skip first node {} because start condition not fulfilled", method);

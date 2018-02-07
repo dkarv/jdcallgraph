@@ -40,11 +40,13 @@ public class CallTask {
   private final String method;
   private final long thread;
   private final boolean enter;
+  private final boolean isTest;
 
-  public CallTask(String method, long thread, boolean enter) {
+  public CallTask(String method, long thread, boolean enter, boolean isTest) {
     this.method = method;
     this.thread = thread;
     this.enter = enter;
+    this.isTest = isTest;
   }
 
   void work() throws IOException {
@@ -55,7 +57,7 @@ public class CallTask {
         graph = new CallGraph(thread);
         GRAPHS.put(thread, graph);
       }
-      graph.called(method);
+      graph.called(method, isTest);
     } else {
       LOG.trace("afterMethod ({}): {}", thread, method);
       CallGraph graph = GRAPHS.get(thread);
