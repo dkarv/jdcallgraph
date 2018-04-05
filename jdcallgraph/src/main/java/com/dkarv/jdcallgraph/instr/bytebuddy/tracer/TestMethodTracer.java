@@ -44,7 +44,7 @@ public class TestMethodTracer {
     } else {
       clazz = thiz.getClass().getCanonicalName();
     }
-    return CallableTracer.enter(clazz, Format.shortName(method), signature, true, type);
+    return CallableTracer.enter(clazz, Format.shortName(method), signature, true, type, true);
   }
 
   @Advice.OnMethodExit(inline = false, onThrowable = Throwable.class, suppress = Throwable.class)

@@ -35,7 +35,7 @@ public class ConstructorTracer {
   public static StackItem enter(@Callable.Type String type,
                                 @Callable.Name String method,
                                 @Callable.Signature String signature) {
-    return CallableTracer.enter(type, Format.shortName(method), signature, false);
+    return CallableTracer.enter(type, Format.shortName(method), signature, false, false);
   }
 
   @Advice.OnMethodExit(inline = false, suppress = Throwable.class)

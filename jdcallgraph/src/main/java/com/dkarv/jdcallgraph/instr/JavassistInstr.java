@@ -29,6 +29,7 @@ import com.dkarv.jdcallgraph.util.config.Config;
 import com.dkarv.jdcallgraph.util.log.Logger;
 import com.dkarv.jdcallgraph.util.options.Target;
 import com.dkarv.jdcallgraph.util.target.Property;
+
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.lang.instrument.ClassFileTransformer;
@@ -37,6 +38,7 @@ import java.security.ProtectionDomain;
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+
 import javassist.CannotCompileException;
 import javassist.ClassPool;
 import javassist.CtBehavior;
@@ -194,9 +196,9 @@ public class JavassistInstr extends Instr implements ClassFileTransformer {
 
       boolean returnSafe = !(method instanceof CtConstructor);
       String srcBefore =
-          "com.dkarv.jdcallgraph.CallRecorder.beforeMethod(" + args + "," + returnSafe + ");";
+          "com.dkarv.jdcallgraph.CallRecorder.beforeMethod(" + args + "," + returnSafe + "," + isSubTest + ");";
       String srcAfter =
-          "com.dkarv.jdcallgraph.CallRecorder.afterMethod(" + args + "," + returnSafe + ");";
+          "com.dkarv.jdcallgraph.CallRecorder.afterMethod(" + args + "," + returnSafe + "," + isSubTest + ");";
 
       method.insertBefore(srcBefore);
       method.insertAfter(srcAfter, true);

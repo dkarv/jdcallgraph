@@ -40,7 +40,7 @@ public abstract class CallableTracer {
   /**
    * Same as normal enter method but pass another class. If necessary take the line number from it.
    */
-  public static StackItem enter(String type, String method, String signature, boolean returnSafe, String clazz) {
+  public static StackItem enter(String type, String method, String signature, boolean returnSafe, String clazz, boolean isTest) {
     try {
       signature = Format.simplifySignatureArrays(signature);
       String fullMethod = method + signature;
@@ -56,7 +56,7 @@ public abstract class CallableTracer {
         lineNumber = -1;
       }
 
-      StackItem item = StackItemCache.get(type, fullMethod, lineNumber, returnSafe);
+      StackItem item = StackItemCache.get(type, fullMethod, lineNumber, returnSafe, isTest);
       CallRecorder.beforeMethod(item);
       return item;
     } catch (Throwable t) {
@@ -65,8 +65,8 @@ public abstract class CallableTracer {
     }
   }
 
-  public static StackItem enter(String type, String method, String signature, boolean returnSafe) {
-    return enter(type, method, signature, returnSafe, type);
+  public static StackItem enter(String type, String method, String signature, boolean returnSafe, boolean isTest) {
+    return enter(type, method, signature, returnSafe, type, isTest);
   }
 
   public static void exit(StackItem item) {

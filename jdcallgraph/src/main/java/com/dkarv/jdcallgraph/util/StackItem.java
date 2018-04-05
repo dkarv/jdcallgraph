@@ -30,33 +30,30 @@ public class StackItem implements Node {
   private final String className;
   private final String methodName;
   private final int lineNumber;
+
+  /**
+   * Whether we are sure to see the return of this method.
+   */
   private final boolean returnSafe;
+
+  /**
+   * Whether this is a test method.
+   */
+  private final boolean test;
 
   private final String formatted;
 
-  StackItem(String className, String methodName, int lineNumber, boolean returnSafe) {
+  StackItem(String className, String methodName, int lineNumber, boolean returnSafe, boolean isTest) {
     this.className = className;
     this.methodName = methodName;
     this.lineNumber = lineNumber;
 
     this.returnSafe = returnSafe;
 
+    this.test = isTest;
+
     this.formatted = Formatter.format(this);
   }
-
-  /*public StackItem(String type, String method, String signature, int lineNumber) {
-    this(type, method, signature, lineNumber, true);
-  }*/
-
-  /*public StackItem(String type, String method, String signature, int lineNumber, boolean returnSafe) {
-    this.className = type;
-    // TODO store them separated
-    this.methodName = method + signature;
-    this.lineNumber = lineNumber;
-    this.returnSafe = returnSafe;
-
-    this.formatted = Formatter.format(this);
-  }*/
 
   public String getClassName() {
     return className;
@@ -121,17 +118,11 @@ public class StackItem implements Node {
     return returnSafe;
   }
 
-  public boolean equalTo(StackTraceElement element) {
-    return element != null
-        && this.className.equals(element.getClassName())
-        && this.getShortMethodName().equals(element.getMethodName())
-        // line number comparison does not work because the stack trace number
-        // is the real line of the call and not beginning of the method
-        //&& this.lineNumber == element.getLineNumber()
-        ;
-  }
-
   public boolean isClinit() {
     return "<clinit>()".equals(methodName);
+  }
+
+  public boolean isTest() {
+    return test;
   }
 }

@@ -36,7 +36,7 @@ public class MethodTracer {
                                 @Callable.Name String method,
                                 @Callable.Signature String signature) {
     LOG.debug("Enter {}::{}", type, method);
-    return CallableTracer.enter(type, Format.shortName(method), signature, true);
+    return CallableTracer.enter(type, Format.shortName(method), signature, true, false);
   }
 
   @Advice.OnMethodExit(inline = false, onThrowable = Throwable.class, suppress = Throwable.class)

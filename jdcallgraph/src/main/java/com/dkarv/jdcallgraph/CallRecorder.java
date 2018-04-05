@@ -41,8 +41,8 @@ public class CallRecorder {
   static final Map<Long, CallGraph> GRAPHS = new HashMap<>();
 
   public static void beforeMethod(String className, String methodName, int lineNumber, boolean
-      returnSafe) {
-    beforeMethod(StackItemCache.get(className, methodName, lineNumber, returnSafe));
+      returnSafe, boolean isTest) {
+    beforeMethod(StackItemCache.get(className, methodName, lineNumber, returnSafe, isTest));
   }
 
   private static CallGraph getGraph(long threadId) {
@@ -56,6 +56,10 @@ public class CallRecorder {
 
   public static void beforeMethod(StackItem item) {
     try {
+      if (item.isTest()) {
+        LOG.info("** Starting {}::{}", item.getClassName(), item.getMethodName());
+      }
+
       LOG.trace(">> {}{}", item, item.isReturnSafe() ? "" : " (return unsafe)");
       long threadId = Thread.currentThread().getId();
       CallGraph graph = getGraph(threadId);
@@ -66,12 +70,16 @@ public class CallRecorder {
   }
 
   public static void afterMethod(String className, String methodName, int lineNumber, boolean
-      returnSafe) {
-    afterMethod(StackItemCache.get(className, methodName, lineNumber, returnSafe));
+      returnSafe, boolean isTest) {
+    afterMethod(StackItemCache.get(className, methodName, lineNumber, returnSafe, isTest));
   }
 
   public static void afterMethod(StackItem item) {
     try {
+      if (item.isTest()) {
+        LOG.info("** Finished {}::{}", item.getClassName(), item.getMethodName());
+      }
+
       LOG.trace("<< {}", item);
       long threadId = Thread.currentThread().getId();
       CallGraph graph = GRAPHS.get(threadId);

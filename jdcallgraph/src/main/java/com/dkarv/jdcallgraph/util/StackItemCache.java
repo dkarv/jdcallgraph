@@ -28,22 +28,27 @@ import java.util.*;
 public class StackItemCache {
   private static final Map<String, Map<String, StackItem>> CACHE = new HashMap<>();
 
-  public static StackItem get(String type, String method, boolean returnSafe) {
+  public static StackItem get(String type, String method, boolean returnSafe, boolean isTest) {
     Map<String, StackItem> methodMap = getBy(type);
     StackItem item = methodMap.get(method);
     if (item == null) {
-      item = new StackItem(type, method, LineNumbers.get(type, method), returnSafe);
+      item = new StackItem(type, method, LineNumbers.get(type, method), returnSafe, isTest);
       methodMap.put(method, item);
+    } else if (item.isTest() != isTest) {
+      return new StackItem(type, method, LineNumbers.get(type, method), returnSafe, isTest);
     }
     return item;
   }
 
-  public static StackItem get(String type, String method, int lineNumber, boolean returnSafe) {
+  public static StackItem get(String type, String method, int lineNumber, boolean returnSafe, boolean isTest) {
     Map<String, StackItem> methodMap = getBy(type);
     StackItem item = methodMap.get(method);
     if (item == null) {
-      item = new StackItem(type, method, lineNumber, returnSafe);
+      item = new StackItem(type, method, lineNumber, returnSafe, isTest);
       methodMap.put(method, item);
+    } else if (item.isTest() != isTest) {
+      // item from cache different than requested one
+      return new StackItem(type, method, lineNumber, returnSafe, isTest);
     }
     return item;
   }

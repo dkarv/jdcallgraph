@@ -37,8 +37,9 @@ public class FieldAccessRecorder {
                            String fieldName) {
     try {
       LOG.trace("Write to {}::{} from {}::{}", fieldClass, fieldName, fromClass, fromMethod);
+      // TODO we don't care here whether it is a test method or not
       graph
-          .addWrite(StackItemCache.get(fromClass, fromMethod, lineNumber, true),
+          .addWrite(StackItemCache.get(fromClass, fromMethod, lineNumber, true, false),
               fieldClass + "::" + fieldName);
     } catch (Exception e) {
       LOG.error("Error in write", e);
@@ -49,7 +50,8 @@ public class FieldAccessRecorder {
                           String fieldName) {
     try {
       LOG.trace("Read to {}::{} from {}::{}", fieldClass, fieldName, fromClass, fromMethod);
-      graph.addRead(StackItemCache.get(fromClass, fromMethod, lineNumber, true),
+      // TODO we don't care here whether it is a test method or not
+      graph.addRead(StackItemCache.get(fromClass, fromMethod, lineNumber, true, false),
           fieldClass + "::" + fieldName);
     } catch (Exception e) {
       LOG.error("Error in read", e);
