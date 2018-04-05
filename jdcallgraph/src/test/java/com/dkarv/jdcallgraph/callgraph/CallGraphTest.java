@@ -20,9 +20,6 @@ public class CallGraphTest {
 
     graph.finish();
     Mockito.verify(writer, Mockito.never()).end();
-    graph.calls.push(item);
-    graph.finish();
-    Mockito.verify(writer).end();
   }
 
   @Test

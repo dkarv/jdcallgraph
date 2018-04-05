@@ -28,8 +28,6 @@ public class TargetSpecificationTest {
     }, new Object[]{
         "cg ddg | dot", true
     }, new Object[]{
-        "cg ddg | matrix", true
-    }, new Object[]{
         "ddg | entry | csv", true
     }, new Object[]{
         "cg | entry | csv", true

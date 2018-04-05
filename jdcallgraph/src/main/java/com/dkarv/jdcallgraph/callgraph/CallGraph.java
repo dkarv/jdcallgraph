@@ -83,32 +83,30 @@ public class CallGraph {
   }
 
   public synchronized void returned(StackItem method) throws IOException {
-    // TODO optimize for the case removed == 1
-    Stack<StackItem> trace = new Stack<>();
-    int removed = 0;
-    boolean found = false;
-    while (!calls.isEmpty() && !found) {
-      removed++;
-      StackItem topItem = calls.pop();
-      trace.push(topItem);
-      if (topItem.equals(method)) {
-        found = true;
+    if (!method.equals(calls.pop())) {
+      Stack<StackItem> trace = new Stack<>();
+      int removed = 1;
+      boolean found = false;
+      while (!calls.isEmpty() && !found) {
+        removed++;
+        StackItem topItem = calls.pop();
+        trace.push(topItem);
+        if (topItem.equals(method)) {
+          found = true;
+        }
       }
-    }
-    if (removed == 0) {
-      LOG.error("Could not find element {} on stack", method);
-    }
-    if (removed > 1) {
-      LOG.warn("Removed {} entries when {} returned. Stack trace {}", removed, method, trace);
+      LOG.warn("Error when method {} returned:", method);
+      LOG.warn("Removed {} entries. Stack trace (top element missing) {}", removed, trace);
       for (StackItem item : trace) {
         if (item.isReturnSafe() && !item.equals(method)) {
           LOG.error("Element {} was removed although its return is safe", item);
         }
       }
+      if (!found) {
+        LOG.error("Couldn't find the returned method call on stack");
+      }
     }
-    if (!found) {
-      LOG.error("Couldn't find the returned method call on stack");
-    }
+
     if (calls.isEmpty()) {
       for (Target w : writers) {
         w.end();
