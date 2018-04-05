@@ -48,7 +48,7 @@ script:
 - if [ "$TRAVIS_BRANCH" == "master" ]; then echo "rm cache" && rm -r $HOME/.m2; fi
 - cd jdcallgraph
 - if [ "$TRAVIS_JDK_VERSION" == "oraclejdk9" ]; then mvn clean verify; fi
-- if [ "$TRAVIS_JDK_VERSION" != "oraclejdk9" ]; then mvn clean test jacoco:report coveralls:report; fi
+- if [ "$TRAVIS_JDK_VERSION" != "oraclejdk9" ]; then mvn clean test jacoco:report coveralls:report verify; fi
 - cd ../integration_tests && ./all.sh
 
 
