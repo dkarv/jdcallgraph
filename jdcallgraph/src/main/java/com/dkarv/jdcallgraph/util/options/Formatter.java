@@ -35,13 +35,10 @@ public class Formatter {
   private static final Pattern P = Pattern.compile("\\{(.+?)}");
 
   public static String format(StackItem item) {
-    Matcher m;
-    if (Config.getInst() != null) {
-      m = P.matcher(Config.getInst().format());
-    }
-    if (m == null) {
+    if (Config.getInst() == null) {
       return null;
     }
+    Matcher m = P.matcher(Config.getInst().format());
     StringBuffer result = new StringBuffer();
     while (m.find()) {
       String replacement = replace(m.group(1), item);
