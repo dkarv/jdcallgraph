@@ -33,6 +33,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.lang.reflect.Method;
+import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -48,9 +49,10 @@ public class ConfigReader {
 
     Map<String, Object> options = new HashMap<>();
     for (InputStream input : inputs) {
-      BufferedReader reader = new BufferedReader(
-          new InputStreamReader(input));
-      this.read(reader, options, targets);
+      try (BufferedReader reader = new BufferedReader(
+          new InputStreamReader(input, StandardCharsets.UTF_8))) {
+        this.read(reader, options, targets);
+      }
     }
 
     save(options);

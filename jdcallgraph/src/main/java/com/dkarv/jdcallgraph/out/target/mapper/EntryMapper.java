@@ -25,7 +25,9 @@ package com.dkarv.jdcallgraph.out.target.mapper;
 
 import com.dkarv.jdcallgraph.util.node.Node;
 import com.dkarv.jdcallgraph.out.target.*;
+
 import java.io.IOException;
+import java.util.Arrays;
 
 public class EntryMapper extends Mapper {
   private String[] ids;
@@ -38,7 +40,7 @@ public class EntryMapper extends Mapper {
   @Override
   public void start(String[] ids) throws IOException {
     current = null;
-    this.ids = ids;
+    this.ids = Arrays.copyOf(ids, ids.length);
   }
 
   @Override

@@ -29,10 +29,7 @@ import com.dkarv.jdcallgraph.out.target.Mapper;
 import com.dkarv.jdcallgraph.out.target.Processor;
 
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 public class ThreadMapper extends Mapper {
   private static final Logger LOG = new Logger(ThreadMapper.class);
@@ -61,7 +58,7 @@ public class ThreadMapper extends Mapper {
 
   @Override
   public void start(String[] ids) throws IOException {
-    lastIds = ids;
+    lastIds = Arrays.copyOf(ids, ids.length);
     getP();
   }
 
@@ -97,7 +94,7 @@ public class ThreadMapper extends Mapper {
     }
     threads.clear();
 
-    for(Processor p : processors) {
+    for (Processor p : processors) {
       p.close();
     }
   }

@@ -33,6 +33,7 @@ import com.dkarv.jdcallgraph.util.log.Logger;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.lang.instrument.Instrumentation;
 import java.util.ArrayList;
 import java.util.List;
@@ -54,15 +55,16 @@ public class Tracer {
    */
   public static void premain(String argument, Instrumentation instrumentation)
       throws IOException, IllegalAccessException {
-    if (argument != null) {
-      new ConfigReader(
-          Tracer.class.getResourceAsStream("/com/dkarv/jdcallgraph/defaults.ini"),
-          new FileInputStream(new File(argument))).read();
-    } else {
-      System.err.println(
-          "You did not specify a config file. Will use the default config options instead.");
-      new ConfigReader(
-          Tracer.class.getResourceAsStream("/com/dkarv/jdcallgraph/defaults.ini")).read();
+    try (InputStream defaults = Tracer.class.getResourceAsStream("/com/dkarv/jdcallgraph/defaults.ini")) {
+      if (argument != null) {
+        try (InputStream user = new FileInputStream(new File(argument))) {
+          new ConfigReader(defaults, user).read();
+        }
+      } else {
+        System.err.println(
+            "You did not specify a config file. Will use the default config options instead.");
+        new ConfigReader(defaults).read();
+      }
     }
 
     Logger.init();

@@ -37,9 +37,11 @@ import com.dkarv.jdcallgraph.instr.bytebuddy.util.NoAnonymousConstructorsMatcher
 import com.dkarv.jdcallgraph.instr.bytebuddy.util.TestMethodMatcher;
 import com.dkarv.jdcallgraph.util.config.ComputedConfig;
 import com.dkarv.jdcallgraph.util.log.Logger;
+
 import java.lang.instrument.Instrumentation;
 import java.util.List;
 import java.util.regex.Pattern;
+
 import net.bytebuddy.agent.builder.AgentBuilder;
 import net.bytebuddy.agent.builder.ResettableClassFileTransformer;
 import net.bytebuddy.asm.Advice;
@@ -71,7 +73,7 @@ public class ByteBuddyInstr extends Instr {
     final FieldAdvice fieldAdvice = new FieldAdvice();
     final LineVisitor lineVisitor = new LineVisitor();
 
-    ResettableClassFileTransformer agent = new AgentBuilder.Default()
+    new AgentBuilder.Default()
         .with(new TracerLogger(false))
         .type(new ElementMatcher<TypeDescription>() {
           @Override

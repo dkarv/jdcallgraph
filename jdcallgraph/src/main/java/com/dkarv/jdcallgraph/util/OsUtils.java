@@ -24,7 +24,7 @@
 package com.dkarv.jdcallgraph.util;
 
 public class OsUtils {
-  public static boolean isWindows = System.getProperty("os.name").startsWith("Windows");
+  private static final boolean isWindows = System.getProperty("os.name").startsWith("Windows");
 
   public static String escapeFilename(String fileName) {
     if (isWindows) {

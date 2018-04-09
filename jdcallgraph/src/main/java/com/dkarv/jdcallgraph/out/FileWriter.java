@@ -41,7 +41,9 @@ public class FileWriter {
   public FileWriter(String fileName) throws IOException {
     fileName = OsUtils.escapeFilename(ComputedConfig.outDir() + fileName);
     File target = new File(fileName).getCanonicalFile();
-    target.getParentFile().mkdirs();
+    if (!target.getParentFile().mkdirs() && !target.getParentFile().isDirectory()) {
+      throw new IOException("Error creating directory " + target.getParentFile());
+    }
     writer = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(target, true), "UTF-8"),
         BUFFER_SIZE);
   }

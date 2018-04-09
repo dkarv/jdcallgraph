@@ -127,6 +127,9 @@ public class FieldAdvice implements AsmVisitorWrapper.ForDeclaredMethods.MethodV
             }
             hashObject(readableOwner, name);
             break;
+          default:
+            LOG.error("Unknown opcode in visitFieldInsn: {}", opcode);
+            break;
         }
         boolean isWrite = (opcode == Opcodes.PUTSTATIC || opcode == Opcodes.PUTFIELD);
 
