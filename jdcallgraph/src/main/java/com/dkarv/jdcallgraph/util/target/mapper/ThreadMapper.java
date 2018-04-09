@@ -27,6 +27,7 @@ import com.dkarv.jdcallgraph.util.log.Logger;
 import com.dkarv.jdcallgraph.util.node.Node;
 import com.dkarv.jdcallgraph.util.target.Mapper;
 import com.dkarv.jdcallgraph.util.target.Processor;
+
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
@@ -78,7 +79,8 @@ public class ThreadMapper extends Mapper {
 
   @Override
   public void end() throws IOException {
-    getP().end();
+    Processor p = threads.remove(Thread.currentThread().getId());
+    p.end();
   }
 
   @Override

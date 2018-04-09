@@ -72,7 +72,8 @@ public class CoverageMapper extends CollectorMapper {
         next.edge(entry.getKey(), n);
       }
     }
-    next.close();
+    // FIXME we can't close the next one because it the same for all copies
+    //next.close();
   }
 
   @Override
