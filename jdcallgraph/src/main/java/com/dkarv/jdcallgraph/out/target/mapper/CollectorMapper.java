@@ -21,50 +21,34 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package com.dkarv.jdcallgraph.util.config;
+package com.dkarv.jdcallgraph.out.target.mapper;
 
-import com.dkarv.jdcallgraph.out.Target;
+import com.dkarv.jdcallgraph.out.target.Mapper;
+import com.dkarv.jdcallgraph.out.target.Processor;
+import java.io.IOException;
 
-public abstract class Config {
+/**
+ * A mapper that collects multiple graphs.
+ */
+public abstract class CollectorMapper extends Mapper {
+  private final String id;
+  private boolean started = false;
 
-  static Config instance;
-
-  public static Config getInst() {
-    return instance;
+  public CollectorMapper(Processor next, boolean addId, String id) {
+    super(next, addId);
+    this.id = id;
   }
 
-  @Option
-  abstract String outDir();
-
-  @Option
-  public abstract int logLevel();
-
-  @Option
-  public abstract boolean logConsole();
-
-  @Option
-  public abstract String format();
-
-  @Option
-  public abstract boolean javassist();
-
-  @Option(mergeDefaults = true)
-  public abstract String[] exclude();
-
-  @Option
-  public abstract boolean ignoreEmptyClinit();
-
-  @Option
-  public abstract Target[] targets();
-
-
-  /**
-   * Check whether everything is set and fix options if necessary.
-   */
-  void check() {
-    if (logLevel() < 0 || logLevel() > 6) {
-      throw new IllegalArgumentException("Invalid log level: " + logLevel());
+  @Override
+  public void start(String[] ids) throws IOException {
+    if (!started) {
+      next.start(super.extend(ids, id));
+      started = true;
     }
   }
 
+  @Override
+  public boolean isCollecting() {
+    return true;
+  }
 }

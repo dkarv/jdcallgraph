@@ -21,50 +21,40 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package com.dkarv.jdcallgraph.util.config;
+package com.dkarv.jdcallgraph.out;
 
-import com.dkarv.jdcallgraph.out.Target;
+import com.dkarv.jdcallgraph.util.OsUtils;
+import com.dkarv.jdcallgraph.util.config.*;
+import com.dkarv.jdcallgraph.util.log.Logger;
 
-public abstract class Config {
+import java.io.*;
 
-  static Config instance;
-
-  public static Config getInst() {
-    return instance;
-  }
-
-  @Option
-  abstract String outDir();
-
-  @Option
-  public abstract int logLevel();
-
-  @Option
-  public abstract boolean logConsole();
-
-  @Option
-  public abstract String format();
-
-  @Option
-  public abstract boolean javassist();
-
-  @Option(mergeDefaults = true)
-  public abstract String[] exclude();
-
-  @Option
-  public abstract boolean ignoreEmptyClinit();
-
-  @Option
-  public abstract Target[] targets();
-
+public class FileWriter {
+  private static final int BUFFER_SIZE = 8192;
+  private static final Logger LOG = new Logger(FileWriter.class);
 
   /**
-   * Check whether everything is set and fix options if necessary.
+   * File writeTo.
    */
-  void check() {
-    if (logLevel() < 0 || logLevel() > 6) {
-      throw new IllegalArgumentException("Invalid log level: " + logLevel());
-    }
+  BufferedWriter writer;
+
+  public FileWriter(String fileName) throws IOException {
+    fileName = OsUtils.escapeFilename(ComputedConfig.outDir() + fileName);
+    File target = new File(fileName).getCanonicalFile();
+    target.getParentFile().mkdirs();
+    writer = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(target, true), "UTF-8"),
+        BUFFER_SIZE);
   }
 
+  public void close() throws IOException {
+    writer.close();
+  }
+
+  public void append(String text) throws IOException {
+    writer.write(text);
+  }
+
+  public void append(char c) throws IOException {
+    writer.append(c);
+  }
 }

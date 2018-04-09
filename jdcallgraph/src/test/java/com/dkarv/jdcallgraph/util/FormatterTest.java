@@ -2,7 +2,7 @@ package com.dkarv.jdcallgraph.util;
 
 import com.dkarv.jdcallgraph.util.config.Config;
 import com.dkarv.jdcallgraph.util.config.ConfigUtils;
-import com.dkarv.jdcallgraph.util.options.Formatter;
+import com.dkarv.jdcallgraph.util.node.StackItem;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;

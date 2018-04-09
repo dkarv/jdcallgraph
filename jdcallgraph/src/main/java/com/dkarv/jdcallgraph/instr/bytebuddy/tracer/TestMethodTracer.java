@@ -24,7 +24,7 @@
 package com.dkarv.jdcallgraph.instr.bytebuddy.tracer;
 
 import com.dkarv.jdcallgraph.instr.bytebuddy.util.Format;
-import com.dkarv.jdcallgraph.util.StackItem;
+import com.dkarv.jdcallgraph.util.node.StackItem;
 import com.dkarv.jdcallgraph.util.log.Logger;
 import net.bytebuddy.asm.Advice;
 

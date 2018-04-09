@@ -23,15 +23,15 @@
  */
 package com.dkarv.jdcallgraph;
 
-import com.dkarv.jdcallgraph.data.DataDependenceGraph;
+import com.dkarv.jdcallgraph.graph.DataGraph;
 import com.dkarv.jdcallgraph.util.LineNumbers;
-import com.dkarv.jdcallgraph.util.StackItemCache;
+import com.dkarv.jdcallgraph.util.node.StackItemCache;
 import com.dkarv.jdcallgraph.util.log.Logger;
 import java.io.IOException;
 
 public class FieldAccessRecorder {
   private static final Logger LOG = new Logger(FieldAccessRecorder.class);
-  private static final DataDependenceGraph graph = new DataDependenceGraph();
+  private static final DataGraph graph = new DataGraph();
 
   public static void write(String fromClass, String fromMethod, int lineNumber, String fieldClass,
                            String fieldName) {

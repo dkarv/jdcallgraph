@@ -21,50 +21,47 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package com.dkarv.jdcallgraph.util.config;
+package com.dkarv.jdcallgraph.out.target;
 
-import com.dkarv.jdcallgraph.out.Target;
+import com.dkarv.jdcallgraph.util.OsUtils;
+import com.dkarv.jdcallgraph.util.node.Node;
+import com.dkarv.jdcallgraph.out.target.writer.CsvFileWriter;
+import com.dkarv.jdcallgraph.out.target.writer.DotFileWriter;
 
-public abstract class Config {
+import java.io.IOException;
 
-  static Config instance;
-
-  public static Config getInst() {
-    return instance;
-  }
-
-  @Option
-  abstract String outDir();
-
-  @Option
-  public abstract int logLevel();
-
-  @Option
-  public abstract boolean logConsole();
-
-  @Option
-  public abstract String format();
-
-  @Option
-  public abstract boolean javassist();
-
-  @Option(mergeDefaults = true)
-  public abstract String[] exclude();
-
-  @Option
-  public abstract boolean ignoreEmptyClinit();
-
-  @Option
-  public abstract Target[] targets();
-
-
-  /**
-   * Check whether everything is set and fix options if necessary.
-   */
-  void check() {
-    if (logLevel() < 0 || logLevel() > 6) {
-      throw new IllegalArgumentException("Invalid log level: " + logLevel());
+public abstract class Writer implements Processor {
+  public static Writer getFor(String w) {
+    switch (w.trim()) {
+      case "dot":
+        return new DotFileWriter();
+      case "csv":
+        return new CsvFileWriter();
     }
+    throw new IllegalArgumentException("Invalid writer: " + w);
   }
 
+  @Override
+  public abstract void node(Node method) throws IOException;
+
+  public String buildFilename(String[] ids, String extension) {
+    StringBuilder filename = new StringBuilder();
+    boolean first = true;
+    for (String id : ids) {
+      if (!first) {
+        filename.append(OsUtils.fileSeparator());
+      } else {
+        first = false;
+      }
+      filename.append(id);
+    }
+    filename.append('.');
+    filename.append(extension);
+    return filename.toString();
+  }
+
+  @Override
+  public boolean isCollecting() {
+    return false;
+  }
 }

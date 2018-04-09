@@ -90,12 +90,4 @@ public class ConfigTest {
     Assert.assertNotNull(Config.getInst().targets()[0]);
     Assert.assertNotNull(Config.getInst().targets()[1]);
   }
-
-  @Test
-  public void testGroupBy() throws IOException {
-    for (GroupBy g : GroupBy.values()) {
-      ConfigUtils.replace(true, "groupBy: " + g.name());
-      Assert.assertEquals(g, Config.getInst().groupBy());
-    }
-  }
 }

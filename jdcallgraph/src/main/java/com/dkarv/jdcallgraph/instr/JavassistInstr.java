@@ -25,10 +25,7 @@ package com.dkarv.jdcallgraph.instr;
 
 import com.dkarv.jdcallgraph.instr.javassist.FieldTracer;
 import com.dkarv.jdcallgraph.util.config.ComputedConfig;
-import com.dkarv.jdcallgraph.util.config.Config;
 import com.dkarv.jdcallgraph.util.log.Logger;
-import com.dkarv.jdcallgraph.util.options.Target;
-import com.dkarv.jdcallgraph.util.target.Property;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;

@@ -21,44 +21,58 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package com.dkarv.jdcallgraph.util.config;
+package com.dkarv.jdcallgraph.graph;
 
+import com.dkarv.jdcallgraph.util.node.StackItem;
 import com.dkarv.jdcallgraph.out.Target;
+import com.dkarv.jdcallgraph.util.config.Config;
+import com.dkarv.jdcallgraph.util.log.Logger;
 import com.dkarv.jdcallgraph.out.target.*;
 
-import java.io.*;
+import java.io.IOException;
+import java.util.*;
 
-/**
- * Some config options that are computed with others.
- */
-public class ComputedConfig {
-  public static boolean dataDependence() {
+public class DataGraph {
+  private static final Logger LOG = new Logger(DataGraph.class);
+
+  private final List<Target> writers = new ArrayList<>();
+  private Map<String, StackItem> lastWrites = new HashMap<>();
+  private boolean initialized = false;
+
+  public DataGraph() {
     for (Target t : Config.getInst().targets()) {
       if (t.needs(Property.DATA_DEPENDENCY)) {
-        return true;
+        writers.add(t);
       }
     }
-    return false;
   }
 
-  public static boolean callDependence() {
-    for (Target t : Config.getInst().targets()) {
-      if (t.needs(Property.METHOD_DEPENDENCY)) {
-        return true;
+  public void addWrite(StackItem location, String field) throws IOException {
+    this.lastWrites.put(field, location);
+  }
+
+  public void addRead(StackItem location, String field) throws IOException {
+    StackItem lastWrite = lastWrites.get(field);
+    if (lastWrite != null) {
+      if (!lastWrite.equals(location)) {
+        if (!initialized) {
+          for (Target t : writers) {
+            t.start(null);
+            t.node(lastWrite);
+          }
+          initialized = true;
+        }
+        // ignore dependency on itself
+        for (Target t : writers) {
+          t.edge(lastWrite, location, field);
+        }
       }
     }
-    return false;
   }
 
-  public static boolean lineNeeded() {
-    return Config.getInst().format().contains("{line}");
-  }
-
-  public static String outDir() {
-    String str = Config.getInst().outDir();
-    if (!str.endsWith(File.separator)) {
-      return str + File.separator;
+  public void finish() throws IOException {
+    for (Target t : writers) {
+      t.end();
     }
-    return str;
   }
 }

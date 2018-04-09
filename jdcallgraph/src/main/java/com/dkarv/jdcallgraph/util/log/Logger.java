@@ -23,7 +23,6 @@
  */
 package com.dkarv.jdcallgraph.util.log;
 
-import com.dkarv.jdcallgraph.callgraph.CallGraph;
 import com.dkarv.jdcallgraph.util.config.*;
 
 import java.io.IOException;

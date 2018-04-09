@@ -21,50 +21,54 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package com.dkarv.jdcallgraph.util.config;
+package com.dkarv.jdcallgraph.out.target;
 
-import com.dkarv.jdcallgraph.out.Target;
+import com.dkarv.jdcallgraph.util.node.Node;
+import java.io.*;
 
-public abstract class Config {
+/**
+ * Processor that automatically delegates everything to another processor if not overwritten.
+ */
+public abstract class DelegatingProcessor implements Processor {
+  protected Processor next;
 
-  static Config instance;
-
-  public static Config getInst() {
-    return instance;
+  @Override
+  public boolean needs(Property p) {
+    return next.needs(p);
   }
 
-  @Option
-  abstract String outDir();
-
-  @Option
-  public abstract int logLevel();
-
-  @Option
-  public abstract boolean logConsole();
-
-  @Option
-  public abstract String format();
-
-  @Option
-  public abstract boolean javassist();
-
-  @Option(mergeDefaults = true)
-  public abstract String[] exclude();
-
-  @Option
-  public abstract boolean ignoreEmptyClinit();
-
-  @Option
-  public abstract Target[] targets();
-
-
-  /**
-   * Check whether everything is set and fix options if necessary.
-   */
-  void check() {
-    if (logLevel() < 0 || logLevel() > 6) {
-      throw new IllegalArgumentException("Invalid log level: " + logLevel());
-    }
+  @Override
+  public void start(String[] ids) throws IOException {
+    next.start(ids);
   }
 
+  @Override
+  public void node(Node node) throws IOException {
+    next.node(node);
+  }
+
+  @Override
+  public void edge(Node from, Node to) throws IOException {
+    next.edge(from, to);
+  }
+
+  @Override
+  public void edge(Node from, Node to, String info) throws IOException {
+    next.edge(from, to, info);
+  }
+
+  @Override
+  public void end() throws IOException {
+    next.end();
+  }
+
+  @Override
+  public void close() throws IOException {
+    next.close();
+  }
+
+  @Override
+  public boolean isCollecting() {
+    return false;
+  }
 }

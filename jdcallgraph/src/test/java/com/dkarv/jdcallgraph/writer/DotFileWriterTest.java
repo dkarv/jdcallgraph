@@ -1,18 +1,5 @@
 package com.dkarv.jdcallgraph.writer;
 
-import com.dkarv.jdcallgraph.helper.TestUtils;
-import com.dkarv.jdcallgraph.util.StackItem;
-import com.dkarv.jdcallgraph.util.config.ConfigUtils;
-import java.io.FileNotFoundException;
-import java.io.IOException;
-import java.util.Arrays;
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.Rule;
-import org.junit.Test;
-import org.junit.rules.TemporaryFolder;
-import org.mockito.Mockito;
-
 public class DotFileWriterTest {
   /*
   @Rule

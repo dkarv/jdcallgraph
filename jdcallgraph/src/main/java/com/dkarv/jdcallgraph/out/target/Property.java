@@ -21,50 +21,9 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package com.dkarv.jdcallgraph.util.config;
+package com.dkarv.jdcallgraph.out.target;
 
-import com.dkarv.jdcallgraph.out.Target;
-
-public abstract class Config {
-
-  static Config instance;
-
-  public static Config getInst() {
-    return instance;
-  }
-
-  @Option
-  abstract String outDir();
-
-  @Option
-  public abstract int logLevel();
-
-  @Option
-  public abstract boolean logConsole();
-
-  @Option
-  public abstract String format();
-
-  @Option
-  public abstract boolean javassist();
-
-  @Option(mergeDefaults = true)
-  public abstract String[] exclude();
-
-  @Option
-  public abstract boolean ignoreEmptyClinit();
-
-  @Option
-  public abstract Target[] targets();
-
-
-  /**
-   * Check whether everything is set and fix options if necessary.
-   */
-  void check() {
-    if (logLevel() < 0 || logLevel() > 6) {
-      throw new IllegalArgumentException("Invalid log level: " + logLevel());
-    }
-  }
-
+public enum Property {
+  METHOD_DEPENDENCY,
+  DATA_DEPENDENCY
 }

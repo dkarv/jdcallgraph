@@ -24,9 +24,9 @@
 package com.dkarv.jdcallgraph.util;
 
 import com.dkarv.jdcallgraph.*;
+import com.dkarv.jdcallgraph.out.Target;
 import com.dkarv.jdcallgraph.util.config.*;
 import com.dkarv.jdcallgraph.util.log.Logger;
-import com.dkarv.jdcallgraph.util.options.*;
 
 import java.io.*;
 

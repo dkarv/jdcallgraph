@@ -21,44 +21,64 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-package com.dkarv.jdcallgraph.util.config;
+package com.dkarv.jdcallgraph.out.target.mapper;
 
-import com.dkarv.jdcallgraph.out.Target;
+import com.dkarv.jdcallgraph.util.node.Node;
 import com.dkarv.jdcallgraph.out.target.*;
+import java.io.IOException;
 
-import java.io.*;
+public class EntryMapper extends Mapper {
+  private String[] ids;
+  private Processor current;
 
-/**
- * Some config options that are computed with others.
- */
-public class ComputedConfig {
-  public static boolean dataDependence() {
-    for (Target t : Config.getInst().targets()) {
-      if (t.needs(Property.DATA_DEPENDENCY)) {
-        return true;
+  public EntryMapper(Processor next, boolean addId) {
+    super(next, addId);
+  }
+
+  @Override
+  public void start(String[] ids) throws IOException {
+    current = null;
+    this.ids = ids;
+  }
+
+  @Override
+  public void node(Node method) throws IOException {
+    if (current == null) {
+      if (next.isCollecting()) {
+        current = next;
+      } else {
+        current = next.copy();
       }
+      current.start(super.extend(ids, method.toString()));
     }
-    return false;
+    current.node(method);
   }
 
-  public static boolean callDependence() {
-    for (Target t : Config.getInst().targets()) {
-      if (t.needs(Property.METHOD_DEPENDENCY)) {
-        return true;
-      }
-    }
-    return false;
+  @Override
+  public void edge(Node from, Node to) throws IOException {
+    current.edge(from, to);
   }
 
-  public static boolean lineNeeded() {
-    return Config.getInst().format().contains("{line}");
+  @Override
+  public void edge(Node from, Node to, String info) throws IOException {
+    current.edge(from, to, info);
   }
 
-  public static String outDir() {
-    String str = Config.getInst().outDir();
-    if (!str.endsWith(File.separator)) {
-      return str + File.separator;
+  @Override
+  public void end() throws IOException {
+    current.end();
+  }
+
+  @Override
+  public void close() throws IOException {
+    if (current != null) {
+      current.close();
+      current = null;
     }
-    return str;
+  }
+
+  @Override
+  public Processor copy() {
+    return new EntryMapper(next.copy(), addId);
   }
 }

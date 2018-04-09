@@ -1,5 +1,6 @@
 package com.dkarv.jdcallgraph.util.options;
 
+import com.dkarv.jdcallgraph.out.Target;
 import com.dkarv.jdcallgraph.util.config.*;
 import org.junit.*;
 import org.junit.runner.*;
