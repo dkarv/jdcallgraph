@@ -75,7 +75,7 @@ public class CallGraph {
           found = true;
         }
       }
-      LOG.warn("Error when method {} returned.\nRemoved {} entries. Stack trace: ", method, trace.size(), trace);
+      LOG.warn("Error when method {} returned.\nRemoved {} entries. Stack trace: {}", method, trace.size(), trace);
       if (!found) {
         LOG.error("Couldn't find {} on stack", method);
       }
