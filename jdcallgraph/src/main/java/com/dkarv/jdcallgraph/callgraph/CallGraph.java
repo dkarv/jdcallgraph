@@ -63,27 +63,22 @@ public class CallGraph {
   }
 
   public synchronized void returned(StackItem method) throws IOException {
-    if (!method.equals(calls.pop())) {
+    StackItem top = calls.pop();
+    if (!method.equals(top)) {
       Stack<StackItem> trace = new Stack<>();
-      int removed = 1;
+      trace.push(top);
       boolean found = false;
-      while (!calls.isEmpty() && !found) {
-        removed++;
-        StackItem topItem = calls.pop();
-        trace.push(topItem);
-        if (topItem.equals(method)) {
+      while (!calls.isEmpty() && !found && !top.isReturnSafe()) {
+        top = calls.pop();
+        trace.push(top);
+        if (method.equals(top)) {
           found = true;
         }
       }
       LOG.warn("Error when method {} returned:", method);
-      LOG.warn("Removed {} entries. Stack trace (top element missing) {}", removed, trace);
-      for (StackItem item : trace) {
-        if (item.isReturnSafe() && !item.equals(method)) {
-          LOG.error("Element {} was removed although its return is safe", item);
-        }
-      }
+      LOG.warn("Removed {} entries. Stack trace (top element missing) {}", trace.size(), trace);
       if (!found) {
-        LOG.error("Couldn't find the returned method call on stack");
+        LOG.error("Couldn't find {} on stack", method);
       }
     }
 
