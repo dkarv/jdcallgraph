@@ -29,12 +29,15 @@ import com.dkarv.jdcallgraph.out.target.Mapper;
 import com.dkarv.jdcallgraph.out.target.Processor;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 public class ThreadMapper extends Mapper {
   private static final Logger LOG = new Logger(ThreadMapper.class);
   private Map<Long, Processor> threads = new HashMap<>();
+  private List<Processor> processors = new ArrayList<Processor>();
   private String[] lastIds;
 
   public ThreadMapper(Processor next, boolean addId) {
@@ -82,15 +85,21 @@ public class ThreadMapper extends Mapper {
     Processor p = threads.remove(Thread.currentThread().getId());
     if (p != null) {
       p.end();
+      processors.add(p);
     }
   }
 
   @Override
   public void close() throws IOException {
     for (Processor p : threads.values()) {
+      p.end();
       p.close();
     }
     threads.clear();
+
+    for(Processor p : processors) {
+      p.close();
+    }
   }
 
   @Override
