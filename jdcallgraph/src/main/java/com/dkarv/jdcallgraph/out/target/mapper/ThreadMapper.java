@@ -80,7 +80,9 @@ public class ThreadMapper extends Mapper {
   @Override
   public void end() throws IOException {
     Processor p = threads.remove(Thread.currentThread().getId());
-    p.end();
+    if (p != null) {
+      p.end();
+    }
   }
 
   @Override
