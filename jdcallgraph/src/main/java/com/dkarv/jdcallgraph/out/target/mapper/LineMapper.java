@@ -47,7 +47,7 @@ public class LineMapper extends Mapper {
       next.node(new TextNode(x.getClassName() + "::" + x.getShortMethodName()));
       next.edge(method, new TextNode(Integer.toString(x.getLineNumber())));
     }
-    next.node(method);
+    //next.node(method);
   }
 
   @Override

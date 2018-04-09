@@ -71,6 +71,7 @@ public class CoverageMapper extends CollectorMapper {
       for (Node n : entry.getValue()) {
         next.edge(entry.getKey(), n);
       }
+      next.end();
     }
     // FIXME we can't close the next one because it the same for all copies
     //next.close();
