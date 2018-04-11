@@ -23,11 +23,6 @@
  */
 package com.dkarv.jdcallgraph.util.config;
 
-import net.bytebuddy.ByteBuddy;
-import net.bytebuddy.dynamic.DynamicType;
-import net.bytebuddy.implementation.FixedValue;
-import net.bytebuddy.matcher.ElementMatchers;
-
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
@@ -38,49 +33,29 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class ConfigReader {
-  private final InputStream[] inputs;
-
-  public ConfigReader(final InputStream... inputs) {
-    this.inputs = inputs;
-  }
-
-  public void read() throws IOException {
+  public static void read(final InputStream... inputs) throws IOException {
     Map<String, Method> targets = parseOptions();
 
     Map<String, Object> options = new HashMap<>();
     for (InputStream input : inputs) {
       try (BufferedReader reader = new BufferedReader(
           new InputStreamReader(input, StandardCharsets.UTF_8))) {
-        this.read(reader, options, targets);
+        ConfigReader.read(reader, options, targets);
       }
     }
 
-    save(options);
-  }
-
-  void save(Map<String, Object> options) {
-    DynamicType.Builder<Config> builder = new ByteBuddy()
-        .subclass(Config.class);
-
-    for (Map.Entry<String, Object> option : options.entrySet()) {
-      builder = builder.method(ElementMatchers.named(option.getKey()))
-          .intercept(FixedValue.value(option.getValue()));
+    Config c;
+    try{
+      c = ByteBuddyConfigReader.create(options);
+    } catch (NoSuchMethodError error) {
+      c = LegacyConfigReader.create(options);
     }
 
-    try {
-      Config.instance = builder
-          .make()
-          .load(ConfigReader.class.getClassLoader())
-          .getLoaded()
-          .newInstance();
-    } catch (InstantiationException | IllegalAccessException e) {
-      throw new IllegalStateException("Error instantiating the config");
-    }
-
-    Config.instance.check();
+    c.check();
+    Config.instance = c;
   }
 
-  void read(BufferedReader input, Map<String, Object> options, Map<String, Method> targets)
+  private static void read(BufferedReader input, Map<String, Object> options, Map<String, Method> targets)
       throws IOException {
     String multiLineValue = null;
 
@@ -131,6 +106,7 @@ public class ConfigReader {
       }
     }
   }
+
 
   private static Map<String, Method> parseOptions() {
     Map<String, Method> fields = new HashMap<>();

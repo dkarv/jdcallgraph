@@ -27,7 +27,9 @@ import com.dkarv.jdcallgraph.instr.ByteBuddyInstr;
 import com.dkarv.jdcallgraph.instr.JavassistInstr;
 import com.dkarv.jdcallgraph.util.ShutdownHook;
 import com.dkarv.jdcallgraph.util.config.Config;
+import com.dkarv.jdcallgraph.util.config.ByteBuddyConfigReader;
 import com.dkarv.jdcallgraph.util.config.ConfigReader;
+import com.dkarv.jdcallgraph.util.config.LegacyConfigReader;
 import com.dkarv.jdcallgraph.util.log.Logger;
 
 import java.io.File;
@@ -58,12 +60,12 @@ public class Tracer {
     try (InputStream defaults = Tracer.class.getResourceAsStream("/com/dkarv/jdcallgraph/defaults.ini")) {
       if (argument != null) {
         try (InputStream user = new FileInputStream(new File(argument))) {
-          new ConfigReader(defaults, user).read();
+          ConfigReader.read(defaults, user);
         }
       } else {
         System.err.println(
             "You did not specify a config file. Will use the default config options instead.");
-        new ConfigReader(defaults).read();
+        ConfigReader.read(defaults);
       }
     }
 
