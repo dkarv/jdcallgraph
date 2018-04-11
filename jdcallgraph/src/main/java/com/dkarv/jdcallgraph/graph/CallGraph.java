@@ -54,6 +54,9 @@ public class CallGraph {
         t.node(method);
       }
     } else {
+      if (method.isTest()) {
+        LOG.warn("Test started but stack is not empty: {}", calls);
+      }
       StackItem top = calls.peek();
       for (Target w : writers) {
         w.edge(top, method);
@@ -85,6 +88,8 @@ public class CallGraph {
       for (Target w : writers) {
         w.end();
       }
+    } else if (method.isTest()) {
+      LOG.warn("Test ended but stack is not empty: {}", calls);
     }
   }
 
