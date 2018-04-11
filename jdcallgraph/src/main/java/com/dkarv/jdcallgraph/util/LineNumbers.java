@@ -54,16 +54,11 @@ public class LineNumbers {
   public static int get(String clazz, String method) {
     Map<String, Integer> lines = LINES.get(clazz);
     if (lines == null) {
-      throw new IllegalArgumentException("Line number for class " + clazz + " not known.");
+      return -1;
     }
     Integer i = lines.get(method);
     if (i == null) {
-      if ("<clinit>()".equals(method)) {
-        // Happens for static imports
-        return -1;
-      }
-      throw new IllegalArgumentException("Line number for method " + clazz + "::" + method +
-          " unknown.");
+      return -1;
     }
     return i;
   }

@@ -9,12 +9,12 @@ public class ConfigUtils {
 
   public static void replace(boolean addDefaults, String... options) throws IOException {
     if (addDefaults) {
-      new ConfigReader(
+      ConfigReader.read(
           ConfigUtils.class.getResourceAsStream("/com/dkarv/jdcallgraph/defaults.ini"),
-          write(options)).read();
+          write(options));
     } else {
-      new ConfigReader(
-          write(options)).read();
+      ConfigReader.read(
+          write(options));
     }
   }
 
