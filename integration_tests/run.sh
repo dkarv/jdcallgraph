@@ -21,7 +21,7 @@ xargs javac -cp target:lib/junit-4.12.jar -d target || exit 255
 function run {
     echo "Run $1 with $2"
     java -cp target:lib/junit-4.12.jar \
-    -javaagent:../jdcallgraph/target/jdcallgraph-0.2-agent.jar=./$2 \
+    -javaagent:../jdcallgraph/target/jdcallgraph-0.2.jar=./$2 \
     com/dkarv/testcases/$1/Main
     if java -cp target com/dkarv/testcases/$1/Verification ; then
         echo "Verification of >>  $1 with $2  << succeeded" >&2
