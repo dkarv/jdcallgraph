@@ -5,10 +5,11 @@ matrix:
     dist: trusty
     sudo: false
     jdk: openjdk7
-  - os: linux
-    dist: trusty
-    sudo: false
-    jdk: openjdk8
+# It sets java to the right version, but javac is on version 9. The integration tests fail
+#  - os: linux
+#    dist: trusty
+#    sudo: false
+#    jdk: openjdk8
 # Not yet supported?
 #  - os: linux
 #    dist: trusty
@@ -22,11 +23,10 @@ matrix:
     dist: trusty
     sudo: false
     jdk: oraclejdk8
-# It sets javac to the right version, but java is still on version 8. The integration tests fail
-#  - os: linux
-#    dist: trusty
-#    sudo: false
-#    jdk: oraclejdk9
+  - os: linux
+    dist: trusty
+    sudo: false
+    jdk: oraclejdk9
 # Test on one osx, should be Java 8
 #  - os: osx (Times out)
 
