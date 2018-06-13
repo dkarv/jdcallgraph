@@ -2,7 +2,7 @@
 
 version=$(java -version 2>&1 | awk -F '"' '/version/ {print $2}')
 versionc=$(javac -version 2>&1)
-echo "Running on java $version javac $versionc" >&2
+echo "Running on java $version $versionc" >&2
 
 rm -r result
 rm -r result2
