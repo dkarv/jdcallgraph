@@ -69,11 +69,11 @@ public class CsvCoverageFileWriter implements GraphWriter {
   @Override
   public void close() throws IOException {
     for (Map.Entry<StackItem, Set<StackItem>> entry : usedIn.entrySet()) {
-      writer.append(entry.getKey().toString());
-      writer.append(';');
+      String key = entry.getKey().toString();
+      writer.append(key);
       for (StackItem item : entry.getValue()) {
-        writer.append(item.toString());
         writer.append(';');
+        writer.append(item.toString());
       }
       writer.append('\n');
     }

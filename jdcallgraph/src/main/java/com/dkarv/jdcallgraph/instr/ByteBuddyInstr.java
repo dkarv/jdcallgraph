@@ -25,16 +25,12 @@ package com.dkarv.jdcallgraph.instr;
 
 import com.dkarv.jdcallgraph.instr.bytebuddy.*;
 import com.dkarv.jdcallgraph.instr.bytebuddy.tracer.ConstructorTracer;
-import com.dkarv.jdcallgraph.instr.bytebuddy.LineVisitor;
 import com.dkarv.jdcallgraph.instr.bytebuddy.tracer.MethodTracer;
-import com.dkarv.jdcallgraph.instr.bytebuddy.util.NoAnonymousConstructorsMatcher;
-import com.dkarv.jdcallgraph.util.config.ComputedConfig;
 import com.dkarv.jdcallgraph.util.log.Logger;
 import net.bytebuddy.agent.builder.AgentBuilder;
 import net.bytebuddy.agent.builder.ResettableClassFileTransformer;
 import net.bytebuddy.asm.Advice;
 import net.bytebuddy.asm.AsmVisitorWrapper;
-import net.bytebuddy.description.method.MethodDescription;
 import net.bytebuddy.description.type.TypeDescription;
 import net.bytebuddy.dynamic.DynamicType;
 import net.bytebuddy.matcher.ElementMatchers;
@@ -59,8 +55,7 @@ public class ByteBuddyInstr extends Instr {
     final Advice methodAdvice = Advice.to(MethodTracer.class);
     final Advice constructorAdvice = Advice.to(ConstructorTracer.class);
 
-    final FieldAdvice fieldAdvice = new FieldAdvice();
-    final LineVisitor lineVisitor = new LineVisitor();
+
 
     ResettableClassFileTransformer agent = new AgentBuilder.Default()
         .with(new TracerLogger())
@@ -70,10 +65,6 @@ public class ByteBuddyInstr extends Instr {
           public DynamicType.Builder<?> transform(DynamicType.Builder<?> builder, TypeDescription typeDescription, ClassLoader classLoader, JavaModule module) {
             builder = builder.visit(new AsmVisitorWrapper.ForDeclaredMethods().method(ElementMatchers.isMethod(), methodAdvice));
             builder = builder.visit(new AsmVisitorWrapper.ForDeclaredMethods().method(ElementMatchers.isConstructor(), constructorAdvice));
-            builder = builder.visit(new AsmVisitorWrapper.ForDeclaredMethods().method(new NoAnonymousConstructorsMatcher(), fieldAdvice));
-            if (ComputedConfig.lineNeeded()) {
-              builder = builder.visit(new AsmVisitorWrapper.ForDeclaredMethods().method(ElementMatchers.<MethodDescription>any(), lineVisitor));
-            }
             return builder;
           }
         })

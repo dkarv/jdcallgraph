@@ -23,14 +23,10 @@
  */
 package com.dkarv.jdcallgraph.instr.bytebuddy.util;
 
-import com.dkarv.jdcallgraph.instr.*;
 import com.dkarv.jdcallgraph.util.log.*;
-import javassist.*;
-import javassist.bytecode.*;
 import net.bytebuddy.description.method.*;
 import net.bytebuddy.description.type.*;
 
-import java.util.regex.*;
 
 public class Format {
   private static final Logger LOG = new Logger(Format.class);

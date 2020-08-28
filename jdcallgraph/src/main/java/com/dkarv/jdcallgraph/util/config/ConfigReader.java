@@ -114,10 +114,9 @@ public class ConfigReader {
 
       Method m = targets.get(key);
       if (m == null) {
-        throw new IllegalArgumentException("Invalid config option: " + key);
-      }
-
-      options.put(key, TypeUtils.cast(m.getReturnType(), val));
+        // throw new IllegalArgumentException("Invalid config option: " + key);
+      } else
+       options.put(key, TypeUtils.cast(m.getReturnType(), val));
     }
   }
 

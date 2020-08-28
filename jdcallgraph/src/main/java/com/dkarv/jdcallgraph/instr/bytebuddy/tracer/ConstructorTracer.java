@@ -32,7 +32,9 @@ public class ConstructorTracer {
   public static final Logger LOG = new Logger(ConstructorTracer.class);
 
   @Advice.OnMethodEnter(inline = false)
-  public static StackItem enter(@Advice.Origin("#t") String type, @Advice.Origin("#m") String method, @Advice.Origin("#s") String signature) {
+  public static StackItem enter(@Advice.Origin("#t") String type,
+                                @Advice.Origin("#m") String method,
+                                @Advice.Origin("#s") String signature) {
     return CallableTracer.enter(type, method, signature, false);
   }
 

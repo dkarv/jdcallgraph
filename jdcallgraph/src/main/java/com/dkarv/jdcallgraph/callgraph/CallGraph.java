@@ -54,20 +54,10 @@ public class CallGraph {
   static GraphWriter createWriter(Target t, boolean multiGraph) {
     // TODO redo this with new remove duplicate strategies
     switch (t) {
-      case DOT:
-        if (multiGraph) {
-          return new DotFileWriter();
-        } else {
-          return new RemoveDuplicatesWriter(new DotFileWriter());
-        }
-      case MATRIX:
-        return new CsvMatrixFileWriter();
       case COVERAGE:
         return new CsvCoverageFileWriter();
       case TRACE:
         return new CsvTraceFileWriter();
-      case LINES:
-        return new LineNumberFileWriter();
       default:
         throw new IllegalArgumentException("Unknown writeTo: " + t);
     }

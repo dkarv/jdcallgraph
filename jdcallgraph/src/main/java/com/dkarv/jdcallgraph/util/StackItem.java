@@ -77,8 +77,8 @@ public class StackItem {
   @Override
   public int hashCode() {
     return 31 * 31 * className.hashCode()
-        + 31 * methodName.hashCode()
-        + lineNumber;
+        + 31 * methodName.hashCode();
+//        + lineNumber;
   }
 
   @Override
@@ -91,8 +91,9 @@ public class StackItem {
     }
     StackItem o = (StackItem) other;
     return className.equals(o.className) &&
-        methodName.equals(o.methodName) &&
-        lineNumber == o.lineNumber;
+        methodName.equals(o.methodName);
+//            &&
+//        lineNumber == o.lineNumber;
   }
 
   public String getPackageName() {

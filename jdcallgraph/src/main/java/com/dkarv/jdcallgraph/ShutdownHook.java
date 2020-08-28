@@ -38,11 +38,6 @@ public class ShutdownHook {
         } catch (NoClassDefFoundError | ExceptionInInitializerError e) {
           // might be triggered when shutdown already ongoing
         }
-        try {
-          FieldAccessRecorder.shutdown();
-        } catch (NoClassDefFoundError | ExceptionInInitializerError e) {
-          // might be triggered when shutdown already ongoing
-        }
       }
     });
   }

@@ -38,6 +38,8 @@ public class Formatter {
     Matcher m = P.matcher(Config.getInst().format());
     StringBuffer result = new StringBuffer();
     while (m.find()) {
+      String key = m.group(1);
+      if(key.equals("line")) continue; //TODO: shiv: don't print line number for now
       String replacement = replace(m.group(1), item);
       replacement = Matcher.quoteReplacement(replacement);
       m.appendReplacement(result, replacement);
