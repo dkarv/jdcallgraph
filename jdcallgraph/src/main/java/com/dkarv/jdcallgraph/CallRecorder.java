@@ -45,6 +45,11 @@ public class CallRecorder {
   }
 
   public static void beforeMethod(StackItem item) {
+    String className = item.getClassName();
+    if(className.contains("org.junit") || className.contains("surefire")) return; //shiv
+    if(!className.contains("harness") && !className.contains("mkyong")) return; //shiv
+//    if(!className.contains("mkyong")) return; //shiv
+
     try {
       LOG.trace(">> {}{}", item, item.isReturnSafe() ? "" : " (return unsafe)");
       long threadId = Thread.currentThread().getId();
@@ -65,6 +70,11 @@ public class CallRecorder {
   }
 
   public static void afterMethod(StackItem item) {
+    String className = item.getClassName();
+    if(className.contains("org.junit") || className.contains("surefire")) return; //shiv
+    if(!className.contains("harness") && !className.contains("mkyong")) return; //shiv
+//    if(!className.contains("mkyong")) return; //shiv
+
     try {
       LOG.trace("<< {}", item);
       long threadId = Thread.currentThread().getId();

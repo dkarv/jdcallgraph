@@ -1,11 +1,6 @@
 # jdcallgraph
 JDCallgraph - Dynamic call graph generation for Java. Uses 
-[ByteBuddy](http://bytebuddy.net/) or 
-[Javassist](http://jboss-javassist.github.io/javassist/) to instrument the target application.
-Can also create a data dependency graph to show field access between methods. Support various output formats like csv, dot or a matrix.
-
-[![Build Status](https://travis-ci.org/dkarv/jdcallgraph.svg?branch=master)](https://travis-ci.org/dkarv/jdcallgraph)
-[![Coverage Status](https://coveralls.io/repos/github/dkarv/jdcallgraph/badge.svg?branch=master)](https://coveralls.io/github/dkarv/jdcallgraph?branch=master)
+[ByteBuddy](http://bytebuddy.net/) to instrument the target application.
 
 ## How-To
 Download the jdcallgraph.jar or build it using `mvn install`.
@@ -81,13 +76,5 @@ Specify the criteria that is used to group the graphs. It will output one graph 
 
 #### Output format `writeTo` ([Enum])
 Specify one or multiple output formats. Multiple formats are separated by comma: `DOT,TRACE`. Valid options:
-- DOT: Write the graph to a .dot file. You can transform it to a png using `dot -Tpng file.dot -o file.png`
-- MATRIX: Output the coverage matrix to a file called `matrix.csv`. The file will contain one row per entry method and one column per covered method. For each entry-method-pair it either outputs 1, when it was covered, or 0 otherwise.
 - TRACE: Write a file called `trace.csv`. It contains one row per entry method and a list of methods that come after behind (Typically a list of methods covered per test).
 - COVERAGE: Write a `coverage.csv` file. The opposite of TRACE. For each method it lists the tests this method was covered in.
-- DATA: Also compute data dependency graphs. This will output them as .dot graph.
-
-#### Backend `javassist` (boolean)
-Decide which backend to use for the instrumentation. Since v0.2 ByteBuddy is the default 
-(`javassist: false`). You can change this by setting this option to true.
-Note that Javassist is not compatible with Java 9, also the ByteBuddy backend is more tested.

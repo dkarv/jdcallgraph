@@ -22,7 +22,7 @@
         <dependency>
             <groupId>net.bytebuddy</groupId>
             <artifactId>byte-buddy</artifactId>
-            <version>1.10.14</version>
+            <version>1.10.15</version>
             <scope>compile</scope>
         </dependency>
         <dependency>
@@ -125,6 +125,42 @@
                     </execution>
                 </executions>
             </plugin>
+
+              <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-shade-plugin</artifactId>
+   		<version>3.2.4</version>
+                <executions>
+                    <execution>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>shade</goal>
+                        </goals>
+                        <configuration>
+                            <relocations>
+                                <relocation>
+                                    <pattern>net.bytebuddy</pattern>
+                                    <shadedPattern>org.jdcallgraph.runtime.package.name.bytebuddy</shadedPattern>
+                                </relocation>
+                                <relocation>
+                                    <pattern>org.objectweb.asm</pattern>
+                                    <shadedPattern>org.jdcallgraph.runtime.package.name.asm</shadedPattern>
+                                </relocation>
+                            </relocations>
+	<transformers>
+                <transformer implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
+                  <manifestEntries>
+		    <Premain-Class>com.dkarv.jdcallgraph.Tracer</Premain-Class>
+                  </manifestEntries>
+                </transformer>
+              </transformers>
+
+
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+
         </plugins>
     </build>
 </project>

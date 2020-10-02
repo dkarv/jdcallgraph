@@ -34,10 +34,6 @@ public abstract class CallableTracer {
   private static final boolean needsLine = ComputedConfig.lineNeeded();
 
   public static StackItem enter(String type, String method, String signature, boolean returnSafe) {
-
-    if(type.contains("org.junit") || type.contains("surefire")) return null; //shiv
-    if(!type.contains("harness") && !type.contains("mkyong")) return null; //shiv
-
     signature = Format.simplifySignatureArrays(signature);
 
     int lineNumber= -1;
@@ -48,8 +44,6 @@ public abstract class CallableTracer {
   }
 
   public static void exit(StackItem item) {
-    if(item != null) {
-      CallRecorder.afterMethod(item);
-    }
+    CallRecorder.afterMethod(item);
   }
 }

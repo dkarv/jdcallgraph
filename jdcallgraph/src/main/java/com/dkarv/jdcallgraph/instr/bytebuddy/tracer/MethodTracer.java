@@ -38,7 +38,6 @@ public class MethodTracer {
   public static StackItem enter(@Advice.Origin("#t") String type,
                                 @Advice.Origin("#m") String method,
                                 @Advice.Origin("#s") String signature) {
-
     return CallableTracer.enter(type, method, signature, true);
   }
 
